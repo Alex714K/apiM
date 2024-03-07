@@ -25,7 +25,7 @@ def start():
     spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
 
     valueInputOption = "USER_ENTERED"  # Данные воспринимаются, как вводимые пользователем (считается значение формул)
-    # majorDimension = "COLUMNS"  # список - столбец
+    # majorDimension = "COLUMNS"  # список - столбец (не работает)
     majorDimension = "ROWS"  # список - строка
     times = dist % 1000+1
     distance = f"Лист1!A{1}:N{dist}"
@@ -40,3 +40,4 @@ def start():
         ]
     }).execute()
     print("Updating complete!")
+    print(results)
