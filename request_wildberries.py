@@ -29,8 +29,9 @@ def start():
         print("Ошибка выполнения запроса:")
         print(request)
         print("Http статус:", response.status_code, "(", response.reason, ")")
-        with open('data.json', 'r') as file:
-            return file.read()
+        # with open('data.json', 'r') as file:
+        #     return file.read()
+        sys.exit('ERROR')
     else:
         # Преобразуем ответ в json-объект
         json_response = response.json()
