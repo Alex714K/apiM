@@ -6,11 +6,11 @@ import convert_to_list
 
 
 def start():
-    CREDENTIALS_FILE = 'apim-415713-6b90e86bb1ba.json'
-    json_response = request_wildberries.start()
-    values, dist = convert_to_list.start(json_response)
     # values = [["Ячейка B2", "Ячейка C2", "Ячейка D2"],  # Заполняем первую строку
     #                     ['25', "=6*6", "=sin(3,14/2)"]]  # Заполняем вторую строку
+    json_response = request_wildberries.start()
+    values, dist = convert_to_list.start(json_response)
+    CREDENTIALS_FILE = 'apim-415713-6b90e86bb1ba.json'
     # Читаем ключи из файла
     credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
                                                                    ['https://www.googleapis.com/auth/spreadsheets',
