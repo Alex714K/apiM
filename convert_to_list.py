@@ -1,13 +1,19 @@
 import json
+import sys
 
 
 def start(file: list):
+    if type(file) == type(None):
+        sys.exit(2)
     ans = list()
+    ans.append([])
+    for key in file[0].keys():
+        ans[0].append(key)
     # print(json.dumps(file, ensure_ascii=False, indent=4))
     for i, row in enumerate(file):
         ans.append([])
         for key, value in row.items():
-            ans[i].append(value)
+            ans[i+1].append(value)
     return ans, len(ans)
 
 

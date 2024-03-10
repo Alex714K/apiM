@@ -13,11 +13,13 @@ def start():
     with open('wildberries_token.txt', 'r') as txt:
         authorization = txt.read()
     # Дата
-    date = '2019-06-20'
+    date_from = '2024-02-29'
+    date_to = '2024-03-03'
+    flag = '1'
     # Ссылка
-    url = 'https://statistics-api.wildberries.ru/api/v1/supplier/incomes'
+    url = 'https://statistics-api.wildberries.ru/api/v1/supplier/sales'
     # Ссылка запроса
-    request = f"{url}?dateFrom={date}"
+    request = f"{url}?dateFrom={date_from}&flag={flag}"
     # Токен
     headers = {
         'Authorization': authorization

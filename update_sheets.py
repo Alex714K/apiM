@@ -28,7 +28,7 @@ def start():
     # majorDimension = "COLUMNS"  # список - столбец (не работает)
     majorDimension = "ROWS"  # список - строка
     times = dist % 1000+1
-    distance = f"Лист1!A{1}:N{dist}"
+    distance = f"Лист1!A{1}:BI{dist+1}"
     print("Start updating sheet...")
     results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
         "valueInputOption": valueInputOption,
@@ -40,4 +40,4 @@ def start():
         ]
     }).execute()
     print("Updating complete!")
-    print(results)
+    # print(results)
