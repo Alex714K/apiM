@@ -2,9 +2,9 @@ import json
 import sys
 
 
-def start(file: list):
-    if type(file) == type(None):
-        sys.exit(2)
+def convert_to_list(file: list) -> tuple[list, int]:
+    if type(file) is type(None):
+        sys.exit('file = None')
     ans = list()
     ans.append([])
     for key in file[0].keys():

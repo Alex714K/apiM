@@ -1,5 +1,5 @@
-import update_sheets
+from Api import Api
 
 
 if __name__ == "__main__":
-    update_sheets.start()
+    Api().start()

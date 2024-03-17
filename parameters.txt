@@ -1,0 +1,4 @@
+url=https://statistics-api.wildberries.ru/api/v1/supplier/sales
+dateFrom=2024-02-29
+flag=1
+date_to=
