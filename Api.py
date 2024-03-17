@@ -11,6 +11,7 @@ class Api:
         # values = [["Ячейка B2", "Ячейка C2", "Ячейка D2"],  # Заполняем первую строку
         #                     ['25', "=6*6", "=sin(3,14/2)"]]  # Заполняем вторую строку
         self.parameters = None
+        self.get_parameters()
         self.start()
 
     def start(self):
@@ -27,7 +28,8 @@ class Api:
         # https://docs.google.com/spreadsheets/d/1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk/edit#gid=0
         # ID таблицы excel в ссылке
         spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
-        name_of_list, new_or_not = self.parameters['dateFrom'], self.choose_name_of_list(service, spreadsheetId)
+        name_of_list = self.parameters['dateFrom']
+        new_or_not = self.choose_name_of_list(service, spreadsheetId)
         if new_or_not:
             Sheet().create(service, spreadsheetId)
         else:
@@ -40,7 +42,6 @@ class Api:
 
     def choose_name_of_list(self, service: apiclient.discovery.build, spreadsheetId: str) -> bool:
         """Возвращает bool ответ, надо ли создать новый лист"""
-        self.get_parameters()
         sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -51,6 +52,6 @@ class Api:
         with open('sheets.txt', 'w') as txt:
             txt.write(str(names_of_lists_and_codes))
         if self.parameters['dateFrom'] in list(map(lambda x: x[0], names_of_lists_and_codes)):
-            return True
-        else:
             return False
+        else:
+            return True

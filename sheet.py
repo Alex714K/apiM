@@ -18,9 +18,19 @@ class Sheet:
         json_response = RequestWildberries().start()
         values, dist = convert_to_list(json_response)
         distance = f"{self.parameters['dateFrom']}!A{1}:BI{dist}"
-        results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
-
-        }).execute()
+        results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
+            "requests": [{
+                    "addSheet": {
+                        "properties": {
+                            "title": self.parameters['dateFrom'],
+                            "gridProperties": {
+                                "rowCount": dist,
+                                "columnCount": 30
+                            }
+                        }
+                    }
+                }]
+            }).execute()
         print("\nStart updating sheet...")
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
