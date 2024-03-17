@@ -31,6 +31,7 @@ class Sheet:
                     }
                 }]
             }).execute()
+        print(f"Created new list {self.parameters['dateFrom']}")
         print("\nStart updating sheet...")
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
