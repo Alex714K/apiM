@@ -1,7 +1,6 @@
 import apiclient
 from request_wildberries import RequestWildberries
 from convert_to_list import convert_to_list
-
 import json
 
 
@@ -9,30 +8,33 @@ class Sheet:
     def __init__(self):
         self.parameters = None
         self.get_parameters()
+        self.number_of_rows = None
 
-    def create(self, service: apiclient.discovery.build, spreadsheetId: str):
-        # Данные воспринимаются, как вводимые пользователем (считается значение формул)
-        valueInputOption = "USER_ENTERED"
-        majorDimension = "ROWS"  # список - строка
-        dateFrom = '2024-02-29'
-        json_response = RequestWildberries().start()
+    @staticmethod
+    def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str):
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet)
         values, dist = convert_to_list(json_response)
-        distance = f"{self.parameters['dateFrom']}!A{1}:BI{dist}"
+        columnCount = len(values[0])  # кол-во столбцов
+        name_of_sheet = name_of_sheet
         results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
             "requests": [{
                     "addSheet": {
                         "properties": {
-                            "title": self.parameters['dateFrom'],
+                            "title": name_of_sheet,
                             "gridProperties": {
                                 "rowCount": dist,
-                                "columnCount": 30
+                                "columnCount": columnCount
                             }
                         }
                     }
                 }]
             }).execute()
-        print(f"Created new list {self.parameters['dateFrom']}")
+        print(f"Created new list '{name_of_sheet}'")
         print("\nStart updating sheet...")
+        # Данные воспринимаются, как вводимые пользователем (считается значение формул)
+        valueInputOption = "USER_ENTERED"
+        majorDimension = "ROWS"  # список - строка
+        distance = f"{name_of_sheet}!A{1}:BI{dist}"
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
             "data": [
@@ -45,15 +47,19 @@ class Sheet:
         print("Updating complete!")
         # print(results)
 
-    def update(self, service: apiclient.discovery.build, spreadsheetId: str):
+    @staticmethod
+    def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str):
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet)
+        values, dist = convert_to_list(json_response)
+        distance = f"{name_of_sheet}!A{1}:BI{dist}"
+        print("\nStart clearing sheet...")
+        results = service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range=name_of_sheet
+                                                        ).execute()
+        print("Clearing complete!")
+        print("\nStart updating sheet...")
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        dateFrom = '2024-02-29'
-        json_response = RequestWildberries().start()
-        values, dist = convert_to_list(json_response)
-        distance = f"{self.parameters['dateFrom']}!A{1}:BI{dist}"
-        print("\nStart updating sheet...")
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
             "data": [

@@ -9,20 +9,18 @@ class RequestWildberries:
         self.parameters = None
         self.get_parameters()
 
-    def start(self) -> list:
+    def start(self, name_of_sheet: str) -> list:
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()
         # Дата
-        dateFrom = '2024-02-29'
         dateFrom = self.parameters['dateFrom']
-        date_to = '2024-03-03'
-        flag = '1'
+        # Флажок
         flag = self.parameters['flag']
         # Ссылка
-        url = 'https://statistics-api.wildberries.ru/api/v1/supplier/sales'
-        url = self.parameters['url']
+        url = self.parameters[f"url_{name_of_sheet}"]
         # Ссылка запроса
         request = f"{url}?dateFrom={dateFrom}&flag={flag}"
+        # request = self.make_request(url, dateFrom, flag)
         # Токен
         headers = {
             'Authorization': authorization
@@ -34,9 +32,9 @@ class RequestWildberries:
             print("Ошибка выполнения запроса:")
             print(request)
             print(f"Http статус: {response.status_code} ( {response.reason} )")
-            with open('data.json') as data:
-                return json.load(data)
-            # sys.exit(1)
+            # with open('data.json') as data:
+            #     return json.load(data)
+            sys.exit(1)
         else:
             # Преобразуем ответ в json-объект
             json_response = response.json()
@@ -48,6 +46,9 @@ class RequestWildberries:
             print(request)
             print(f'Http статус: {response.status_code}')
             return json_response
+
+    def make_request(self, url,  *args) -> str:
+        pass
 
     def get_parameters(self):
         with open('parameters.txt', 'r') as txt:

@@ -1,4 +1,14 @@
-url=https://statistics-api.wildberries.ru/api/v1/supplier/sales
-dateFrom=2024-02-29
-flag=1
+url_sales=https://statistics-api.wildberries.ru/api/v1/supplier/sales
+dateFrom=2024-03-08
 date_to=
+flag=1
+url_ostatki=https://statistics-api.wildberries.ru/api/v1/supplier/stocks
+url_zakaz_1mes=https://statistics-api.wildberries.ru/api/v1/supplier/orders
+url_zakaz_1ned=https://statistics-api.wildberries.ru/api/v1/supplier/orders
+url_zakaz_2dnya=https://statistics-api.wildberries.ru/api/v1/supplier/orders
+url_zakaz_today=https://statistics-api.wildberries.ru/api/v1/supplier/orders
+url_stoim_hraneniya=https://seller-analytics-api.wildberries.ru/api/v1/paid_storage
+url_koroba=https://common-api.wildberries.ru/api/v1/tariffs/box
+url_pallety=https://common-api.wildberries.ru/api/v1/tariffs/pallet
+url_prodaza=https://statistics-api.wildberries.ru/api/v1/supplier/orders
+url_rk=https://advert-api.wb.ru/adv/v1/upd
