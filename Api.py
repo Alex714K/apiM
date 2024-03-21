@@ -14,7 +14,7 @@ class Api:
         self.get_parameters()
 
     def start(self, name_of_sheet: str, date: str):
-        CREDENTIALS_FILE = 'apim-415713-6b90e86bb1ba.json'
+        CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
                                                                        ['https://www.googleapis.com/auth/spreadsheets',

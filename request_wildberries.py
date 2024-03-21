@@ -10,8 +10,6 @@ class RequestWildberries:
         self.get_parameters()
 
     def start(self, name_of_sheet: str, date: str) -> list:
-        with open('wildberries_token.txt', 'r') as txt:
-            authorization = txt.read()
         # Дата
         match date:
             case 'today':
@@ -35,6 +33,8 @@ class RequestWildberries:
         request = f"{url}?dateFrom={dateFrom}&flag={flag}"
         # request = self.make_request(url, dateFrom, flag)
         # Токен
+        with open('wildberries_token.txt', 'r') as txt:
+            authorization = txt.read()
         headers = {
             'Authorization': authorization
         }
@@ -53,8 +53,8 @@ class RequestWildberries:
             json_response = response.json()
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл
-            with open('data.json', 'w') as d:
-                json.dump(json_response, d)
+            # with open('data.json', 'w') as d:
+            #     json.dump(json_response, d)
             print("Успешно")
             print(request)
             print(f'Http статус: {response.status_code}')
