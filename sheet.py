@@ -12,6 +12,7 @@ class Sheet:
 
     @staticmethod
     def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, date: str):
+        """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, date=date)
         values, dist = convert_to_list(json_response)
         columnCount = len(values[0])  # кол-во столбцов
@@ -49,6 +50,7 @@ class Sheet:
 
     @staticmethod
     def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, date: str):
+        """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
         json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, date=date)
         values, dist = convert_to_list(json_response)
@@ -73,6 +75,7 @@ class Sheet:
         # print(results)
 
     def get_parameters(self):
+        """Достаёт словарь параметров в parameters.txt"""
         with open('parameters.txt', 'r') as txt:
             param = txt.read().split('\n')
         self.parameters = dict(map(lambda x: x.split('='), param))

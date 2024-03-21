@@ -4,6 +4,7 @@ import numpy
 
 
 def beta_start(file: list) -> tuple[list, int]:
+    """Конвертирует файл json-объект в список, который подходит для добавления данных из файла в Google Excel"""
     if type(file) is type(None):
         sys.exit('file = None')
     ans = list()
@@ -19,6 +20,7 @@ def beta_start(file: list) -> tuple[list, int]:
 
 
 def convert_to_list(file: list) -> tuple[list, int]:
+    """Конвертирует файл json-объект в список, который подходит отправки запроса на добавление данных в таблицу Google Excel"""
     if type(file) is type(None):
         sys.exit('file = None')
     keys = list()

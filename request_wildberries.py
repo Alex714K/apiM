@@ -10,6 +10,9 @@ class RequestWildberries:
         self.get_parameters()
 
     def start(self, name_of_sheet: str, date: str) -> list:
+        """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
+        вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
+        пишет ошибку в консоль"""
         # Дата
         match date:
             case 'today':
@@ -64,6 +67,7 @@ class RequestWildberries:
         pass
 
     def get_parameters(self):
+        """Достаёт словарь параметров в parameters.txt"""
         with open('parameters.txt', 'r') as txt:
             param = txt.read().split('\n')
         self.parameters = dict(map(lambda x: x.split('='), param))
