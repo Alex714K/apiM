@@ -1,8 +1,9 @@
 import json
 import sys
+import numpy
 
 
-def convert_to_list(file: list) -> tuple[list, int]:
+def beta_start(file: list) -> tuple[list, int]:
     if type(file) is type(None):
         sys.exit('file = None')
     ans = list()
@@ -17,15 +18,17 @@ def convert_to_list(file: list) -> tuple[list, int]:
     return ans, len(ans)
 
 
-def beta_start(file: list):
-    ans = list()
-    dist = len(file)
-    # print(json.dumps(file, ensure_ascii=False, indent=4))
+def convert_to_list(file: list) -> tuple[list, int]:
+    if type(file) is type(None):
+        sys.exit('file = None')
+    keys = list()
+    for key in file[0].keys():
+        keys.append(key)
+    ans = numpy.array([keys])
     for i, row in enumerate(file):
-        if i % 1000 == 0:
-            ans.append([])
-            print(len(ans[0]))
-        ans[0].append([])
+        values = list()
         for key, value in row.items():
-            ans[0][i].append(value)
-    return ans, len(ans)
+            values.append(value)
+        values = numpy.array([values])
+        ans = numpy.concatenate((ans, values), axis=0)
+    return ans.tolist(), ans.shape[0]

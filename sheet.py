@@ -1,18 +1,18 @@
 import apiclient
 from request_wildberries import RequestWildberries
-from convert_to_list import convert_to_list
+from convert_to_list import convert_to_list, beta_start
 import json
+import numpy
 
 
 class Sheet:
     def __init__(self):
         self.parameters = None
         self.get_parameters()
-        self.number_of_rows = None
 
     @staticmethod
-    def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str):
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet)
+    def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, date: str):
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, date=date)
         values, dist = convert_to_list(json_response)
         columnCount = len(values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
@@ -48,9 +48,9 @@ class Sheet:
         # print(results)
 
     @staticmethod
-    def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str):
+    def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, date: str):
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet)
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, date=date)
         values, dist = convert_to_list(json_response)
         distance = f"{name_of_sheet}!A{1}:BI{dist}"
         print("\nStart clearing sheet...")

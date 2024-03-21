@@ -13,7 +13,7 @@ class Api:
         self.parameters = None
         self.get_parameters()
 
-    def start(self, name_of_sheet: str):
+    def start(self, name_of_sheet: str, date: str):
         CREDENTIALS_FILE = 'apim-415713-6b90e86bb1ba.json'
         # Читаем ключи из файла
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
@@ -30,9 +30,9 @@ class Api:
         name_of_list = self.parameters['dateFrom']
         new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
         if new_or_not:
-            Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet)
+            Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet, date=date)
         else:
-            Sheet().update(service, spreadsheetId, name_of_sheet=name_of_sheet)
+            Sheet().update(service, spreadsheetId, name_of_sheet=name_of_sheet, date=date)
 
     def get_parameters(self):
         with open('parameters.txt', 'r') as txt:

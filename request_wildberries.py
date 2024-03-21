@@ -1,7 +1,7 @@
 import sys
-
 import requests
 import json
+import datetime
 
 
 class RequestWildberries:
@@ -9,15 +9,28 @@ class RequestWildberries:
         self.parameters = None
         self.get_parameters()
 
-    def start(self, name_of_sheet: str) -> list:
+    def start(self, name_of_sheet: str, date: str) -> list:
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()
         # Дата
-        dateFrom = self.parameters['dateFrom']
+        match date:
+            case 'today':
+                dateFrom = datetime.date.today()
+            case '2days':
+                dateFrom = datetime.date.today() - datetime.timedelta(days=2)
+            case '1week':
+                dateFrom = datetime.date.today() - datetime.timedelta(weeks=1)
+            case '1mnth':
+                dateFrom = datetime.date.today() - datetime.timedelta(days=30)
+            case _:
+                dateFrom = date
         # Флажок
         flag = self.parameters['flag']
         # Ссылка
-        url = self.parameters[f"url_{name_of_sheet}"]
+        try:
+            url = self.parameters[f"url_{name_of_sheet}"]
+        except KeyError:
+            sys.exit('Wrong name of sheet!')
         # Ссылка запроса
         request = f"{url}?dateFrom={dateFrom}&flag={flag}"
         # request = self.make_request(url, dateFrom, flag)
