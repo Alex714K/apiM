@@ -11,9 +11,10 @@ class Sheet:
         self.get_parameters()
 
     @staticmethod
-    def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, date: str):
+    def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
+               flag: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, date=date)
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag)
         values, dist = convert_to_list(json_response)
         columnCount = len(values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
@@ -49,10 +50,11 @@ class Sheet:
         # print(results)
 
     @staticmethod
-    def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, date: str):
+    def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
+               flag: str):
         """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, date=date)
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag)
         values, dist = convert_to_list(json_response)
         distance = f"{name_of_sheet}!A{1}:BI{dist}"
         print("\nStart clearing sheet...")
