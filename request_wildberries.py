@@ -13,7 +13,7 @@ class RequestWildberries:
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
         # Дата
-        self.choose_dates(dateFrom=dateFrom, date=date)
+        dateFrom, date = self.choose_dates(dateFrom=dateFrom, date=date)
         # Ссылка
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
@@ -56,9 +56,9 @@ class RequestWildberries:
             fin_url = f"{url}"
         else:
             fin_url = f"{url}?"
-        for key, item in kwargs.items():
-            if item != None:
-                fin_url += f"{key}={item}"
+            for key, item in kwargs.items():
+                if item != None:
+                    fin_url += f"&{key}={item}"
         return fin_url
 
     def get_parameters(self):
@@ -68,7 +68,7 @@ class RequestWildberries:
         self.parameters = dict(map(lambda x: x.split('='), param))
 
     @staticmethod
-    def choose_dates(dateFrom, date):
+    def choose_dates(dateFrom, date) -> tuple[str, str]:
         """Если вводиться не дата, а слова: today, 2days, 1week, 1mnth"""
         match dateFrom:
             case 'today':

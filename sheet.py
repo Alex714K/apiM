@@ -1,6 +1,6 @@
 import apiclient
 from request_wildberries import RequestWildberries
-from convert_to_list import convert_to_list, beta_start
+from convert_to_list import convert_to_list
 import json
 import numpy
 
@@ -31,7 +31,7 @@ class Sheet:
                     }
                 }]
             }).execute()
-        print(f"\nCreated new list '{name_of_sheet}'")
+        print(f"\nCreated new sheet '{name_of_sheet}'")
         print("\nStart updating sheet...")
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
         valueInputOption = "USER_ENTERED"
@@ -41,12 +41,12 @@ class Sheet:
             "valueInputOption": valueInputOption,
             "data": [
                 {"range": distance,
-                 "majorDimension": majorDimension,  # Сначала заполнять строки, затем столбцы
+                 "majorDimension": majorDimension,
                  "values": values
                  }
             ]
         }).execute()
-        print("Updating complete!")
+        print("Updating complete!\n")
         # print(results)
 
     @staticmethod
@@ -68,12 +68,12 @@ class Sheet:
             "valueInputOption": valueInputOption,
             "data": [
                 {"range": distance,
-                 "majorDimension": majorDimension,  # Сначала заполнять строки, затем столбцы
+                 "majorDimension": majorDimension,
                  "values": values
                  }
             ]
         }).execute()
-        print("Updating complete!")
+        print("Updating complete!\n")
         # print(results)
 
     def get_parameters(self):
