@@ -30,7 +30,7 @@ class Sheet:
                     }
                 }]
             }).execute()
-        print(f"Created new list '{name_of_sheet}'")
+        print(f"\nCreated new list '{name_of_sheet}'")
         print("\nStart updating sheet...")
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
         valueInputOption = "USER_ENTERED"
