@@ -14,7 +14,7 @@ class Api:
         self.get_parameters()
 
     def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID='',
-              limit: str = None):
+              limit: str = None, dateTo: str = None, from_rk: str = None, to_rk: str = None):
         """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
         в лист 'name_of_sheet'. Данные берутся с сервера WildBerries"""
         CREDENTIALS_FILE = 'Alex714K.json'
@@ -35,10 +35,10 @@ class Api:
         new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
         if new_or_not:
             Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                           limit=limit)
+                           limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
         else:
             Sheet().update(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                           limit=limit)
+                           limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
 
     def get_parameters(self):
         """Достаёт словарь параметров в parameters.txt"""

@@ -1,7 +1,7 @@
 dateFrom=2024-03-08
 date_to=
 flag=1
-url_sales=https://statistics-api.wildberries.ru/api/v1/supplier/sales
+url_orders=https://statistics-api.wildberries.ru/api/v1/supplier/sales
 url_stocks=https://statistics-api.wildberries.ru/api/v1/supplier/stocks
 url_orders_1mnth=https://statistics-api.wildberries.ru/api/v1/supplier/orders
 url_orders_1week=https://statistics-api.wildberries.ru/api/v1/supplier/orders
@@ -12,4 +12,4 @@ url_tariffs_boxes=https://common-api.wildberries.ru/api/v1/tariffs/box
 url_tariffs_pallet=https://common-api.wildberries.ru/api/v1/tariffs/pallet
 url_prodaza=https://statistics-api.wildberries.ru/api/v1/supplier/orders
 url_rk=https://advert-api.wb.ru/adv/v1/upd
-url_goods=https://discounts-prices-api.wb.ru/api/v2/list/goods/filter
+url_prices=https://discounts-prices-api.wb.ru/api/v2/list/goods/filter
