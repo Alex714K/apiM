@@ -12,9 +12,10 @@ class Sheet:
 
     @staticmethod
     def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
-               flag: str):
+               flag: str, limit: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag)
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
+                                                   limit=limit)
         values, dist = convert_to_list(json_response)
         columnCount = len(values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
@@ -24,7 +25,7 @@ class Sheet:
                         "properties": {
                             "title": name_of_sheet,
                             "gridProperties": {
-                                "rowCount": dist,
+                                "rowCount": dist+500,
                                 "columnCount": columnCount
                             }
                         }
@@ -36,7 +37,7 @@ class Sheet:
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        distance = f"{name_of_sheet}!A{1}:BI{dist}"
+        distance = f"{name_of_sheet}!A{1}:BI{dist+500}"
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
             "data": [
@@ -51,13 +52,14 @@ class Sheet:
 
     @staticmethod
     def update(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
-               flag: str):
+               flag: str, limit: str):
         """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag)
+        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
+                                                   limit=limit)
         values, dist = convert_to_list(json_response)
-        distance = f"{name_of_sheet}!A{1}:BI{dist}"
-        print("\nStart clearing sheet...")
+        distance = f"{name_of_sheet}!A{1}:BI{dist+500}"
+        print(f"\nStart clearing sheet '{name_of_sheet}' ...")
         results = service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range=name_of_sheet
                                                         ).execute()
         print("Clearing complete!")

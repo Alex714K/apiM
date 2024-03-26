@@ -1,6 +1,7 @@
 import sys
 import requests
 import datetime
+import json
 
 
 class RequestWildberries:
@@ -8,7 +9,7 @@ class RequestWildberries:
         self.parameters = None
         self.get_parameters()
 
-    def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str) -> list:
+    def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, limit: str) -> list:
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
@@ -20,7 +21,7 @@ class RequestWildberries:
         except KeyError:
             sys.exit('Wrong name of sheet!')
         # Ссылка запроса
-        request = self.make_request(url, dateFrom=dateFrom, date=date, flag=flag)
+        request = self.make_request(url, dateFrom=dateFrom, date=date, flag=flag, limit=limit)
         # Токен
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()
@@ -43,7 +44,7 @@ class RequestWildberries:
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл
             # with open('data.json', 'w') as d:
-            #     json.dump(json_response, d)
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             print("Успешно")
             print(request)
             print(f'Http статус: {response.status_code}')

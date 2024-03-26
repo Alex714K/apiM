@@ -23,8 +23,6 @@ def convert_to_list(file: list) -> tuple[list, int]:
     """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
     if type(file) is type(None):
         sys.exit('file = None')
-    else:
-        print(file)
     keys = list()
     for key in file[0].keys():
         keys.append(key)
