@@ -1,6 +1,3 @@
-dateFrom=2024-03-08
-date_to=
-flag=1
 url_orders=https://statistics-api.wildberries.ru/api/v1/supplier/sales
 url_stocks=https://statistics-api.wildberries.ru/api/v1/supplier/stocks
 url_orders_1mnth=https://statistics-api.wildberries.ru/api/v1/supplier/orders
