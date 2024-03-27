@@ -16,7 +16,7 @@ class Api:
     def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID='',
               limit: str = None, dateTo: str = None, from_rk: str = None, to_rk: str = None):
         """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
-        в лист 'name_of_sheet'. Данные берутся с сервера WildBerries"""
+        в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
         CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,

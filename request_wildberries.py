@@ -55,7 +55,7 @@ class RequestWildberries:
 
     @staticmethod
     def make_request(url, **kwargs) -> str:
-        """Формируей ссылку для отправки запроса на сервер WildBerries"""
+        """Формируей ссылку для отправки запроса на сервер Wildberries"""
         if kwargs == {}:
             fin_url = f"{url}"
         else:
