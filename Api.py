@@ -55,9 +55,9 @@ class Api:
         for one_sheet in sheets:
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
-            names_of_lists_and_codes.append([title, sheet_id])
+            names_of_lists_and_codes.append([title, str(sheet_id)])
         with open('sheets.txt', 'w') as txt:
-            txt.write(str(names_of_lists_and_codes))
+            txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
         else:

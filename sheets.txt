@@ -1,1 +1,10 @@
-[['stocks', 1881758355], ['orders_1mnth', 446535518], ['orders_1week', 2046041770], ['orders_2days', 1357676260], ['orders_today', 1749784216], ['tariffs_boxes', 806730763], ['tariffs_pallet', 1536374855], ['goods', 1003714444], ['rk', 385537977]]
+stocks=1881758355
+orders_1mnth=446535518
+orders_1week=2046041770
+orders_2days=1357676260
+orders_today=1749784216
+tariffs_boxes=806730763
+tariffs_pallet=1536374855
+goods=1003714444
+rk=385537977
+prices=393255567

@@ -38,7 +38,7 @@ class Sheet:
         valueInputOption = "USER_ENTERED"
         valueInputOption = "RAW"
         majorDimension = "ROWS"  # список - строка
-        distance = f"{name_of_sheet}!A{1}:BI{dist+100}"
+        distance = f"{name_of_sheet}"
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
             "data": [
@@ -59,15 +59,29 @@ class Sheet:
         json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
                                                    limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
         values, dist = convert_to_list(json_response, name_of_sheet)
-        distance = f"{name_of_sheet}!A{1}:BI{dist+100}"
-        print(f"\nStart clearing sheet '{name_of_sheet}' ...")
-        results = service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range=name_of_sheet
-                                                        ).execute()
-        print("Clearing complete!")
-        print("\nStart updating sheet...")
+        distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         valueInputOption = "RAW"
         majorDimension = "ROWS"  # список - строка
+        responseValueRenderOption = 'UNFORMATTED_VALUE'
+        with open('sheets.txt', 'r') as txt:
+            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+            sheetId = sheets[name_of_sheet]
+        print(f"\nStart clearing sheet '{name_of_sheet}' ...")
+        results = service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range=name_of_sheet
+                                                        ).execute()
+        # results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
+        #     "requests": [
+        #         {
+        #          "updateCells": {
+        #              "range": {"sheetId": sheetId},
+        #              "fields": "*"
+        #              }
+        #          }
+        #     ]
+        # }).execute()
+        print("Clearing complete!")
+        print("\nStart updating sheet...")
         results = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
             "valueInputOption": valueInputOption,
             "data": [
