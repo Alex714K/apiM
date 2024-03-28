@@ -13,4 +13,4 @@ if __name__ == "__main__":
     # API.start('prices', filterNmID='', limit='1000')
     # API.start('storage_paid', dateFrom='2024-02-01', dateTo='2024-02-20')
     # API.start('rk', from_rk='2024-02-01', to_rk='2024-02-29')
-    # API.start('statements', dateFrom='2024-03-18', dateTo='2024-03-24')
+    # API.start('statements', dateFrom='statements', dateTo='statements')
