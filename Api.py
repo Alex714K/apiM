@@ -31,7 +31,6 @@ class Api:
 
         # ID таблицы excel в ссылке
         spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
-        name_of_list = self.parameters['dateFrom']
         new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
         if new_or_not:
             Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,

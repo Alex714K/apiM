@@ -14,24 +14,33 @@ class Sheet:
     def create(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
                flag: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                                                   limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
-        values, dist = convert_to_list(json_response, name_of_sheet)
+        try:
+            json_response, status_code = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom,
+                                                                    date=date, flag=flag, limit=limit, dateTo=dateTo,
+                                                                    from_rk=from_rk, to_rk=to_rk)
+        except TypeError:
+            print(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
+            return
+        try:
+            values, dist = convert_to_list(json_response, name_of_sheet)
+        except TypeError:
+            print('Файл скачен на устройство')
+            return
         columnCount = len(values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
         results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
             "requests": [{
-                    "addSheet": {
-                        "properties": {
-                            "title": name_of_sheet,
-                            "gridProperties": {
-                                "rowCount": dist+100,
-                                "columnCount": columnCount + 5
-                            }
+                "addSheet": {
+                    "properties": {
+                        "title": name_of_sheet,
+                        "gridProperties": {
+                            "rowCount": dist + 100,
+                            "columnCount": columnCount + 5
                         }
                     }
-                }]
-            }).execute()
+                }
+            }]
+        }).execute()
         print(f"\nCreated new sheet '{name_of_sheet}'")
         print("\nStart updating sheet...")
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
@@ -56,9 +65,15 @@ class Sheet:
                flag: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
-        json_response = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                                                   limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
-        values, dist = convert_to_list(json_response, name_of_sheet)
+        json_response, status_code = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom,
+                                                                date=date, flag=flag,
+                                                                limit=limit, dateTo=dateTo, from_rk=from_rk,
+                                                                to_rk=to_rk)
+        try:
+            values, dist = convert_to_list(json_response, name_of_sheet)
+        except Exception as _ex:
+            print(_ex)
+            return
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         valueInputOption = "RAW"

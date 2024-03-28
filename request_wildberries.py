@@ -10,7 +10,7 @@ class RequestWildberries:
         self.get_parameters()
 
     def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, limit: str, dateTo: str, from_rk: str,
-              to_rk: str) -> (list, dict):
+              to_rk: str) -> tuple[list | dict, int] | None:
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
@@ -39,7 +39,7 @@ class RequestWildberries:
             print(f"Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
-            sys.exit(1)
+            return None
         else:
             # Преобразуем ответ в json-объект
             json_response = response.json()
@@ -51,7 +51,7 @@ class RequestWildberries:
             print("Успешно")
             print(request)
             print(f'Http статус: {response.status_code}')
-            return json_response
+            return json_response, response.status_code
 
     @staticmethod
     def make_request(url, **kwargs) -> str:

@@ -19,15 +19,15 @@ def beta_start(file: list) -> tuple[list, int]:
     return ans, len(ans)
 
 
-def convert_to_list(file: (list, dict), name_of_sheet: str) -> tuple[list, int]:
+def convert_to_list(file: list | dict, name_of_sheet: str) -> tuple[list, int] | bool:
     if name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days', 'orders_today', 'stocks', 'rk']:
         return orders(file=file)
     elif name_of_sheet == 'prices':
-        return goods(file=file)
+        return prices(file=file)
     elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
-        return tariffs(file)
-    elif name_of_sheet == 'rk':
-        return rk(file)
+        return tariffs(file=file)
+    elif name_of_sheet in ['storage_paid', 'statements']:
+        return download(file=file, name=name_of_sheet)
 
 
 def orders(file: list) -> tuple[list, int]:
@@ -47,7 +47,7 @@ def orders(file: list) -> tuple[list, int]:
     return ans.tolist(), ans.shape[0]
 
 
-def goods(file: dict) -> tuple[list, int]:
+def prices(file: dict) -> tuple[list, int]:
     if type(file) is type(None):
         sys.exit('file = None')
     file = file["data"]["listGoods"]
@@ -64,7 +64,6 @@ def goods(file: dict) -> tuple[list, int]:
         for key, value in row.items():
             if type(value) is list:
                 ans[i+1].extend([value for key, value in value[0].items()])
-                # ans[i+1].append()
             else:
                 ans[i+1].append(value)
     for i in range(len(ans)):
@@ -90,5 +89,20 @@ def tariffs(file: dict) -> tuple[list, int]:
     return ans.tolist(), ans.shape[0]
 
 
-def rk(file: dict) -> tuple[list, int]:
+def download(file: dict, name: str) -> bool:
+    match name:
+        case 'statements':
+            with open('Финансовые отчёты.json', 'w') as d:
+                # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                json.dump(file, d, ensure_ascii=False, indent=4)
+        case 'statements_old':
+            with open('Финансовые отчёты.json', 'w') as d:
+                # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                json.dump(file, d, ensure_ascii=False, indent=4)
+        case 'storage_paid':
+            pass
+    return True
+
+
+def check_keys():
     pass
