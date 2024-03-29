@@ -1,3 +1,5 @@
+import socket
+
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
@@ -22,22 +24,29 @@ class Api:
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
                                                                        ['https://www.googleapis.com/auth/spreadsheets',
                                                                         'https://www.googleapis.com/auth/drive'])
-        # Авторизуемся в системе
-        httpAuth = credentials.authorize(httplib2.Http())
-        # Выбираем работу с таблицами и 4 версию API
-        service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
+        try:
+            # Авторизуемся в системе
+            httpAuth = credentials.authorize(httplib2.Http())
+            # Выбираем работу с таблицами и 4 версию API
+            service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
 
-        # https://docs.google.com/spreadsheets/d/1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk/edit#gid=0
+            # https://docs.google.com/spreadsheets/d/1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk/edit#gid=0
 
-        # ID таблицы excel в ссылке
-        spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
-        new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
-        if new_or_not:
-            Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                           limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
-        else:
-            Sheet().update(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                           limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+            # ID таблицы excel в ссылке
+            spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
+            new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
+            if new_or_not:
+                Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
+                               limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+            else:
+                Sheet().update(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
+                               limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+        except httplib2.error.ServerNotFoundError:
+            print("Google: 'ServerNotFound'...\nHOW?!\n")
+            return
+        except socket.gaierror:
+            print("The 'gaierror' has come!\n")
+            return
 
     def get_parameters(self):
         """Достаёт словарь параметров в parameters.txt"""
