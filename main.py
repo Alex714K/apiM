@@ -3,7 +3,7 @@ from Api import Api
 
 if __name__ == "__main__":
     API = Api()
-    API.start('stocks', dateFrom='2days')
+    # API.start('stocks', dateFrom='2days')
     # API.start('orders_1mnth', dateFrom='1mnth')
     # API.start('orders_1week', dateFrom='1week')
     # API.start('orders_2days', dateFrom='2days')
