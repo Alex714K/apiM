@@ -44,7 +44,7 @@ class Sheet:
         print("\nStart updating sheet...")
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
         valueInputOption = "USER_ENTERED"
-        valueInputOption = "RAW"
+        # valueInputOption = "RAW"
         majorDimension = "ROWS"  # список - строка
         distance = f"{name_of_sheet}"
         with open('sheets.txt', 'r') as txt:
