@@ -81,7 +81,7 @@ class Sheet:
             return
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
-        valueInputOption = "RAW"
+        # valueInputOption = "RAW"
         majorDimension = "ROWS"  # список - строка
         responseValueRenderOption = 'UNFORMATTED_VALUE'
         with open('sheets.txt', 'r') as txt:
@@ -126,11 +126,7 @@ class Sheet:
                             "startColumnIndex": needed_keys[0],
                             "endColumnIndex": needed_keys[0] + 1
                         },
-                        "cell": {
-                            "userEnteredValue": {"stringValue": "1000"},
-                            "formattedValue": "1000",
-                            "userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "0,00"}}
-                        },
+                        "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "0.00"}}},
                         "fields": "userEnteredFormat(numberFormat)"
                     }
                 }
