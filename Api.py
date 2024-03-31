@@ -13,7 +13,7 @@ class Api:
         # values = [["Ячейка B2", "Ячейка C2", "Ячейка D2"],  # Заполняем первую строку
         #                     ['25', "=6*6", "=sin(3,14/2)"]]  # Заполняем вторую строку
         self.parameters = None
-        self.get_parameters()
+        # self.get_parameters()
 
     def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID='',
               limit: str = None, dateTo: str = None, from_rk: str = None, to_rk: str = None):

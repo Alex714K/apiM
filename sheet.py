@@ -116,7 +116,9 @@ class Sheet:
         # print(results)
 
     @staticmethod
-    def change_formats(service: apiclient.discovery.build, spreadsheetId: str, needed_keys, sheetId):
+    def change_formats(service: apiclient.discovery.build, spreadsheetId: str, needed_keys: list | None, sheetId: str):
+        if needed_keys == None:
+            return
         results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
             "requests": [
                 {
