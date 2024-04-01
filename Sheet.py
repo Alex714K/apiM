@@ -1,15 +1,12 @@
 import apiclient
-from request_wildberries import RequestWildberries
-from convert_to_list import convert_to_list
+from Request_wildberries import RequestWildberries
+from Convert_to_list import convert_to_list
 import json
 import numpy
+from Initer import Initer
 
 
-class Sheet:
-    def __init__(self):
-        self.parameters = None
-        self.get_parameters()
-
+class Sheet(Initer):
     def create(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
                flag: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
@@ -134,9 +131,3 @@ class Sheet:
                 }
             ]
         }).execute()
-
-    def get_parameters(self):
-        """Достаёт словарь параметров в parameters.txt"""
-        with open('parameters.txt', 'r') as txt:
-            param = txt.read().split('\n')
-        self.parameters = dict(map(lambda x: x.split('='), param))

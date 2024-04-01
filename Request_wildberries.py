@@ -2,13 +2,10 @@ import sys
 import requests
 import datetime
 import json
+from Initer import Initer
 
 
-class RequestWildberries:
-    def __init__(self):
-        self.parameters = None
-        self.get_parameters()
-
+class RequestWildberries(Initer):
     def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, limit: str, dateTo: str, from_rk: str,
               to_rk: str) -> tuple[list | dict, int] | None:
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
@@ -77,12 +74,6 @@ class RequestWildberries:
                             fin_url += f"&{key}={item}"
 
         return fin_url
-
-    def get_parameters(self):
-        """Достаёт словарь параметров в parameters.txt"""
-        with open('parameters.txt', 'r') as txt:
-            param = txt.read().split('\n')
-        self.parameters = dict(map(lambda x: x.split('='), param))
 
     @staticmethod
     def choose_dates(dateFrom: str, date: str, dateTo: str) -> tuple[str, str, str]:

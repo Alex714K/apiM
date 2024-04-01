@@ -3,18 +3,12 @@ import socket
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
-from sheet import Sheet
-
+from Sheet import Sheet
 import json
+from Initer import Initer
 
 
-class Api:
-    def __init__(self):
-        # values = [["Ячейка B2", "Ячейка C2", "Ячейка D2"],  # Заполняем первую строку
-        #                     ['25', "=6*6", "=sin(3,14/2)"]]  # Заполняем вторую строку
-        self.parameters = None
-        # self.get_parameters()
-
+class Api(Initer):
     def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID='',
               limit: str = None, dateTo: str = None, from_rk: str = None, to_rk: str = None):
         """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
@@ -47,12 +41,8 @@ class Api:
         except socket.gaierror:
             print("The 'gaierror' has come!\n")
             return
-
-    def get_parameters(self):
-        """Достаёт словарь параметров в parameters.txt"""
-        with open('parameters.txt', 'r') as txt:
-            param = txt.read().split('\n')
-        self.parameters = dict(map(lambda x: x.split('='), param))
+        finally:
+            print(f"Complete '{name_of_sheet}'")
 
     @staticmethod
     def choose_name_of_sheet(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet) -> bool:
