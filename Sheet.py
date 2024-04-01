@@ -1,12 +1,12 @@
 import apiclient
 from Request_wildberries import RequestWildberries
-from Convert_to_list import convert_to_list
+from Converter_to_list import Converter
 import json
 import numpy
 from Initer import Initer
 
 
-class Sheet(Initer):
+class Sheet(Initer, Converter):
     def create(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str, date: str,
                flag: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
@@ -17,11 +17,14 @@ class Sheet(Initer):
         except TypeError:
             print(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
             return
-        try:
-            values, dist, needed_keys = convert_to_list(json_response, name_of_sheet)
-        except TypeError:
-            print('Файл скачен на устройство')
-            return
+        values, dist, needed_keys = self.convert_to_list(json_response, name_of_sheet)
+        if type(values) != list:
+            if values:
+                print("File = None")
+                return
+            else:
+                print("File is empty")
+                return
         columnCount = len(values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
         results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
@@ -71,11 +74,14 @@ class Sheet(Initer):
         except TypeError:
             print(f"There is no access to the file '{name_of_sheet}' on the server of Wildberries\n")
             return
-        try:
-            values, dist, needed_keys = convert_to_list(json_response, name_of_sheet)
-        except TypeError:
-            print(f"The file '{name_of_sheet}' has been downloaded to the device")
-            return
+        values, dist, needed_keys = self.convert_to_list(json_response, name_of_sheet)
+        if type(values) != list:
+            if values:
+                print("File = None")
+                return
+            else:
+                print("File is empty")
+                return
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         # valueInputOption = "RAW"
