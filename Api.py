@@ -1,11 +1,10 @@
 import socket
-
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
 from Sheet import Sheet
-import json
-from Initer import Initer
+from Initers import Initer, Getter
+import logging
 
 
 class Api(Initer):
@@ -19,6 +18,7 @@ class Api(Initer):
                                                                        ['https://www.googleapis.com/auth/spreadsheets',
                                                                         'https://www.googleapis.com/auth/drive'])
         try:
+            logging.info(f"Started {name_of_sheet}")
             # Авторизуемся в системе
             httpAuth = credentials.authorize(httplib2.Http())
             # Выбираем работу с таблицами и 4 версию API
@@ -30,19 +30,22 @@ class Api(Initer):
             spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
             new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
             if new_or_not:
-                Sheet().create(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                               limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+                Sheet().create_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
+                                     date=date, flag=flag, limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
             else:
-                Sheet().update(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                               limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+                Sheet().update_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
+                                     date=date, flag=flag, limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
         except httplib2.error.ServerNotFoundError:
+            logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")
             return
         except socket.gaierror:
+            logging.error("gaierror")
             print("The 'gaierror' has come!\n")
             return
         finally:
-            print(f"Complete '{name_of_sheet}'")
+            logging.info(f"Complete '{name_of_sheet}'")
+            print(f"Complete '{name_of_sheet}'\n")
 
     @staticmethod
     def choose_name_of_sheet(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet) -> bool:

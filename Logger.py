@@ -5,7 +5,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 
 FORMATTER = logging.Formatter("%(time)s — %(name)s — %(level)s — %(message)s")
-LOG_FILE = f"{datetime.date.today()}.log"
+LOG_FILE = f"2024-04-01.log"
 
 
 def get_console_handler():

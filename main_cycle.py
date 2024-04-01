@@ -1,5 +1,6 @@
 from Api import Api
 import schedule
+import logging
 
 
 if __name__ == "__main__":

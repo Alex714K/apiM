@@ -1,11 +1,12 @@
+import logging
 import sys
 import requests
 import datetime
 import json
-from Initer import Initer
+from Initers import Initer, Getter
 
 
-class RequestWildberries(Initer):
+class RequestWildberries(Getter):
     def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, limit: str, dateTo: str, from_rk: str,
               to_rk: str) -> tuple[list | dict, int] | None:
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
@@ -17,7 +18,8 @@ class RequestWildberries(Initer):
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
-            sys.exit('Wrong name of sheet!')
+            logging.critical("Wrong name of sheet!")
+            sys.exit("Wrong name of sheet!")
         # Ссылка запроса
         request = self.make_request(url, dateFrom=dateFrom, date=date, flag=flag, limit=limit, dateTo=dateTo,
                                     from_rk=from_rk, to_rk=to_rk)
@@ -31,6 +33,7 @@ class RequestWildberries(Initer):
         # Выполняем запрос
         response = requests.get(request, headers=headers)
         if not response:
+            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             print("Ошибка выполнения запроса:")
             print(request)
             print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -45,9 +48,10 @@ class RequestWildberries(Initer):
             with open('data.json', 'w') as d:
                 # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 json.dump(json_response, d, ensure_ascii=False, indent=4)
+            logging.info(f"Http статус: {response.status_code}")
             print("Успешно")
             print(request)
-            print(f'Http статус: {response.status_code}')
+            print(f"Http статус: {response.status_code}")
             return json_response, response.status_code
 
     @staticmethod

@@ -1,25 +1,12 @@
 import json
 import sys
 import numpy
+import logging
 
 
 class Converter:
-    @staticmethod
-    def beta_start(file: list) -> tuple[list, int]:
-        if type(file) is type(None):
-            sys.exit('file = None')
-        ans = list()
-        ans.append([])
-        for key in file[0].keys():
-            ans[0].append(key)
-        # print(json.dumps(file, ensure_ascii=False, indent=4))
-        for i, row in enumerate(file):
-            ans.append([])
-            for key, value in row.items():
-                ans[i+1].append(value)
-        return ans, len(ans)
-
-    def convert_to_list(self, file: list | dict, name_of_sheet: str) -> tuple[list, int, list] | tuple[bool, bool, bool]:
+    def convert_to_list(self,
+                        file: list | dict, name_of_sheet: str) -> tuple[list, int, list] | tuple[bool, bool, bool]:
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
             case None:
@@ -112,3 +99,18 @@ class Converter:
             return needed_keys
         else:
             return
+
+    @staticmethod
+    def beta_start(file: list) -> tuple[list, int]:
+        if type(file) is type(None):
+            sys.exit('file = None')
+        ans = list()
+        ans.append([])
+        for key in file[0].keys():
+            ans[0].append(key)
+        # print(json.dumps(file, ensure_ascii=False, indent=4))
+        for i, row in enumerate(file):
+            ans.append([])
+            for key, value in row.items():
+                ans[i+1].append(value)
+        return ans, len(ans)
