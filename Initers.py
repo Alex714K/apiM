@@ -7,8 +7,9 @@ class Initer:
     def __init__(self):
         self.parameters = None
         # self.logger = Logger.get_logger("Apister")
-        logging.basicConfig(level=logging.INFO, filename=f"{datetime.date.today()}.log", filemode="w",
-                            format="%(asctime)s %(levelname)s %(message)s")
+        current_date = datetime.datetime.now()
+        logging.basicConfig(level=logging.INFO, filename=f"{current_date.strftime('%m-%d-%y %H-%M-%S')}.log",
+                            filemode="w", format="%(asctime)s %(levelname)s %(message)s")
 
     def get_parameters(self):
         """Достаёт словарь параметров в parameters.txt"""
