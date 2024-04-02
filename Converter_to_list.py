@@ -92,13 +92,22 @@ class Converter:
 
     @staticmethod
     def check_keys(keys: list) -> list | None:
+        need_to_check = ['nmId', 'nmID']
         needed_keys = list()
-        if 'nmId' in keys:
-            n = keys.index('nmId')
-            needed_keys.append(n)
-            return needed_keys
-        else:
+        for i in need_to_check:
+            if i in keys:
+                n = keys.index(i)
+                needed_keys.append(n)
+        if needed_keys == []:
             return
+        else:
+            return needed_keys
+        # if 'nmId' in keys:
+        #     n = keys.index('nmId')
+        #     needed_keys.append(n)
+        #     return needed_keys
+        # else:
+        #     return
 
     @staticmethod
     def beta_start(file: list) -> tuple[list, int]:

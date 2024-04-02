@@ -118,18 +118,17 @@ class Sheet(Getter, Converter):
     def change_formats(service: apiclient.discovery.build, spreadsheetId: str, needed_keys: list | None, sheetId: str):
         if needed_keys == None:
             return
-        results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
-            "requests": [
-                {
-                    "repeatCell": {
-                        "range": {
-                            "sheetId": sheetId,
-                            "startColumnIndex": needed_keys[0],
-                            "endColumnIndex": needed_keys[0] + 1
-                        },
-                        "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "0.00"}}},
-                        "fields": "userEnteredFormat(numberFormat)"
-                    }
+        data = {"requests": []}
+        for i in needed_keys:
+            data["requests"].append({
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheetId,
+                        "startColumnIndex": i,
+                        "endColumnIndex": i + 1
+                    },
+                    "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "0.00"}}},
+                    "fields": "userEnteredFormat(numberFormat)"
                 }
-            ]
-        }).execute()
+            })
+        results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=data).execute()
