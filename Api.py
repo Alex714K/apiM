@@ -31,10 +31,12 @@ class Api(Initer):
             new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
             if new_or_not:
                 Sheet().create_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                     date=date, flag=flag, limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+                                     date=date, flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                     from_rk=from_rk, to_rk=to_rk)
             else:
                 Sheet().update_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                     date=date, flag=flag, limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+                                     date=date, flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                     from_rk=from_rk, to_rk=to_rk)
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")

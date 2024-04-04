@@ -7,8 +7,8 @@ from Initers import Initer, Getter
 
 
 class RequestWildberries(Getter):
-    def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, limit: str, dateTo: str, from_rk: str,
-              to_rk: str) -> tuple[list | dict, int] | None:
+    def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, filterNmID: str, limit: str, dateTo: str,
+              from_rk: str, to_rk: str) -> tuple[list | dict, int] | None:
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
@@ -21,8 +21,8 @@ class RequestWildberries(Getter):
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Ссылка запроса
-        request = self.make_request(url, dateFrom=dateFrom, date=date, flag=flag, limit=limit, dateTo=dateTo,
-                                    from_rk=from_rk, to_rk=to_rk)
+        request = self.make_request(url, dateFrom=dateFrom, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
+                                    dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
         # Токен
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()

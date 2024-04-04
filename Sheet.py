@@ -11,32 +11,35 @@ class Sheet(Getter, Converter):
         self.values, self.dist, self.needed_keys = None, None, None
 
     def create_sheet(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str,
-                     date: str, flag: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
+                     date: str, flag: str, filterNmID: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         self.values, self.dist, self.needed_keys = self.start_work_with_request(name_of_sheet=name_of_sheet,
                                                                                 dateFrom=dateFrom, date=date,
-                                                                                flag=flag, limit=limit, dateTo=dateTo,
+                                                                                flag=flag, filterNmID=filterNmID,
+                                                                                limit=limit, dateTo=dateTo,
                                                                                 from_rk=from_rk, to_rk=to_rk)
         self.private_create(service, spreadsheetId, name_of_sheet=name_of_sheet)
         self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
 
     def update_sheet(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str,
-                     date: str, flag: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
+                     date: str, flag: str, filterNmID: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
-                                             limit=limit, dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+                                             filterNmID=filterNmID, limit=limit, dateTo=dateTo, from_rk=from_rk,
+                                             to_rk=to_rk)
         if check:
             return
         self.private_clear(service, spreadsheetId, name_of_sheet=name_of_sheet)
         self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
         # print(results)
 
-    def start_work_with_request(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, limit: str, dateTo: str,
-                                from_rk: str, to_rk: str) -> bool:
+    def start_work_with_request(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, filterNmID: str,
+                                limit: str, dateTo: str, from_rk: str, to_rk: str) -> bool:
         try:
             json_response, status_code = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                                                    date=date, flag=flag, limit=limit, dateTo=dateTo,
-                                                                    from_rk=from_rk, to_rk=to_rk)
+                                                                    date=date, flag=flag, filterNmID=filterNmID,
+                                                                    limit=limit, dateTo=dateTo, from_rk=from_rk,
+                                                                    to_rk=to_rk)
         except TypeError:
             logging.warning(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
             print(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
