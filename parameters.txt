@@ -10,5 +10,5 @@ url_tariffs_pallet=https://common-api.wildberries.ru/api/v1/tariffs/pallet
 url_prodaza=https://statistics-api.wildberries.ru/api/v1/supplier/orders
 url_rk=https://advert-api.wb.ru/adv/v1/upd
 url_prices=https://discounts-prices-api.wb.ru/api/v2/list/goods/filter
-url_statements=https://statistics-api.wildberries.ru/api/v3/supplier/reportDetailByPeriod
+url_statements=http://statistics-api.wildberries.ru/api/v5/supplier/reportDetailByPeriod
 url_statements_old=https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod
