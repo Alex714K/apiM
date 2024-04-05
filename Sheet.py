@@ -13,11 +13,11 @@ class Sheet(Getter, Converter):
     def create_sheet(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str,
                      date: str, flag: str, filterNmID: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
-        self.values, self.dist, self.needed_keys = self.start_work_with_request(name_of_sheet=name_of_sheet,
-                                                                                dateFrom=dateFrom, date=date,
-                                                                                flag=flag, filterNmID=filterNmID,
-                                                                                limit=limit, dateTo=dateTo,
-                                                                                from_rk=from_rk, to_rk=to_rk)
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
+                                             filterNmID=filterNmID, limit=limit, dateTo=dateTo, from_rk=from_rk,
+                                             to_rk=to_rk)
+        if check:
+            return
         self.private_create(service, spreadsheetId, name_of_sheet=name_of_sheet)
         self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
 
@@ -44,16 +44,21 @@ class Sheet(Getter, Converter):
             logging.warning(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
             print(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
             return True
-        self.values, self.dist, self.needed_keys = self.convert_to_list(json_response, name_of_sheet)
-        if type(self.values) != list:
-            if self.values:
+        result = self.convert_to_list(json_response, name_of_sheet)
+        match result:
+            case 'download':
+                logging.warning("Downloaded")
+                print(f"Downloaded {name_of_sheet}")
+                return True
+            case 'is None':
                 logging.warning("File = None")
                 print("File = None")
                 return True
-            else:
+            case 'is empty':
                 logging.warning("File is empty")
                 print("File is empty")
                 return True
+        self.values, self.dist, self.needed_keys = result
         return False
 
     def private_create(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str):

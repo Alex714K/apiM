@@ -6,23 +6,25 @@ import logging
 
 class Converter:
     def convert_to_list(self,
-                        file: list | dict, name_of_sheet: str) -> tuple[list, int, list] | tuple[bool, bool, bool]:
+                        file: list | dict, name_of_sheet: str) -> (tuple[list, int, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
             case None:
-                return True, True, True
+                return 'is None'
             case []:
-                return False, False, False
+                return 'is empty'
         if name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days', 'orders_today', 'stocks', 'rk']:
-            return self.orders(file=file)
+            return self.list_with_dict(file=file)
         elif name_of_sheet == 'prices':
             return self.prices(file=file)
         elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
             return self.tariffs(file=file)
-        elif name_of_sheet in ['storage_paid', 'statements']:
+        elif name_of_sheet == 'statements':
+            return self.statements(file=file)
+        elif name_of_sheet == 'storage_paid':
             return self.download(file=file, name=name_of_sheet)
 
-    def orders(self, file: list) -> tuple[list, int, list]:
+    def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
         keys = list()
         for key in file[0].keys():
             keys.append(key)
@@ -36,7 +38,7 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
-    def prices(self, file: dict) -> tuple[list, int, list]:
+    def prices(self, file: dict) -> tuple[list, int, list | None]:
         file = file["data"]["listGoods"]
         keys = list()
         for key, value in file[0].items():
@@ -54,12 +56,11 @@ class Converter:
                     ans[i+1].extend([value for key, value in value[0].items()])
                 else:
                     ans[i+1].append(value)
-        for i in range(len(ans)):
-            ans[i] = list(map(lambda x: str(x), ans[i]))
+        ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
 
-    def tariffs(self, file: dict) -> tuple[list, int, list]:
+    def tariffs(self, file: dict) -> tuple[list, int, list | None]:
         with open('date_of_tariffs.txt', 'w') as txt:
             txt.write(file['response']['data']['dtTillMax'])
         keys = list()
@@ -75,8 +76,23 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
+    def statements(self, file: list) -> tuple[list, int, list | None]:
+        keys = list()
+        for key, value in file[0].items():
+            keys.append(key)
+        ans = list()
+        ans.append(keys)
+        # print(json.dumps(file, ensure_ascii=False, indent=4))
+        for i, row in enumerate(file):
+            ans.append([])
+            for key, value in row.items():
+                ans[i+1].append(value)
+        ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
+
     @staticmethod
-    def download(file: dict, name: str) -> tuple[bool, bool, bool]:
+    def download(file: dict, name: str) -> str:
         match name:
             case 'statements':
                 with open('Финансовые отчёты.json', 'w') as d:
@@ -86,13 +102,11 @@ class Converter:
                 with open('Финансовые отчёты.json', 'w') as d:
                     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                     json.dump(file, d, ensure_ascii=False, indent=4)
-            case 'storage_paid':
-                pass
-        return True, True, True
+        return 'download'
 
     @staticmethod
     def check_keys(keys: list) -> list | None:
-        need_to_check = ['nmId', 'nmID']
+        need_to_check = ['nmId', 'nmID', 'nm_id']
         needed_keys = list()
         for i in need_to_check:
             if i in keys:

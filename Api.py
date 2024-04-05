@@ -8,7 +8,7 @@ import logging
 
 
 class Api(Initer):
-    def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID='',
+    def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID=None,
               limit: str = None, dateTo: str = None, from_rk: str = None, to_rk: str = None):
         """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
         в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
@@ -18,7 +18,7 @@ class Api(Initer):
                                                                        ['https://www.googleapis.com/auth/spreadsheets',
                                                                         'https://www.googleapis.com/auth/drive'])
         try:
-            logging.info(f"Started {name_of_sheet}")
+            logging.info(f"Started '{name_of_sheet}'")
             # Авторизуемся в системе
             httpAuth = credentials.authorize(httplib2.Http())
             # Выбираем работу с таблицами и 4 версию API

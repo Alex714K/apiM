@@ -61,15 +61,15 @@ class RequestWildberries(Getter):
             fin_url = f"{url}"
         else:
             fin_url = f"{url}?"
-            a = 0
+            a = True
             for key, item in kwargs.items():
-                if a == 0:
+                if a:
                     if item != None:
                         if 'rk' in key:
                             fin_url += f"{key[:-3]}={item}"
                         else:
                             fin_url += f"{key}={item}"
-                        a += 1
+                        a = False
                 else:
                     if item != None:
                         if 'rk' in key:

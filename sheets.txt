@@ -7,3 +7,4 @@ tariffs_boxes=806730763
 tariffs_pallet=1536374855
 rk=385537977
 prices=393255567
+statements=699117969
