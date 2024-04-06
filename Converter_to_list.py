@@ -1,6 +1,7 @@
 import json
 import sys
 import numpy
+import datetime
 import logging
 
 
@@ -13,8 +14,10 @@ class Converter:
                 return 'is None'
             case []:
                 return 'is empty'
-        if name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days', 'orders_today', 'stocks', 'rk']:
+        if name_of_sheet in ['orders_today', 'stocks', 'rk']:
             return self.list_with_dict(file=file)
+        elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
+            return self.orders_not_today(file=file)
         elif name_of_sheet == 'prices':
             return self.prices(file=file)
         elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
@@ -35,6 +38,27 @@ class Converter:
                 values.append(value)
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
+        needed_keys = self.check_keys(keys)
+        return ans.tolist(), ans.shape[0], needed_keys
+
+    def orders_not_today(self, file: list) -> tuple[list, int, list | None]:
+        keys = list()
+        for key in file[0].keys():
+            keys.append(key)
+        ans = numpy.array([keys])
+        for i, row in enumerate(file):
+            values = list()
+            for key, value in row.items():
+                values.append(value)
+            values = numpy.array([values])
+            ans = numpy.concatenate((ans, values), axis=0)
+        need_to_delete = list()
+        length_of_row = ans.shape[1]
+        length_of_column = ans.shape[0]
+        for i in range(len(ans)):
+            if datetime.datetime.now().strftime('%Y-%m-%d') == str(ans[i][1])[:10]:
+                need_to_delete.append(i)
+        ans = numpy.delete(ans, need_to_delete, axis=0)
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
