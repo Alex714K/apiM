@@ -15,7 +15,7 @@ if __name__ == "__main__":
     schedule.every().wednesday.at("17:00").do(
         API.start, name_of_sheet='statements', dateFrom='statements', dateTo='statements'
     )
-    schedule.every(30).minutes.do(API.start, name_of_sheet='prices', limit='1000', filterNmID='')
+    schedule.every(30).minutes.do(API.start, name_of_sheet='prices', limit='1000')
     print(schedule.get_jobs())
     while True:
         schedule.run_pending()
