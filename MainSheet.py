@@ -5,13 +5,13 @@ from Initers import Initer, Getter
 import logging
 
 
-class Sheet(Getter, Converter):
+class MainSheet(Getter, Converter):
     def __init__(self):
         super().__init__()
         self.values, self.dist, self.needed_keys = None, None, None
 
     def create_sheet(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str,
-                     date: str, flag: str, filterNmID: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
+                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str):
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
                                              filterNmID=filterNmID, limit=limit, dateTo=dateTo, from_rk=from_rk,
@@ -22,7 +22,7 @@ class Sheet(Getter, Converter):
         self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
 
     def update_sheet(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str, dateFrom: str,
-                     date: str, flag: str, filterNmID: str, limit: str, dateTo: str, from_rk: str, to_rk: str):
+                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str):
         """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom, date=date, flag=flag,
                                              filterNmID=filterNmID, limit=limit, dateTo=dateTo, from_rk=from_rk,
@@ -33,8 +33,8 @@ class Sheet(Getter, Converter):
         self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
         # print(results)
 
-    def start_work_with_request(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, filterNmID: str,
-                                limit: str, dateTo: str, from_rk: str, to_rk: str) -> bool:
+    def start_work_with_request(self, name_of_sheet: str, dateFrom: str, dateTo: str, date: str, flag: str,
+                                filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
         try:
             json_response, status_code = RequestWildberries().start(name_of_sheet=name_of_sheet, dateFrom=dateFrom,
                                                                     date=date, flag=flag, filterNmID=filterNmID,

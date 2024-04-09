@@ -25,7 +25,7 @@ class Converter:
         elif name_of_sheet == 'statements':
             return self.statements(file=file)
         elif name_of_sheet == 'storage_paid':
-            return self.download(file=file, name=name_of_sheet)
+            return self.list_with_dict(file=file)
 
     def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
         keys = list()
@@ -53,8 +53,6 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         need_to_delete = list()
-        length_of_row = ans.shape[1]
-        length_of_column = ans.shape[0]
         for i in range(len(ans)):
             if datetime.datetime.now().strftime('%Y-%m-%d') == str(ans[i][1])[:10]:
                 need_to_delete.append(i)

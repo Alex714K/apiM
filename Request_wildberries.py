@@ -7,13 +7,17 @@ from Initers import Initer, Getter
 
 
 class RequestWildberries(Getter):
-    def start(self, name_of_sheet: str, dateFrom: str, date: str, flag: str, filterNmID: str, limit: str, dateTo: str,
-              from_rk: str, to_rk: str) -> tuple[list | dict, int] | None:
+    def start(self, name_of_sheet: str, storage_paid=False, **kwargs) -> tuple[list | dict, int] | None:
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
         # Дата
-        dateFrom, date, dateTo = self.choose_dates(dateFrom=dateFrom, date=date, dateTo=dateTo)
+        if storage_paid:
+            kwargs['dateFrom'], date, kwargs['dateTo'] = self.choose_dates(dateFrom=kwargs['dateFrom'])
+        else:
+            kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
+                                                                                     kwargs['dateTo'])
+
         # Ссылка
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
@@ -21,8 +25,7 @@ class RequestWildberries(Getter):
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Ссылка запроса
-        request = self.make_request(url, dateFrom=dateFrom, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
-                                    dateTo=dateTo, from_rk=from_rk, to_rk=to_rk)
+        request = self.make_request(url, kwargs)
         # Токен
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()
@@ -55,7 +58,7 @@ class RequestWildberries(Getter):
             return json_response, response.status_code
 
     @staticmethod
-    def make_request(url, **kwargs) -> str:
+    def make_request(url, kwargs: dict) -> str:
         """Формируей ссылку для отправки запроса на сервер Wildberries"""
         if kwargs == {}:
             fin_url = f"{url}"
@@ -80,7 +83,7 @@ class RequestWildberries(Getter):
         return fin_url
 
     @staticmethod
-    def choose_dates(dateFrom: str, date: str, dateTo: str) -> tuple[str, str, str]:
+    def choose_dates(dateFrom: str = None, date: str = None, dateTo: str = None) -> tuple[str, str, str]:
         """Если вводиться не дата, а слова: today, 2days, 1week, 1mnth; то выводятся сегодняшняя дата и до -30 дней"""
         match dateFrom:
             case 'today':
@@ -96,6 +99,14 @@ class RequestWildberries(Getter):
                     date = txt.read()
             case 'statements':
                 dateFrom = datetime.date.today() - datetime.timedelta(days=(datetime.date.today().weekday()), weeks=1)
+                dateTo = datetime.date.today() - datetime.timedelta(days=(datetime.date.today().weekday() + 1))
+            case 'storage_paid':
+                date = datetime.date.today()
+                year = date.year
+                month = (datetime.date.today() - datetime.timedelta(days=30)).month
+                last_day = (datetime.date.today() - datetime.timedelta(days=1)).day
+                dateFrom = datetime.date(year, month, 1).strftime("%Y-%m-%d")
+                dateTo = datetime.date(year, month, last_day).strftime("%Y-%m-%d")
 
         match date:
             case 'today':

@@ -2,9 +2,12 @@ import socket
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
-from Sheet import Sheet
+from MainSheet import MainSheet
 from Initers import Initer, Getter
 import logging
+import datetime
+from Storage_paid import StoragePaid
+from Statements import Statements
 
 
 class Api(Initer):
@@ -28,15 +31,21 @@ class Api(Initer):
 
             # ID таблицы excel в ссылке
             spreadsheetId = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
-            new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
-            if new_or_not:
-                Sheet().create_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                     date=date, flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                     from_rk=from_rk, to_rk=to_rk)
-            else:
-                Sheet().update_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                     date=date, flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                     from_rk=from_rk, to_rk=to_rk)
+            match name_of_sheet:
+                case 'storage_paid':
+                    StoragePaid().update_sheet(service, name_of_sheet=name_of_sheet, dateFrom=dateFrom)
+                case 'statements':
+                    Statements().create_sheet(service, name_of_sheet, dateFrom=dateFrom)
+                case _:
+                    new_or_not = self.choose_name_of_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet)
+                    if new_or_not:
+                        MainSheet().create_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
+                                                 dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID,
+                                                 limit=limit, from_rk=from_rk, to_rk=to_rk)
+                    else:
+                        MainSheet().update_sheet(service, spreadsheetId, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
+                                                 dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID,
+                                                 limit=limit, from_rk=from_rk, to_rk=to_rk)
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")
