@@ -1,7 +1,7 @@
 import apiclient
 from Request_wildberries import RequestWildberries
 from Converter_to_list import Converter
-from Initers import Initer, Getter
+from Initers import Getter
 import logging
 
 
@@ -70,8 +70,8 @@ class MainSheet(Getter, Converter):
                     "properties": {
                         "title": name_of_sheet,
                         "gridProperties": {
-                            "rowCount": self.dist + 100,
-                            "columnCount": columnCount + 5
+                            "rowCount": self.dist,
+                            "columnCount": columnCount
                         }
                     }
                 }

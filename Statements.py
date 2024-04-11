@@ -1,39 +1,18 @@
 import apiclient
 from Request_wildberries import RequestWildberries
 from Converter_to_list import Converter
-from Initers import Initer, Getter
+from Initers import Getter
 import datetime
 import logging
 
 
 class Statements(Getter, Converter):
-    def __init__(self):
+    def __init__(self, spreadsheetId):
         super().__init__()
-        self.values, self.dist, self.needed_keys = None, None, None
-
-    def create_sheet(self, service: apiclient.discovery.build, name_of_sheet_for_request: str, dateFrom: str):
-        # https://docs.google.com/spreadsheets/d/1kgPtysbiN4P46WMJcKD95ZI14SjLFeQO9-aMOCNsEbI/edit#gid=0
-        spreadsheetId = '1kgPtysbiN4P46WMJcKD95ZI14SjLFeQO9-aMOCNsEbI'
-        if datetime.date.today().day != 9:
-            return
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet_for_request, dateFrom=dateFrom)
-        if check:
-            return
-        name_of_sheet = datetime.date.today().isocalendar()[1]
-        self.private_create(service, spreadsheetId, name_of_sheet=name_of_sheet)
-        self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
-
-    def update_sheet(self, service: apiclient.discovery.build, name_of_sheet: str, dateFrom: str):
         # https://docs.google.com/spreadsheets/d/1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE/edit#gid=0
-        spreadsheetId = '1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE-aMOCNsEbI'
-        if datetime.date.today().day != 1:
-            return
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom)
-        if check:
-            return
-        name_of_sheet = datetime.date.today().isocalendar()[1]
-        self.private_clear(service, spreadsheetId, name_of_sheet=name_of_sheet)
-        self.private_update(service, spreadsheetId, name_of_sheet=name_of_sheet)
+        self.spreadsheetId = '1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE'
+        self.values, self.dist, self.needed_keys = None, None, None
+        self.name_of_sheet = (datetime.date.today() - datetime.timedelta(weeks=1)).isocalendar()[1]
 
     def start_work_with_request(self, name_of_sheet: str, dateFrom: str) -> bool:
         try:
@@ -60,17 +39,34 @@ class Statements(Getter, Converter):
         self.values, self.dist, self.needed_keys = result
         return False
 
+    def create_sheet(self, service: apiclient.discovery.build, name_of_sheet_for_request: str, dateFrom: str):
+        if datetime.date.today().day != 1:
+            return
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet_for_request, dateFrom=dateFrom)
+        if check:
+            return
+        self.private_create(service, self.spreadsheetId, name_of_sheet=self.name_of_sheet)
+        self.private_update(service, self.spreadsheetId, name_of_sheet=self.name_of_sheet)
+
+    def update_sheet(self, service: apiclient.discovery.build, name_of_sheet: str, dateFrom: str):
+        if datetime.date.today().day != 1:
+            return
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom)
+        if check:
+            return
+        self.private_clear(service, self.spreadsheetId, name_of_sheet=self.name_of_sheet)
+        self.private_update(service, self.spreadsheetId, name_of_sheet=self.name_of_sheet)
+
     def private_create(self, service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet: str):
         columnCount = len(self.values[0])  # кол-во столбцов
-        name_of_sheet = name_of_sheet
         results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
             "requests": [{
                 "addSheet": {
                     "properties": {
                         "title": name_of_sheet,
                         "gridProperties": {
-                            "rowCount": self.dist + 100,
-                            "columnCount": columnCount + 5
+                            "rowCount": self.dist,
+                            "columnCount": columnCount
                         }
                     }
                 }

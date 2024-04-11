@@ -12,8 +12,8 @@ if __name__ == "__main__":
     schedule.every().day.at("05:05").do(API.start, name_of_sheet='orders_today', dateFrom='today', flag='1')
     schedule.every().day.at("05:10").do(API.start, name_of_sheet='tariffs_boxes', date='tariffs')
     schedule.every().day.at("05:15").do(API.start, name_of_sheet='tariffs_pallet', date='tariffs')
-    # schedule.every().day.at("05:20").do(API.start, name_of_sheet='storage_paid', dateFrom='storage_paid')
-    # schedule.every().day.at("5:25").do(API.start, name_of_sheet='statements', dateFrom='statements')
+    schedule.every().day.at("05:20").do(API.start, name_of_sheet='statements', dateFrom='statements')
+    # schedule.every().day.at("05:25").do(API.start, name_of_sheet='storage_paid', dateFrom='storage_paid')
     schedule.every(30).minutes.do(API.start, name_of_sheet='prices', limit='1000')
     print(schedule.get_jobs())
     while True:

@@ -3,16 +3,19 @@ import sys
 import requests
 import datetime
 import json
-from Initers import Initer, Getter
+from Initers import Getter
 
 
 class RequestWildberries(Getter):
-    def start(self, name_of_sheet: str, storage_paid=False, **kwargs) -> tuple[list | dict, int] | None:
+    def start(self, name_of_sheet: str, storage_paid=False, statements=False, **kwargs) -> (tuple[list | dict, int] |
+                                                                                            None):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
         # Дата
         if storage_paid:
+            kwargs['dateFrom'], date, kwargs['dateTo'] = self.choose_dates(dateFrom=kwargs['dateFrom'])
+        elif statements:
             kwargs['dateFrom'], date, kwargs['dateTo'] = self.choose_dates(dateFrom=kwargs['dateFrom'])
         else:
             kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
@@ -30,7 +33,8 @@ class RequestWildberries(Getter):
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()
         headers = {
-            'Authorization': authorization
+            'Authorization': authorization,
+            'Content-Type': "application/json; charset=utf-8"
         }
 
         # Выполняем запрос
@@ -42,7 +46,7 @@ class RequestWildberries(Getter):
             print(f"Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
-            return None
+            return
         else:
             # Преобразуем ответ в json-объект
             json_response = response.json()
@@ -98,8 +102,10 @@ class RequestWildberries(Getter):
                 with open('date_of_tariffs.txt', 'r') as txt:
                     date = txt.read()
             case 'statements':
-                dateFrom = datetime.date.today() - datetime.timedelta(days=(datetime.date.today().weekday()), weeks=1)
-                dateTo = datetime.date.today() - datetime.timedelta(days=(datetime.date.today().weekday() + 1))
+                first_day = datetime.date.today().weekday() % 7 + 7
+                last_day = first_day - 6
+                dateFrom = datetime.date.today() - datetime.timedelta(days=first_day)
+                dateTo = datetime.date.today() - datetime.timedelta(days=last_day)
             case 'storage_paid':
                 date = datetime.date.today()
                 year = date.year
@@ -130,6 +136,4 @@ class RequestWildberries(Getter):
                 dateTo = datetime.date.today() - datetime.timedelta(weeks=1)
             case '1mnth':
                 dateTo = datetime.date.today() - datetime.timedelta(days=30)
-            case 'statements':
-                dateTo = datetime.date.today() - datetime.timedelta(days=(datetime.date.today().weekday() + 1))
         return dateFrom, date, dateTo
