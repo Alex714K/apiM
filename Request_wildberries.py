@@ -33,8 +33,7 @@ class RequestWildberries(Getter):
         with open('wildberries_token.txt', 'r') as txt:
             authorization = txt.read()
         headers = {
-            'Authorization': authorization,
-            'Content-Type': "application/json; charset=utf-8"
+            'Authorization': authorization
         }
 
         # Выполняем запрос
