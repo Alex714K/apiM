@@ -40,8 +40,6 @@ class Statements(Getter, Converter):
         return False
 
     def create_sheet(self, service: apiclient.discovery.build, name_of_sheet_for_request: str, dateFrom: str):
-        if datetime.date.today().day != 1:
-            return
         check = self.start_work_with_request(name_of_sheet=name_of_sheet_for_request, dateFrom=dateFrom)
         if check:
             return
@@ -49,8 +47,6 @@ class Statements(Getter, Converter):
         self.private_update(service, self.spreadsheetId, name_of_sheet=self.name_of_sheet)
 
     def update_sheet(self, service: apiclient.discovery.build, name_of_sheet: str, dateFrom: str):
-        if datetime.date.today().day != 1:
-            return
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, dateFrom=dateFrom)
         if check:
             return

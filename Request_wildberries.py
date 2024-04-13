@@ -47,8 +47,12 @@ class RequestWildberries(Getter):
             #     return json.load(data)
             return
         else:
-            # Преобразуем ответ в json-объект
-            json_response = response.json()
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                print('Missing json file')
+                return
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл
             with open('data.json', 'w') as d:
