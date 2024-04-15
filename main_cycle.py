@@ -5,7 +5,7 @@ import logging
 
 if __name__ == "__main__":
     API = Api()
-    schedule.every().day.at("04:45").do(API.start, name_of_sheet='stocks', dateFrom='today')
+    schedule.every().day.at("04:45").do(API.start, name_of_sheet='stocks', dateFrom='2019-06-20')
     schedule.every().day.at("04:50").do(API.start, name_of_sheet='orders_1mnth', dateFrom='1mnth')
     schedule.every().day.at("04:55").do(API.start, name_of_sheet='orders_1week', dateFrom='1week')
     schedule.every().day.at("05:00").do(API.start, name_of_sheet='orders_2days', dateFrom='2days')
