@@ -23,14 +23,15 @@ class ApiNew(Converter):
         """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
         в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
         self.choose_spreadsheetId(who_is=who_is)
-        self.connect_to_Google()
+        if self.connect_to_Google():
+            return
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not:
-            self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
-                              filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+            self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo, date=date,
+                              flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
         else:
-            self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
-                              filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+            self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo, date=date,
+                              flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool:
         """Возвращает bool ответ, надо ли создать новый лист"""
@@ -68,14 +69,15 @@ class ApiNew(Converter):
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")
-            return
+            return True
         except socket.gaierror:
             logging.error("gaierror")
             print("The 'gaierror' has come!\n")
-            return
+            return True
         finally:
             print('Connected to Google')
         self.service = service
+        return False
 
     def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str):
