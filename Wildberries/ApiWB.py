@@ -4,7 +4,6 @@ import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
 from Converter_to_list import Converter
 from Wildberries.Request_wildberries import RequestWildberries
-from MainSheet import MainSheet
 from Initers import Getter
 import logging
 from Storage_paid import StoragePaid

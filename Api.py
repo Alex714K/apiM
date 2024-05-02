@@ -2,7 +2,6 @@ import socket
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
-from MainSheet import MainSheet
 from Initers import Initer
 import logging
 from Storage_paid import StoragePaid
