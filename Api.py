@@ -7,62 +7,20 @@ from Initers import Initer
 import logging
 from Storage_paid import StoragePaid
 from Statements import Statements
+from Wildberries.ApiWB import ApiNew
 
 
 class Api(Initer):
-    def start(self, name_of_sheet: str, dateFrom: str = None, date: str = None, flag: str = None, filterNmID=None,
-              limit: str = None, dateTo: str = None, from_rk: str = None, to_rk: str = None):
-        """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
-        в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
-        CREDENTIALS_FILE = 'Alex714K.json'
-        # Читаем ключи из файла
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
-                                                                       ['https://www.googleapis.com/auth/spreadsheets',
-                                                                        'https://www.googleapis.com/auth/drive'])
-        try:
-            logging.info(f"Started '{name_of_sheet}'")
-            # Авторизуемся в системе
-            httpAuth = credentials.authorize(httplib2.Http())
-            # Выбираем работу с таблицами и 4 версию API
-            service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
-
-            # https://docs.google.com/spreadsheets/d/1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk/edit#gid=0
-
-            # ID основной таблицы excel из ссылке
-            spreadsheetId_in_main = '1G0v5HexBJYX3moRV_0-sGTh9oVjq3FKdpZIcZr-IKmk'
-            # ID таблицы excel 'statements из ссылке
-            spreadsheetId_of_statements = '1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE'
-            match name_of_sheet:
-                case 'storage_paid':
-                    StoragePaid().update_sheet(service, name_of_sheet=name_of_sheet, dateFrom=dateFrom)
-                case 'statements':
-                    new_or_not = self.choose_name_of_sheet(service, spreadsheetId_of_statements,
-                                                           name_of_sheet=name_of_sheet)
-                    if new_or_not:
-                        Statements(spreadsheetId_of_statements).create_sheet(service, name_of_sheet, dateFrom=dateFrom)
-                    else:
-                        Statements(spreadsheetId_of_statements).update_sheet(service, name_of_sheet, dateFrom=dateFrom)
-                case _:
-                    new_or_not = self.choose_name_of_sheet(service, spreadsheetId_in_main, name_of_sheet=name_of_sheet)
-                    if new_or_not:
-                        MainSheet().create_sheet(service, spreadsheetId_in_main, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                                 dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID,
-                                                 limit=limit, from_rk=from_rk, to_rk=to_rk)
-                    else:
-                        MainSheet().update_sheet(service, spreadsheetId_in_main, name_of_sheet=name_of_sheet, dateFrom=dateFrom,
-                                                 dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID,
-                                                 limit=limit, from_rk=from_rk, to_rk=to_rk)
-        except httplib2.error.ServerNotFoundError:
-            logging.error("Google: ServerNotFound")
-            print("Google: 'ServerNotFound'...\nHOW?!\n")
-            return
-        except socket.gaierror:
-            logging.error("gaierror")
-            print("The 'gaierror' has come!\n")
-            return
-        finally:
-            logging.info(f"Complete '{name_of_sheet}'")
-            print(f"Complete '{name_of_sheet}'\n")
+    def start(self, name_of_sheet: str, who_is: str, folder: str, dateFrom: str = None, date: str = None,
+              flag: str = None, filterNmID=None, limit: str = None, dateTo: str = None, from_rk: str = None,
+              to_rk: str = None):
+        """None"""
+        print('-------------------------------------------------------------------------------------------------------')
+        logging.info(f"Started '{name_of_sheet}'")
+        match folder:
+            case 'WB':
+                ApiNew().start(name_of_sheet, who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
+                               filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
 
     @staticmethod
     def choose_name_of_sheet(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet) -> bool:
@@ -80,3 +38,25 @@ class Api(Initer):
             return False
         else:
             return True
+
+    def connect_to_Google(self):  # Need to move into place, where I work with sheet
+        CREDENTIALS_FILE = 'Alex714K.json'
+        # Читаем ключи из файла
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
+                                                                       ['https://www.googleapis.com/auth/spreadsheets',
+                                                                        'https://www.googleapis.com/auth/drive'])
+        try:
+            # Авторизуемся в системе
+            httpAuth = credentials.authorize(httplib2.Http())
+            # Выбираем работу с таблицами и 4 версию API
+            service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
+        except httplib2.error.ServerNotFoundError:
+            logging.error("Google: ServerNotFound")
+            print("Google: 'ServerNotFound'...\nHOW?!\n")
+            return
+        except socket.gaierror:
+            logging.error("gaierror")
+            print("The 'gaierror' has come!\n")
+            return
+        finally:
+            print('Connected to Google')

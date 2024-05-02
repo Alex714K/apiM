@@ -7,19 +7,14 @@ from Initers import Getter
 
 
 class RequestWildberries(Getter):
-    def start(self, name_of_sheet: str, storage_paid=False, statements=False, **kwargs) -> (tuple[list | dict, int] |
-                                                                                            None):
+    def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
+            (tuple[list | dict, int] | None):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
         пишет ошибку в консоль"""
-        # Дата
-        if storage_paid:
-            kwargs['dateFrom'], date, kwargs['dateTo'] = self.choose_dates(dateFrom=kwargs['dateFrom'])
-        elif statements:
-            kwargs['dateFrom'], date, kwargs['dateTo'] = self.choose_dates(dateFrom=kwargs['dateFrom'])
-        else:
-            kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
-                                                                                     kwargs['dateTo'])
+        # Даты
+        kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
+                                                                                 kwargs['dateTo'])
 
         # Ссылка
         try:
@@ -30,8 +25,11 @@ class RequestWildberries(Getter):
         # Ссылка запроса
         request = self.make_request(url, kwargs)
         # Токен
-        with open('wildberries_token.txt', 'r') as txt:
-            authorization = txt.read()
+        with open('data/tokens.txt') as txt:
+            tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        # with open('wildberries_token.txt', 'r') as txt:
+        #     authorization = txt.read()
+        authorization = tokens[who_is]
         headers = {
             'Authorization': authorization
         }
@@ -110,8 +108,7 @@ class RequestWildberries(Getter):
                 dateFrom = datetime.date.today() - datetime.timedelta(days=first_day)
                 dateTo = datetime.date.today() - datetime.timedelta(days=last_day)
             case 'storage_paid':
-                date = datetime.date.today()
-                year = date.year
+                year = datetime.date.today().year
                 month = (datetime.date.today() - datetime.timedelta(days=30)).month
                 last_day = (datetime.date.today() - datetime.timedelta(days=1)).day
                 dateFrom = datetime.date(year, month, 1).strftime("%Y-%m-%d")

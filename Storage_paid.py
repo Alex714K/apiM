@@ -1,5 +1,5 @@
 import apiclient
-from Request_wildberries import RequestWildberries
+from Request_wildberries_old import RequestWildberries
 from Converter_to_list import Converter
 from Initers import Initer, Getter
 import datetime
