@@ -1,7 +1,7 @@
 import apiclient
 from Wildberries.Request_wildberries import RequestWildberries
-from Converter_to_list import Converter
-from Initers import Initer, Getter
+from Wildberries.Converter_to_list import Converter
+from Initers import Getter
 import datetime
 import logging
 
