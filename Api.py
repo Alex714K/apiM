@@ -7,14 +7,16 @@ import logging
 from Storage_paid import StoragePaid
 from Statements import Statements
 from Wildberries.ApiWB import ApiNew
+from datetime import datetime
 
 
 class Api(Initer):
     def start(self, name_of_sheet: str, who_is: str, folder: str, dateFrom: str = None, date: str = None,
               flag: str = None, filterNmID=None, limit: str = None, dateTo: str = None, from_rk: str = None,
               to_rk: str = None):
-        """None"""
+        """Основной старт. От него зависит, что запуститься. Ничего не возвращает."""
         print('-------------------------------------------------------------------------------------------------------')
+        print(datetime.now().strftime(""))
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':
@@ -23,7 +25,7 @@ class Api(Initer):
 
     @staticmethod
     def choose_name_of_sheet(service: apiclient.discovery.build, spreadsheetId: str, name_of_sheet) -> bool:
-        """Возвращает bool ответ, надо ли создать новый лист"""
+        """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
         sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
