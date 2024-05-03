@@ -53,7 +53,7 @@ class StoragePaid(Getter, Converter):
         print(f"\nStart clearing sheet '{name_of_sheet}'...")
         results = service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range=name_of_sheet
                                                         ).execute()
-        # with open('sheets.txt', 'r') as txt:
+        # with open('data/sheets.txt', 'r') as txt:
         #     sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         #     sheetId = sheets[name_of_sheet]
         # results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
@@ -85,7 +85,7 @@ class StoragePaid(Getter, Converter):
         }).execute()
         logging.info("Updating complete")
         print("Updating complete!")
-        with open('sheets.txt', 'r') as txt:
+        with open('data/sheets.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(service, spreadsheetId, needed_keys=self.needed_keys, sheetId=sheetId)

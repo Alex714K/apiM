@@ -39,7 +39,7 @@ class ApiNew(Converter):
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
             names_of_lists_and_codes.append([title, str(sheet_id)])
-        with open('sheets.txt', 'w') as txt:
+        with open('data/sheets.txt', 'w') as txt:
             txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
@@ -182,7 +182,7 @@ class ApiNew(Converter):
         }).execute()
         logging.info("Updating complete")
         print("Updating complete!")
-        with open('sheets.txt', 'r') as txt:
+        with open('data/sheets.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
