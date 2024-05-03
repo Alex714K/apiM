@@ -2,12 +2,9 @@ import socket
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
-from Converter_to_list import Converter
+from Wildberries.Converter_to_list import Converter
 from Wildberries.Request_wildberries import RequestWildberries
-from Initers import Getter
 import logging
-from Storage_paid import StoragePaid
-from Statements import Statements
 
 
 class ApiNew(Converter):
@@ -23,7 +20,7 @@ class ApiNew(Converter):
         """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
         в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
         self.choose_spreadsheetId(who_is=who_is)
-        if self.connect_to_Google():
+        if not self.connect_to_Google():
             return
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not:
@@ -34,7 +31,7 @@ class ApiNew(Converter):
                               flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool:
-        """Возвращает bool ответ, надо ли создать новый лист"""
+        """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
         sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -69,15 +66,15 @@ class ApiNew(Converter):
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")
-            return True
+            return False
         except socket.gaierror:
             logging.error("gaierror")
             print("The 'gaierror' has come!\n")
-            return True
+            return False
         finally:
             print('Connected to Google')
         self.service = service
-        return False
+        return True
 
     def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str):

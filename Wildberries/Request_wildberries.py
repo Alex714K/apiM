@@ -20,6 +20,7 @@ class RequestWildberries(Getter):
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
+            print("Wrong name of sheet")
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Ссылка запроса
@@ -27,8 +28,6 @@ class RequestWildberries(Getter):
         # Токен
         with open('data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        # with open('wildberries_token.txt', 'r') as txt:
-        #     authorization = txt.read()
         authorization = tokens[who_is]
         headers = {
             'Authorization': authorization
