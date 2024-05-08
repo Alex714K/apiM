@@ -39,6 +39,8 @@ class RequestWildberries(Getter):
             response = requests.get(request, headers=headers)
         except socket.gaierror:
             logging.error("gaierror")
+            logging.error("IN WB")
+            print('IN WB')
             print("The 'gaierror' has come!\n")
             return
         if not response:
