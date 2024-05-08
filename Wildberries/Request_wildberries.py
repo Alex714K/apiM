@@ -3,6 +3,7 @@ import sys
 import requests
 import datetime
 import json
+import socket
 from Initers import Getter
 
 
@@ -34,7 +35,12 @@ class RequestWildberries(Getter):
         }
 
         # Выполняем запрос
-        response = requests.get(request, headers=headers)
+        try:
+            response = requests.get(request, headers=headers)
+        except socket.gaierror:
+            logging.error("gaierror")
+            print("The 'gaierror' has come!\n")
+            return
         if not response:
             logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             print("Ошибка выполнения запроса:")

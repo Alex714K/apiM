@@ -97,7 +97,6 @@ class ApiNew(Converter):
             return
         self.private_clear(name_of_sheet=name_of_sheet)
         self.private_update(name_of_sheet=name_of_sheet)
-        # print(results)
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str, date: str, flag: str,
                                 filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
@@ -107,8 +106,8 @@ class ApiNew(Converter):
                                                                     filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                                                     from_rk=from_rk, to_rk=to_rk)
         except TypeError:
-            logging.warning(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
-            print(f"Нет доступа к файлу '{name_of_sheet}' на сервере")
+            logging.warning(f"Нет доступа к файлу")
+            print(f"Нет доступа к файлу")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
