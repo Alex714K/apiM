@@ -11,7 +11,7 @@ class RequestWildberries(Getter):
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
             (tuple[list | dict, int] | None):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
-        вводимых параветров). При успешнов получении возвращает json-объект. При ошибке останавливает программу и
+        вводимых параветров). При успешнов получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
         # Даты
         kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
