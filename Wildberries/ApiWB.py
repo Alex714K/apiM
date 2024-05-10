@@ -1,4 +1,6 @@
 import socket
+
+import googleapiclient.errors
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
@@ -23,16 +25,25 @@ class ApiNew(Converter):
         if not self.connect_to_Google():
             return
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        if new_or_not == 'error':
+            return
         if new_or_not:
-            self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo, date=date,
-                              flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo,
+                                      date=date, flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk,
+                                      to_rk=to_rk)
         else:
-            self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo, date=date,
-                              flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo,
+                                      date=date, flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk,
+                                      to_rk=to_rk)
+        if check:
+            self.update_result(name_of_sheet=name_of_sheet)
 
-    def choose_name_of_sheet(self, name_of_sheet) -> bool:
+    def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
         """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
-        sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        try:
+            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        except googleapiclient.errors.HttpError:
+            return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
         for one_sheet in sheets:
@@ -77,26 +88,30 @@ class ApiNew(Converter):
         return True
 
     def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
-                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str):
+                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
         """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date, flag=flag,
-                                             filterNmID=filterNmID, limit=limit, dateTo=dateTo, from_rk=from_rk,
-                                             to_rk=to_rk)
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
+                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                             from_rk=from_rk, to_rk=to_rk)
         if check:
-            return
+            return False
         self.private_create(name_of_sheet=name_of_sheet)
         self.private_update(name_of_sheet=name_of_sheet)
+        return True
 
     def update_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
-                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str):
+                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
         """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date, flag=flag,
-                                             filterNmID=filterNmID, limit=limit, dateTo=dateTo, from_rk=from_rk,
-                                             to_rk=to_rk)
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
+                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                             from_rk=from_rk, to_rk=to_rk)
         if check:
-            return
-        self.private_clear(name_of_sheet=name_of_sheet)
-        self.private_update(name_of_sheet=name_of_sheet)
+            return False
+        if self.private_clear(name_of_sheet=name_of_sheet):
+            return False
+        if self.private_update(name_of_sheet=name_of_sheet):
+            return False
+        return True
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str, date: str, flag: str,
                                 filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
@@ -126,29 +141,36 @@ class ApiNew(Converter):
         self.values, self.dist, self.needed_keys = result
         return False
 
-    def private_create(self, name_of_sheet: str):
+    def private_create(self, name_of_sheet: str) -> bool:
         columnCount = len(self.values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
-        results = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-            "requests": [{
-                "addSheet": {
-                    "properties": {
-                        "title": name_of_sheet,
-                        "gridProperties": {
-                            "rowCount": self.dist,
-                            "columnCount": columnCount
+        try:
+            results = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "requests": [{
+                    "addSheet": {
+                        "properties": {
+                            "title": name_of_sheet,
+                            "gridProperties": {
+                                "rowCount": self.dist,
+                                "columnCount": columnCount
+                            }
                         }
                     }
-                }
-            }]
-        }).execute()
+                }]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            return True
         logging.info(f"Created new sheet '{name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
+        return False
 
     def private_clear(self, name_of_sheet: str):
         print(f"\nStart clearing sheet '{name_of_sheet}'...")
-        results = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
-                                                             ).execute()
+        try:
+            results = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+                                                                 ).execute()
+        except googleapiclient.errors.HttpError:
+            return True
         # with open('sheets.txt', 'r') as txt:
         #     sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         #     sheetId = sheets[name_of_sheet]
@@ -164,27 +186,32 @@ class ApiNew(Converter):
         # }).execute()
         logging.info("Clearing complete!")
         print("Clearing complete!")
+        return False
 
-    def private_update(self, name_of_sheet: str):
+    def private_update(self, name_of_sheet: str) -> bool:
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
         print("\nStart updating sheet...")
-        results = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-            "valueInputOption": valueInputOption,
-            "data": [
-                {"range": distance,
-                 "majorDimension": majorDimension,
-                 "values": self.values
-                 }
-            ]
-        }).execute()
+        try:
+            results = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "valueInputOption": valueInputOption,
+                "data": [
+                    {"range": distance,
+                     "majorDimension": majorDimension,
+                     "values": self.values
+                     }
+                ]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            return True
         logging.info("Updating complete")
         print("Updating complete!")
         with open('data/sheets.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
+        return False
 
     def change_formats(self, needed_keys: list | None, sheetId: str):
         if needed_keys == None:
@@ -202,4 +229,28 @@ class ApiNew(Converter):
                     "fields": "userEnteredFormat(numberFormat)"
                 }
             })
-        results = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
+        try:
+            results = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
+        except googleapiclient.errors.HttpError:
+            return False
+        return True
+
+    def update_result(self, name_of_sheet: str):
+        data = self.service.spreadsheets().get(
+            spreadsheetId=self.spreadsheetId, ranges="Result!A1:E5", includeGridData=True
+        ).execute()
+        with open('data/data.txt', 'w') as txt:
+            txt.write(str(data['sheets'][0]['data'][0]['rowData']))
+        # distance = f"{name_of_sheet}"
+        # valueInputOption = "USER_ENTERED"
+        # majorDimension = "ROWS"  # список - строка
+        # print("\nStart updating sheet...")
+        # results = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+        #     "valueInputOption": valueInputOption,
+        #     "data": [
+        #         {"range": distance,
+        #          "majorDimension": majorDimension,
+        #          "values": self.values
+        #          }
+        #     ]
+        # }).execute()
