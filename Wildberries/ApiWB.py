@@ -35,8 +35,8 @@ class ApiNew(Converter):
             check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo,
                                       date=date, flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk,
                                       to_rk=to_rk)
-        if check:
-            self.update_result(name_of_sheet=name_of_sheet)
+        # if check:
+        #     self.update_result(name_of_sheet=name_of_sheet)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
         """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
