@@ -7,6 +7,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 from Wildberries.Converter_to_list import Converter
 from Wildberries.Request_wildberries import RequestWildberries
 import logging
+import csv
+from datetime import datetime
 
 
 class ApiNew(Converter):
@@ -15,6 +17,7 @@ class ApiNew(Converter):
         self.spreadsheetId = None
         self.service = None
         self.values, self.dist, self.needed_keys = None, None, None
+        self.result = None
 
     def start(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
               date: str = None, flag=None, filterNmID: str = None, limit: str = None, from_rk: str = None,
@@ -35,14 +38,18 @@ class ApiNew(Converter):
             check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo,
                                       date=date, flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk,
                                       to_rk=to_rk)
-        # if check:
-        #     self.update_result(name_of_sheet=name_of_sheet)
+        if check:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        else:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
         """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
+            return 'error'
+        except httplib2.error.ServerNotFoundError:
             return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -235,22 +242,84 @@ class ApiNew(Converter):
             return False
         return True
 
-    def update_result(self, name_of_sheet: str):
-        data = self.service.spreadsheets().get(
-            spreadsheetId=self.spreadsheetId, ranges="Result!A1:E5", includeGridData=True
+    def start_work_with_list_result(self, name_of_sheet: str):
+        # Проверка на наличие листа Result
+        with open('data/sheets.txt', 'r') as txt:
+            try:
+                check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
+            except KeyError:
+                result = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "requests": [{
+                        "addSheet": {
+                            "properties": {
+                                "title": "Result",
+                                "gridProperties": {
+                                    "rowCount": 100,
+                                    "columnCount": 26
+                                }
+                            }
+                        }
+                    },]
+                }).execute()
+                values = list()
+                with open('data/info_about_Result.csv', 'r') as file:
+                    csv_file = csv.reader(file)
+                    for i in csv_file:
+                        if '' == i:
+                            continue
+                        else:
+                            values.append(i)
+                result = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "valueInputOption": "USER_ENTERED",
+                    "data": [
+                        {"range": "Result!A:E",
+                         "majorDimension": "ROWS",
+                         "values": values
+                         }
+                    ]
+                }).execute()
+        # with open('data/info_about_Result.csv', 'r') as file:
+        #     csv_file = csv.reader(file, lineterminator='\r')
+        #     for i in csv_file:
+        #         ans.append(i)
+
+        result = self.service.spreadsheets().values().batchGet(
+            spreadsheetId=self.spreadsheetId,
+            ranges="Result!A:E",
+            valueRenderOption='FORMATTED_VALUE',
+            dateTimeRenderOption='FORMATTED_STRING'
         ).execute()
-        with open('data/data.txt', 'w') as txt:
-            txt.write(str(data['sheets'][0]['data'][0]['rowData']))
-        # distance = f"{name_of_sheet}"
-        # valueInputOption = "USER_ENTERED"
-        # majorDimension = "ROWS"  # список - строка
-        # print("\nStart updating sheet...")
-        # results = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-        #     "valueInputOption": valueInputOption,
-        #     "data": [
-        #         {"range": distance,
-        #          "majorDimension": majorDimension,
-        #          "values": self.values
-        #          }
-        #     ]
-        # }).execute()
+
+        values = result['valueRanges'][0]['values']
+
+        for i in range(len(values)):
+            if '' in values[i]:
+                values[i] = values[i][:values[i].index('')]
+
+        ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
+        if len(values[ind]) > 3:
+            values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            values[ind][4] = f"Успешно записано строк: {self.dist}"
+        else:
+            values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
+
+        # with open('data/info_about_Result.csv', 'w') as file:
+        #     csv_file = csv.writer(file, lineterminator='\r')
+        #     csv_file.writerows(ans)
+
+        self.private_clear(name_of_sheet=name_of_sheet)
+
+        valueInputOption = "USER_ENTERED"
+        majorDimension = "ROWS"  # список - строка
+        try:
+            result = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "valueInputOption": valueInputOption,
+                "data": [
+                    {"range": "Result!A:E",
+                     "majorDimension": majorDimension,
+                     "values": values
+                     }
+                ]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            return
