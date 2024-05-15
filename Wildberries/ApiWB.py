@@ -152,7 +152,7 @@ class ApiNew(Converter):
         columnCount = len(self.values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
         try:
-            results = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "requests": [{
                     "addSheet": {
                         "properties": {
@@ -177,7 +177,7 @@ class ApiNew(Converter):
         else:
             print(f"\nStart clearing sheet '{name_of_sheet}'...")
         try:
-            results = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                  ).execute()
         except googleapiclient.errors.HttpError:
             return True
@@ -191,7 +191,7 @@ class ApiNew(Converter):
         majorDimension = "ROWS"  # список - строка
         print("\nStart updating sheet...")
         try:
-            results = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
                 "data": [
                     {"range": distance,
@@ -227,7 +227,7 @@ class ApiNew(Converter):
                 }
             })
         try:
-            results = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
+            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError:
             return False
         return True
@@ -238,7 +238,7 @@ class ApiNew(Converter):
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
             except KeyError:
-                result = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                     "requests": [{
                         "addSheet": {
                             "properties": {
@@ -259,7 +259,7 @@ class ApiNew(Converter):
                             continue
                         else:
                             values.append(i)
-                result = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                     "valueInputOption": "USER_ENTERED",
                     "data": [
                         {"range": "Result!A:E",
@@ -273,14 +273,14 @@ class ApiNew(Converter):
         #     for i in csv_file:
         #         ans.append(i)
 
-        result = self.service.spreadsheets().values().batchGet(
+        getted = self.service.spreadsheets().values().batchGet(
             spreadsheetId=self.spreadsheetId,
             ranges="Result!A:E",
             valueRenderOption='FORMATTED_VALUE',
             dateTimeRenderOption='FORMATTED_STRING'
         ).execute()
 
-        values = result['valueRanges'][0]['values']
+        values = getted['valueRanges'][0]['values']
 
         for i in range(len(values)):
             if '' in values[i]:
@@ -302,7 +302,7 @@ class ApiNew(Converter):
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
         try:
-            result = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
                 "data": [
                     {"range": "Result!A:E",
