@@ -172,7 +172,10 @@ class ApiNew(Converter):
         return False
 
     def private_clear(self, name_of_sheet: str):
-        print(f"\nStart clearing sheet '{name_of_sheet}'...")
+        if '!' in name_of_sheet:
+            print(f"\nStart clearing sheet '{name_of_sheet[:name_of_sheet.index('!')]}'...")
+        else:
+            print(f"\nStart clearing sheet '{name_of_sheet}'...")
         try:
             results = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                  ).execute()
