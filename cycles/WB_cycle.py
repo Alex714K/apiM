@@ -13,7 +13,7 @@ def WB_cycle():
     schedule.every().day.at("01:55").do(API.start, 'tariffs_boxes', 'grand', 'WB', date='tariffs')
     schedule.every().day.at("02:00").do(API.start, 'tariffs_pallet', 'grand', 'WB', date='tariffs')
     # День гранд
-    schedule.every(30).minutes.do(API.start, 'prices', 'grand', 'WB', limit='1000')
+    schedule.every(10).minutes.do(API.start, 'prices', 'grand', 'WB', limit='1000')
     schedule.every().day.at("13:30").do(API.start, 'stocks', 'grand', 'WB', dateFrom='2024-03-25')
     schedule.every().day.at("13:35").do(API.start, 'orders_1mnth', 'grand', 'WB', dateFrom='1mnth')
     schedule.every().day.at("13:40").do(API.start, 'orders_1week', 'grand', 'WB', dateFrom='1week')
@@ -30,7 +30,7 @@ def WB_cycle():
     schedule.every().day.at("02:30").do(API.start, 'tariffs_boxes', 'terehov', 'WB', date='tariffs')
     schedule.every().day.at("02:35").do(API.start, 'tariffs_pallet', 'terehov', 'WB', date='tariffs')
     # День терехов
-    schedule.every(30).minutes.do(API.start, 'prices', 'terehov', 'WB', limit='1000')
+    schedule.every(10).minutes.do(API.start, 'prices', 'terehov', 'WB', limit='1000')
     schedule.every().day.at("14:05").do(API.start, 'stocks', 'terehov', 'WB', dateFrom='2019-06-20')
     schedule.every().day.at("14:10").do(API.start, 'orders_1mnth', 'terehov', 'WB', dateFrom='1mnth')
     schedule.every().day.at("14:15").do(API.start, 'orders_1week', 'terehov', 'WB', dateFrom='1week')
@@ -47,7 +47,7 @@ def WB_cycle():
     schedule.every().day.at("03:05").do(API.start, 'tariffs_boxes', 'dnk', 'WB', date='tariffs')
     schedule.every().day.at("03:10").do(API.start, 'tariffs_pallet', 'dnk', 'WB', date='tariffs')
     # День днк
-    schedule.every(30).minutes.do(API.start, 'prices', 'dnk', 'WB', limit='1000')
+    schedule.every(10).minutes.do(API.start, 'prices', 'dnk', 'WB', limit='1000')
     schedule.every().day.at("14:40").do(API.start, 'stocks', 'dnk', 'WB', dateFrom='2019-06-20')
     schedule.every().day.at("14:45").do(API.start, 'orders_1mnth', 'dnk', 'WB', dateFrom='1mnth')
     schedule.every().day.at("14:50").do(API.start, 'orders_1week', 'dnk', 'WB', dateFrom='1week')
@@ -64,7 +64,7 @@ def WB_cycle():
     schedule.every().day.at("03:40").do(API.start, 'tariffs_boxes', 'planeta', 'WB', date='tariffs')
     schedule.every().day.at("03:45").do(API.start, 'tariffs_pallet', 'planeta', 'WB', date='tariffs')
     # День планета
-    schedule.every(30).minutes.do(API.start, 'prices', 'planeta', 'WB', limit='1000')
+    schedule.every(10).minutes.do(API.start, 'prices', 'planeta', 'WB', limit='1000')
     schedule.every().day.at("15:15").do(API.start, 'stocks', 'planeta', 'WB', dateFrom='2019-06-20')
     schedule.every().day.at("15:20").do(API.start, 'orders_1mnth', 'planeta', 'WB', dateFrom='1mnth')
     schedule.every().day.at("15:25").do(API.start, 'orders_1week', 'planeta', 'WB', dateFrom='1week')
