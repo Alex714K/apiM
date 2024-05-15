@@ -181,19 +181,6 @@ class ApiNew(Converter):
                                                                  ).execute()
         except googleapiclient.errors.HttpError:
             return True
-        # with open('sheets.txt', 'r') as txt:
-        #     sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        #     sheetId = sheets[name_of_sheet]
-        # results = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body={
-        #     "requests": [
-        #         {
-        #          "updateCells": {
-        #              "range": {"sheetId": sheetId},
-        #              "fields": "*"
-        #              }
-        #          }
-        #     ]
-        # }).execute()
         logging.info("Clearing complete!")
         print("Clearing complete!")
         return False
