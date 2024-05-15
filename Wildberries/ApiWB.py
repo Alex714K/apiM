@@ -41,7 +41,7 @@ class ApiNew(Converter):
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         else:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
         """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
@@ -232,42 +232,8 @@ class ApiNew(Converter):
             return False
         return True
 
-    def start_work_with_list_result(self, name_of_sheet: str):
-        # Проверка на наличие листа Result
-        with open('data/sheets.txt', 'r') as txt:
-            try:
-                check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
-            except KeyError:
-                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                    "requests": [{
-                        "addSheet": {
-                            "properties": {
-                                "title": "Result",
-                                "gridProperties": {
-                                    "rowCount": 100,
-                                    "columnCount": 26
-                                }
-                            }
-                        }
-                    },]
-                }).execute()
-                values = list()
-                with open('data/info_about_Result.csv', 'r') as file:
-                    csv_file = csv.reader(file)
-                    for i in csv_file:
-                        if '' == i:
-                            continue
-                        else:
-                            values.append(i)
-                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                    "valueInputOption": "USER_ENTERED",
-                    "data": [
-                        {"range": "Result!A:E",
-                         "majorDimension": "ROWS",
-                         "values": values
-                         }
-                    ]
-                }).execute()
+    def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
+        self.create_result()
         # with open('data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')
         #     for i in csv_file:
@@ -281,17 +247,25 @@ class ApiNew(Converter):
         ).execute()
 
         values = getted['valueRanges'][0]['values']
-
+        # очистка от лишних пустых элементов списка (а они бывают)
         for i in range(len(values)):
             if '' in values[i]:
                 values[i] = values[i][:values[i].index('')]
 
         ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
-        if len(values[ind]) > 3:
-            values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            values[ind][4] = f"Успешно записано строк: {self.dist}"
+        if bad:
+            if len(values[ind]) > 3:
+                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind][4] = f"Ошибка: {self.result}"
+            else:
+                values[ind].extend(
+                    [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
         else:
-            values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
+            if len(values[ind]) > 3:
+                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind][4] = f"Успешно записано строк: {self.dist}"
+            else:
+                values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
 
         # with open('data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
@@ -313,3 +287,39 @@ class ApiNew(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             return
+
+    def create_result(self):
+        with open('data/sheets.txt', 'r') as txt:
+            try:
+                check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
+            except KeyError:
+                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "requests": [{
+                        "addSheet": {
+                            "properties": {
+                                "title": "Result",
+                                "gridProperties": {
+                                    "rowCount": 100,
+                                    "columnCount": 26
+                                }
+                            }
+                        }
+                    }]
+                }).execute()
+                values = list()
+                with open('data/info_about_Result.csv', 'r') as file:
+                    csv_file = csv.reader(file)
+                    for i in csv_file:
+                        if '' == i:
+                            continue
+                        else:
+                            values.append(i)
+                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "valueInputOption": "USER_ENTERED",
+                    "data": [
+                        {"range": "Result!A:E",
+                         "majorDimension": "ROWS",
+                         "values": values
+                         }
+                    ]
+                }).execute()
