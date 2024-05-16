@@ -22,8 +22,20 @@ class ApiNew(Converter):
     def start(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
               date: str = None, flag=None, filterNmID: str = None, limit: str = None, from_rk: str = None,
               to_rk: str = None):
-        """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
-        в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
+        """
+        Запуск работы с запросом на сервера WildBerries.
+        :param name_of_sheet: Название листа
+        :param who_is: Чей токен используется
+        :param dateFrom: С этой даты
+        :param dateTo: По эту дату
+        :param date: Просто дата
+        :param flag: Флаг (1 или 0)
+        :param filterNmID: Не помню # TODO: дописать описание
+        :param limit: Лимит количества строк в запросе
+        :param from_rk: С этой даты для рекламных компаний
+        :param to_rk: По эту дату для рекламных компаний
+        :return:
+        """
         self.choose_spreadsheetId(who_is=who_is)
         if not self.connect_to_Google():
             return
@@ -44,7 +56,11 @@ class ApiNew(Converter):
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
-        """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
+        """
+        Определяет, нужен ли создать новый лист или нет.
+        :param name_of_sheet: Название листа
+        :return: Возващает bool | str ответ результата определения
+        """
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
@@ -65,12 +81,21 @@ class ApiNew(Converter):
             return True
 
     def choose_spreadsheetId(self, who_is: str):
+        """
+        Записывает в self.spreadsheetId Id Таблицы, с которой надо будет работать.
+        :param who_is:
+        :return:
+        """
         with open('data/spreadsheetIds.txt', 'r') as txt:
             data = txt.read().split('\n')
         data = dict(map(lambda x: x.split('='), data))
         self.spreadsheetId = data[who_is]
 
-    def connect_to_Google(self):
+    def connect_to_Google(self) -> bool:
+        """
+        Выполняет подключение к сервису Google
+        :return: Возвращает bool ответ результата подключения
+        """
         CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
@@ -96,7 +121,21 @@ class ApiNew(Converter):
 
     def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
-        """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
+        """
+        Посылает запрос на сервера WildBerries, обрабатывает его, создаёт и обновляет лист под названием
+        name_of_sheet с данными запроса.
+        :param name_of_sheet: Название листа
+        :param who_is: Чей токен используется
+        :param dateFrom: С этой даты
+        :param dateTo: По эту дату
+        :param date: Просто дата
+        :param flag: Флаг (1 или 0)
+        :param filterNmID: Не помню # TODO: дописать описание
+        :param limit: Лимит количества строк в запросе
+        :param from_rk: С этой даты для рекламных компаний
+        :param to_rk: По эту дату для рекламных компаний
+        :return: Возвращает bool ответ результата работы всех действий (при неуспехе одного из них, возвращает False
+        """
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                              from_rk=from_rk, to_rk=to_rk)
@@ -108,7 +147,22 @@ class ApiNew(Converter):
 
     def update_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
-        """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
+        """
+        Посылает запрос на сервера WildBerries, обрабатывает его, очищает и обновляет лист под названием name_of_sheet
+        name_of_sheet данными с запроса.
+        :param name_of_sheet: Название листа
+        :param who_is: Чей токен используется
+        :param dateFrom: С этой даты
+        :param dateTo: По эту дату
+        :param date: Просто дата
+        :param flag: Флаг (1 или 0)
+        :param filterNmID: Не помню # TODO: дописать описание
+        :param limit: Лимит количества строк в запросе
+        :param from_rk: С этой даты для рекламных компаний
+        :param to_rk: По эту дату для рекламных компаний
+        :return: Возвращает bool ответ результата работы всех действий (при неуспехе одного из них, возвращает False
+        и останавливается)
+        """
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                              from_rk=from_rk, to_rk=to_rk)
@@ -122,6 +176,21 @@ class ApiNew(Converter):
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str, date: str, flag: str,
                                 filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
+        """
+        Функция, в которой посылается и обрабатывается запрос на сервера WildBerries. Обработка зависит от
+        названия name_of_sheet.
+        :param name_of_sheet: Название листа
+        :param who_is: Чей токен используется
+        :param dateFrom: С этой даты
+        :param dateTo: По эту дату
+        :param date: Просто дата
+        :param flag: Флаг (1 или 0)
+        :param filterNmID: Не помню # TODO: дописать описание
+        :param limit: Лимит количества строк в запросе
+        :param from_rk: С этой даты для рекламных компаний
+        :param to_rk: По эту дату для рекламных компаний
+        :return: Возвращает bool ответ результата запроса
+        """
         try:
             json_response, status_code = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is,
                                                                     dateFrom=dateFrom, date=date, flag=flag,
@@ -149,6 +218,13 @@ class ApiNew(Converter):
         return False
 
     def private_create(self, name_of_sheet: str) -> bool:
+        """
+        Функция, создающая лист под названием name_of_sheet.
+
+        ВНИМАНИЕ!!! Не следует создавать лист при наличии листа с тем же названием
+        :param name_of_sheet: Название листа
+        :return: Возвращает bool ответ результата создания
+        """
         columnCount = len(self.values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
         try:
@@ -171,7 +247,12 @@ class ApiNew(Converter):
         print(f"\nCreated new sheet '{name_of_sheet}'")
         return False
 
-    def private_clear(self, name_of_sheet: str):
+    def private_clear(self, name_of_sheet: str) -> bool:
+        """
+        Функция, очищающая лист под название name_of_sheet
+        :param name_of_sheet: Название листа
+        :return: Возвращает bool ответ результата очистки
+        """
         if '!' in name_of_sheet:
             print(f"\nStart clearing sheet '{name_of_sheet[:name_of_sheet.index('!')]}'...")
         else:
@@ -186,6 +267,11 @@ class ApiNew(Converter):
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:
+        """
+        Функция, обновляющий лист под название name_of_sheet.
+        :param name_of_sheet: Название листа
+        :return: Возвращает bool ответ результата обновления
+        """
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
@@ -211,6 +297,13 @@ class ApiNew(Converter):
         return False
 
     def change_formats(self, needed_keys: list | None, sheetId: str):
+        """
+        При наличии столбцов, требующих изменения формата на число с двумя знаками посе запятой, функция изменяет
+        формат конкретно этих столбцов.
+        :param needed_keys: Список индексов столбцов
+        :param sheetId: Id листа, в котором работаем
+        :return:
+        """
         if needed_keys == None:
             return
         data = {"requests": []}
@@ -233,6 +326,15 @@ class ApiNew(Converter):
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
+        """
+        Пишет результат работы с листом в таблицу 'Result'. При отстутсвии таковой создаёт её и только после этого
+        добавляет туда результат.
+
+        В результате пишутся дата обновления и результат (количество успешно записанных строк или ошибку)
+        :param name_of_sheet: Название листа, в котором пытались сделать обновление
+        :param bad: Успешно или нет
+        :return:
+        """
         self.create_result()
         # with open('data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')
@@ -289,6 +391,10 @@ class ApiNew(Converter):
             return
 
     def create_result(self):
+        """
+        При отсутствии листа Result создаёт таковой по макету из файла info_about_Result.csv.
+        :return:
+        """
         with open('data/sheets.txt', 'r') as txt:
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
