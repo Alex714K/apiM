@@ -106,9 +106,6 @@ class RequestWildberries(Getter):
                 dateFrom = datetime.date.today() - datetime.timedelta(weeks=1)
             case '1mnth':
                 dateFrom = datetime.date.today() - datetime.timedelta(days=30)
-            case 'tariffs':
-                with open('date_of_tariffs.txt', 'r') as txt:
-                    date = txt.read()
             case 'statements':
                 first_day = datetime.date.today().weekday() % 7 + 7
                 last_day = first_day - 6
@@ -131,7 +128,7 @@ class RequestWildberries(Getter):
             case '1mnth':
                 date = datetime.date.today() - datetime.timedelta(days=30)
             case 'tariffs':
-                with open('date_of_tariffs.txt', 'r') as txt:
+                with open('data/date_of_tariffs.txt', 'r') as txt:
                     date = txt.read()
 
         match dateTo:

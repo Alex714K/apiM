@@ -83,7 +83,7 @@ class Converter:
         return ans, len(ans), needed_keys
 
     def tariffs(self, file: dict) -> tuple[list, int, list | None]:
-        with open('../date_of_tariffs.txt', 'w') as txt:
+        with open('data/date_of_tariffs.txt', 'w') as txt:
             txt.write(file['response']['data']['dtTillMax'])
         keys = list()
         for key in file['response']['data']['warehouseList'][0].keys():
