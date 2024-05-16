@@ -392,7 +392,7 @@ class ApiNew(Converter):
 
     def create_result(self):
         """
-        При отсутствии листа Result создаёт таковой по макету из файла info_about_Result.csv.
+        При отсутствии листа Result создаёт таковой по макету из файла.
         :return:
         """
         with open('data/sheets.txt', 'r') as txt:
