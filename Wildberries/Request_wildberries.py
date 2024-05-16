@@ -10,23 +10,23 @@ from Initers import Getter
 class RequestWildberries(Getter):
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
             (tuple[list | dict, int] | None):
-        """Р¤РѕСЂРјРёСЂСѓРµС‚ СЃ РѕС‚РїСЂР°РІР»СЏРµС‚ Р·Р°РїСЂРѕСЃ РЅР° СЃРµСЂРІРµСЂР° Wildberries РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ СЂР°Р·Р»РёС‡РЅС‹С… РґР°РЅРЅС‹С… (РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚
-        РІРІРѕРґРёРјС‹С… РїР°СЂР°РІРµС‚СЂРѕРІ). РџСЂРё СѓСЃРїРµС€РЅРѕРІ РїРѕР»СѓС‡РµРЅРёРё РІРѕР·РІСЂР°С‰Р°РµС‚ json-РѕР±СЉРµРєС‚. РџСЂРё РѕС€РёР±РєРµ РЅРёС‡РµРіРѕ РЅРµ РІРѕР·РІСЂР°С‰Р°РµС‚ Рё
-        РїРёС€РµС‚ РѕС€РёР±РєСѓ РІ РєРѕРЅСЃРѕР»СЊ"""
-        # Р”Р°С‚С‹
+        """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
+        вводимых параветров). При успешнов получении возвращает json-объект. При ошибке ничего не возвращает и
+        пишет ошибку в консоль"""
+        # Даты
         kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
                                                                                  kwargs['dateTo'])
 
-        # РЎСЃС‹Р»РєР°
+        # Ссылка
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
             print("Wrong name of sheet")
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
-        # РЎСЃС‹Р»РєР° Р·Р°РїСЂРѕСЃР°
+        # Ссылка запроса
         request = self.make_request(url, kwargs)
-        # РўРѕРєРµРЅ
+        # Токен
         with open('data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         authorization = tokens[who_is]
@@ -34,7 +34,7 @@ class RequestWildberries(Getter):
             'Authorization': authorization
         }
 
-        # Р’С‹РїРѕР»РЅСЏРµРј Р·Р°РїСЂРѕСЃ
+        # Выполняем запрос
         try:
             response = requests.get(request, headers=headers)
         except socket.gaierror:
@@ -44,34 +44,34 @@ class RequestWildberries(Getter):
             print("The 'gaierror' has come!\n")
             return
         if not response:
-            logging.warning(f"РћС€РёР±РєР° РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РїСЂРѕСЃР°:\nHttp СЃС‚Р°С‚СѓСЃ: {response.status_code} ( {response.reason} )")
-            print("РћС€РёР±РєР° РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РїСЂРѕСЃР°:")
+            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            print("Ошибка выполнения запроса:")
             print(request)
-            print(f"Http СЃС‚Р°С‚СѓСЃ: {response.status_code} ( {response.reason} )")
+            print(f"Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
             return
         else:
             try:
-                # РџСЂРµРѕР±СЂР°Р·СѓРµРј РѕС‚РІРµС‚ РІ json-РѕР±СЉРµРєС‚
+                # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 print('Missing json file')
                 return
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Р—Р°РїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ РІ С„Р°Р№Р»
+            # Записываем данные в файл
             with open('data.json', 'w') as d:
                 # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 json.dump(json_response, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http СЃС‚Р°С‚СѓСЃ: {response.status_code}")
-            print("РЈСЃРїРµС€РЅРѕ")
+            logging.info(f"Http статус: {response.status_code}")
+            print("Успешно")
             print(request)
-            print(f"Http СЃС‚Р°С‚СѓСЃ: {response.status_code}")
+            print(f"Http статус: {response.status_code}")
             return json_response, response.status_code
 
     @staticmethod
     def make_request(url, kwargs: dict) -> str:
-        """Р¤РѕСЂРјРёСЂСѓРµР№ СЃСЃС‹Р»РєСѓ РґР»СЏ РѕС‚РїСЂР°РІРєРё Р·Р°РїСЂРѕСЃР° РЅР° СЃРµСЂРІРµСЂ Wildberries"""
+        """Формируей ссылку для отправки запроса на сервер Wildberries"""
         if kwargs == {}:
             fin_url = f"{url}"
         else:
@@ -96,7 +96,7 @@ class RequestWildberries(Getter):
 
     @staticmethod
     def choose_dates(dateFrom: str = None, date: str = None, dateTo: str = None) -> tuple[str, str, str]:
-        """Р•СЃР»Рё РІРІРѕРґРёС‚СЊСЃСЏ РЅРµ РґР°С‚Р°, Р° СЃР»РѕРІР°: today, 2days, 1week, 1mnth; С‚Рѕ РІС‹РІРѕРґСЏС‚СЃСЏ СЃРµРіРѕРґРЅСЏС€РЅСЏСЏ РґР°С‚Р° Рё РґРѕ -30 РґРЅРµР№"""
+        """Если вводиться не дата, а слова: today, 2days, 1week, 1mnth; то выводятся сегодняшняя дата и до -30 дней"""
         match dateFrom:
             case 'today':
                 dateFrom = datetime.date.today()

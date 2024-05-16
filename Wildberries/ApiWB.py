@@ -22,8 +22,8 @@ class ApiNew(Converter):
     def start(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
               date: str = None, flag=None, filterNmID: str = None, limit: str = None, from_rk: str = None,
               to_rk: str = None):
-        """Р—Р°РїСѓСЃРєР°РµС‚ РїСЂРѕРіСЂР°РјРјСѓ, РєРѕС‚РѕСЂР°СЏ Р·Р°РїРёСЃС‹РІР°РµС‚ РІ С‚Р°Р±Р»РёС†Сѓ excel СЃ ID РІ Google Drive
-        РІ Р»РёСЃС‚ 'name_of_sheet'. Р”Р°РЅРЅС‹Рµ Р±РµСЂСѓС‚СЃСЏ СЃ СЃРµСЂРІРµСЂР° Wildberries"""
+        """Запускает программу, которая записывает в таблицу excel с ID в Google Drive
+        в лист 'name_of_sheet'. Данные берутся с сервера Wildberries"""
         self.choose_spreadsheetId(who_is=who_is)
         if not self.connect_to_Google():
             return
@@ -44,7 +44,7 @@ class ApiNew(Converter):
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
-        """Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚, РЅР°РґРѕ Р»Рё СЃРѕР·РґР°С‚СЊ РЅРѕРІС‹Р№ Р»РёСЃС‚. РўР°РєР¶Рµ РґРѕР±Р°РІР»СЏРµС‚ РІ sheets.txt РІСЃРµ РІРєР»Р°РґРєРё"""
+        """Возвращает bool ответ, надо ли создать новый лист. Также добавляет в sheets.txt все вкладки"""
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
@@ -72,14 +72,14 @@ class ApiNew(Converter):
 
     def connect_to_Google(self):
         CREDENTIALS_FILE = 'Alex714K.json'
-        # Р§РёС‚Р°РµРј РєР»СЋС‡Рё РёР· С„Р°Р№Р»Р°
+        # Читаем ключи из файла
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
                                                                        ['https://www.googleapis.com/auth/spreadsheets',
                                                                         'https://www.googleapis.com/auth/drive'])
         try:
-            # РђРІС‚РѕСЂРёР·СѓРµРјСЃСЏ РІ СЃРёСЃС‚РµРјРµ
+            # Авторизуемся в системе
             httpAuth = credentials.authorize(httplib2.Http())
-            # Р’С‹Р±РёСЂР°РµРј СЂР°Р±РѕС‚Сѓ СЃ С‚Р°Р±Р»РёС†Р°РјРё Рё 4 РІРµСЂСЃРёСЋ API
+            # Выбираем работу с таблицами и 4 версию API
             service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
@@ -96,7 +96,7 @@ class ApiNew(Converter):
 
     def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
-        """РЎРѕР·РґР°С‘С‚ СЃРїРёСЃРѕРє РїРѕРґ РЅР°Р·РІР°РЅРёРµРј 'name_of_sheet' СЃ РґР°РЅРЅС‹РјРё РёР· СЃРµСЂРІРµСЂР° Wildberries"""
+        """Создаёт список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                              from_rk=from_rk, to_rk=to_rk)
@@ -108,7 +108,7 @@ class ApiNew(Converter):
 
     def update_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
-        """РћС‡РёС‰Р°РµС‚ Рё РѕР±РЅРѕРІР»СЏРµС‚ СЃРїРёСЃРѕРє РїРѕРґ РЅР°Р·РІР°РЅРёРµРј 'name_of_sheet' СЃ РґР°РЅРЅС‹РјРё РёР· СЃРµСЂРІРµСЂР° Wildberries"""
+        """Очищает и обновляет список под названием 'name_of_sheet' с данными из сервера Wildberries"""
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                              from_rk=from_rk, to_rk=to_rk)
@@ -128,8 +128,8 @@ class ApiNew(Converter):
                                                                     filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                                                     from_rk=from_rk, to_rk=to_rk)
         except TypeError:
-            logging.warning(f"РќРµС‚ РґРѕСЃС‚СѓРїР° Рє С„Р°Р№Р»Сѓ")
-            print(f"РќРµС‚ РґРѕСЃС‚СѓРїР° Рє С„Р°Р№Р»Сѓ")
+            logging.warning(f"Нет доступа к файлу")
+            print(f"Нет доступа к файлу")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
@@ -149,7 +149,7 @@ class ApiNew(Converter):
         return False
 
     def private_create(self, name_of_sheet: str) -> bool:
-        columnCount = len(self.values[0])  # РєРѕР»-РІРѕ СЃС‚РѕР»Р±С†РѕРІ
+        columnCount = len(self.values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -188,7 +188,7 @@ class ApiNew(Converter):
     def private_update(self, name_of_sheet: str) -> bool:
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
-        majorDimension = "ROWS"  # СЃРїРёСЃРѕРє - СЃС‚СЂРѕРєР°
+        majorDimension = "ROWS"  # список - строка
         print("\nStart updating sheet...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -247,7 +247,7 @@ class ApiNew(Converter):
         ).execute()
 
         values = getted['valueRanges'][0]['values']
-        # РѕС‡РёСЃС‚РєР° РѕС‚ Р»РёС€РЅРёС… РїСѓСЃС‚С‹С… СЌР»РµРјРµРЅС‚РѕРІ СЃРїРёСЃРєР° (Р° РѕРЅРё Р±С‹РІР°СЋС‚)
+        # очистка от лишних пустых элементов списка (а они бывают)
         for i in range(len(values)):
             if '' in values[i]:
                 values[i] = values[i][:values[i].index('')]
@@ -256,16 +256,16 @@ class ApiNew(Converter):
         if bad:
             if len(values[ind]) > 3:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"РћС€РёР±РєР°: {self.result}"
+                values[ind][4] = f"Ошибка: {self.result}"
             else:
                 values[ind].extend(
-                    [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"РЈСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРѕ СЃС‚СЂРѕРє: {self.dist}"])
+                    [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
         else:
             if len(values[ind]) > 3:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"РЈСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРѕ СЃС‚СЂРѕРє: {self.dist}"
+                values[ind][4] = f"Успешно записано строк: {self.dist}"
             else:
-                values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"РЈСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРѕ СЃС‚СЂРѕРє: {self.dist}"])
+                values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
 
         # with open('data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
@@ -274,7 +274,7 @@ class ApiNew(Converter):
         self.private_clear(name_of_sheet="Result!A:E")
 
         valueInputOption = "USER_ENTERED"
-        majorDimension = "ROWS"  # СЃРїРёСЃРѕРє - СЃС‚СЂРѕРєР°
+        majorDimension = "ROWS"  # список - строка
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,

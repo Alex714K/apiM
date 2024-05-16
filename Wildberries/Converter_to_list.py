@@ -8,7 +8,7 @@ import logging
 class Converter:
     def convert_to_list(self,
                         file: list | dict, name_of_sheet: str) -> (tuple[list, int, list | None] | str):
-        """РљРѕРЅРІРµСЂС‚РёСЂСѓРµС‚ json-РѕР±СЉРµРєС‚ РІ СЃРїРёСЃРѕРє, РєРѕС‚РѕСЂС‹Р№ РїРѕРґС…РѕРґРёС‚ РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РґР°РЅРЅС‹С… РёР· С„Р°Р№Р»Р° РІ Google Excel"""
+        """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
             case None:
                 return 'is None'
@@ -117,11 +117,11 @@ class Converter:
     def download(file: dict, name: str) -> str:
         match name:
             case 'statements':
-                with open('../Р¤РёРЅР°РЅСЃРѕРІС‹Рµ РѕС‚С‡С‘С‚С‹.json', 'w') as d:
+                with open('../Финансовые отчёты.json', 'w') as d:
                     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                     json.dump(file, d, ensure_ascii=False, indent=4)
             case 'statements_old':
-                with open('../Р¤РёРЅР°РЅСЃРѕРІС‹Рµ РѕС‚С‡С‘С‚С‹.json', 'w') as d:
+                with open('../Финансовые отчёты.json', 'w') as d:
                     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                     json.dump(file, d, ensure_ascii=False, indent=4)
         return 'download'
