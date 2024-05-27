@@ -4,7 +4,7 @@ import sys
 from logging.handlers import TimedRotatingFileHandler
 
 
-FORMATTER = logging.Formatter("%(time)s — %(name)s — %(level)s — %(message)s")
+FORMATTER = logging.Formatter("%(time)s вЂ” %(name)s вЂ” %(level)s вЂ” %(message)s")
 LOG_FILE = f"2024-04-01.log"
 
 
@@ -22,7 +22,7 @@ def get_file_handler():
 
 def get_logger(logger_name):
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)  # лучше иметь больше логов, чем их нехватку
+    logger.setLevel(logging.DEBUG)  # Р»СѓС‡С€Рµ РёРјРµС‚СЊ Р±РѕР»СЊС€Рµ Р»РѕРіРѕРІ, С‡РµРј РёС… РЅРµС…РІР°С‚РєСѓ
     logger.addHandler(get_console_handler())
     logger.addHandler(get_file_handler())
     logger.propagate = False

@@ -1,4 +1,3 @@
-Result=1715453659
 stocks=1881758355
 orders_1mnth=446535518
 orders_1week=2046041770
@@ -9,3 +8,4 @@ tariffs_pallet=1536374855
 rk=385537977
 prices=393255567
 statements=699117969
+Result=1664189592

@@ -23,17 +23,17 @@ class ApiNew(Converter):
               date: str = None, flag=None, filterNmID: str = None, limit: str = None, from_rk: str = None,
               to_rk: str = None):
         """
-        Запуск работы с запросом на сервера WildBerries.
-        :param name_of_sheet: Название листа
-        :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
+        Р—Р°РїСѓСЃРє СЂР°Р±РѕС‚С‹ СЃ Р·Р°РїСЂРѕСЃРѕРј РЅР° СЃРµСЂРІРµСЂР° WildBerries.
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :param who_is: Р§РµР№ С‚РѕРєРµРЅ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+        :param dateFrom: РЎ СЌС‚РѕР№ РґР°С‚С‹
+        :param dateTo: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ
+        :param date: РџСЂРѕСЃС‚Рѕ РґР°С‚Р°
+        :param flag: Р¤Р»Р°Рі (1 РёР»Рё 0)
+        :param filterNmID: РќРµ РїРѕРјРЅСЋ # TODO: РґРѕРїРёСЃР°С‚СЊ РѕРїРёСЃР°РЅРёРµ
+        :param limit: Р›РёРјРёС‚ РєРѕР»РёС‡РµСЃС‚РІР° СЃС‚СЂРѕРє РІ Р·Р°РїСЂРѕСЃРµ
+        :param from_rk: РЎ СЌС‚РѕР№ РґР°С‚С‹ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :param to_rk: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
         :return:
         """
         self.choose_spreadsheetId(who_is=who_is)
@@ -59,17 +59,17 @@ class ApiNew(Converter):
 
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
         """
-        Определяет, нужен ли создать новый лист или нет.
-        :param name_of_sheet: Название листа
-        :return: Возващает bool | str ответ результата определения
+        РћРїСЂРµРґРµР»СЏРµС‚, РЅСѓР¶РµРЅ Р»Рё СЃРѕР·РґР°С‚СЊ РЅРѕРІС‹Р№ Р»РёСЃС‚ РёР»Рё РЅРµС‚.
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :return: Р’РѕР·РІР°С‰Р°РµС‚ bool | str РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° РѕРїСЂРµРґРµР»РµРЅРёСЏ
         """
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return 'error'
         except httplib2.error.ServerNotFoundError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -86,7 +86,7 @@ class ApiNew(Converter):
 
     def choose_spreadsheetId(self, who_is: str):
         """
-        Записывает в self.spreadsheetId Id Таблицы, с которой надо будет работать.
+        Р—Р°РїРёСЃС‹РІР°РµС‚ РІ self.spreadsheetId Id РўР°Р±Р»РёС†С‹, СЃ РєРѕС‚РѕСЂРѕР№ РЅР°РґРѕ Р±СѓРґРµС‚ СЂР°Р±РѕС‚Р°С‚СЊ.
         :param who_is:
         :return:
         """
@@ -97,28 +97,28 @@ class ApiNew(Converter):
 
     def connect_to_Google(self) -> bool:
         """
-        Выполняет подключение к сервису Google
-        :return: Возвращает bool ответ результата подключения
+        Р’С‹РїРѕР»РЅСЏРµС‚ РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє СЃРµСЂРІРёСЃСѓ Google
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° РїРѕРґРєР»СЋС‡РµРЅРёСЏ
         """
         CREDENTIALS_FILE = 'Alex714K.json'
-        # Читаем ключи из файла
+        # Р§РёС‚Р°РµРј РєР»СЋС‡Рё РёР· С„Р°Р№Р»Р°
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
                                                                        ['https://www.googleapis.com/auth/spreadsheets',
                                                                         'https://www.googleapis.com/auth/drive'])
         try:
-            # Авторизуемся в системе
+            # РђРІС‚РѕСЂРёР·СѓРµРјСЃСЏ РІ СЃРёСЃС‚РµРјРµ
             httpAuth = credentials.authorize(httplib2.Http())
-            # Выбираем работу с таблицами и 4 версию API
+            # Р’С‹Р±РёСЂР°РµРј СЂР°Р±РѕС‚Сѓ СЃ С‚Р°Р±Р»РёС†Р°РјРё Рё 4 РІРµСЂСЃРёСЋ API
             service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return False
         except socket.gaierror:
             logging.error("gaierror")
             print("The 'gaierror' has come!\n")
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return False
         finally:
             print('Connected to Google')
@@ -128,19 +128,19 @@ class ApiNew(Converter):
     def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
         """
-        Посылает запрос на сервера WildBerries, обрабатывает его, создаёт и обновляет лист под названием
-        name_of_sheet с данными запроса.
-        :param name_of_sheet: Название листа
-        :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
-        :return: Возвращает bool ответ результата работы всех действий (при неуспехе одного из них, возвращает False
+        РџРѕСЃС‹Р»Р°РµС‚ Р·Р°РїСЂРѕСЃ РЅР° СЃРµСЂРІРµСЂР° WildBerries, РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РµРіРѕ, СЃРѕР·РґР°С‘С‚ Рё РѕР±РЅРѕРІР»СЏРµС‚ Р»РёСЃС‚ РїРѕРґ РЅР°Р·РІР°РЅРёРµРј
+        name_of_sheet СЃ РґР°РЅРЅС‹РјРё Р·Р°РїСЂРѕСЃР°.
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :param who_is: Р§РµР№ С‚РѕРєРµРЅ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+        :param dateFrom: РЎ СЌС‚РѕР№ РґР°С‚С‹
+        :param dateTo: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ
+        :param date: РџСЂРѕСЃС‚Рѕ РґР°С‚Р°
+        :param flag: Р¤Р»Р°Рі (1 РёР»Рё 0)
+        :param filterNmID: РќРµ РїРѕРјРЅСЋ # TODO: РґРѕРїРёСЃР°С‚СЊ РѕРїРёСЃР°РЅРёРµ
+        :param limit: Р›РёРјРёС‚ РєРѕР»РёС‡РµСЃС‚РІР° СЃС‚СЂРѕРє РІ Р·Р°РїСЂРѕСЃРµ
+        :param from_rk: РЎ СЌС‚РѕР№ РґР°С‚С‹ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :param to_rk: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° СЂР°Р±РѕС‚С‹ РІСЃРµС… РґРµР№СЃС‚РІРёР№ (РїСЂРё РЅРµСѓСЃРїРµС…Рµ РѕРґРЅРѕРіРѕ РёР· РЅРёС…, РІРѕР·РІСЂР°С‰Р°РµС‚ False
         """
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
@@ -154,20 +154,20 @@ class ApiNew(Converter):
     def update_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
                      dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
         """
-        Посылает запрос на сервера WildBerries, обрабатывает его, очищает и обновляет лист под названием name_of_sheet
-        name_of_sheet данными с запроса.
-        :param name_of_sheet: Название листа
-        :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
-        :return: Возвращает bool ответ результата работы всех действий (при неуспехе одного из них, возвращает False
-        и останавливается)
+        РџРѕСЃС‹Р»Р°РµС‚ Р·Р°РїСЂРѕСЃ РЅР° СЃРµСЂРІРµСЂР° WildBerries, РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РµРіРѕ, РѕС‡РёС‰Р°РµС‚ Рё РѕР±РЅРѕРІР»СЏРµС‚ Р»РёСЃС‚ РїРѕРґ РЅР°Р·РІР°РЅРёРµРј name_of_sheet
+        name_of_sheet РґР°РЅРЅС‹РјРё СЃ Р·Р°РїСЂРѕСЃР°.
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :param who_is: Р§РµР№ С‚РѕРєРµРЅ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+        :param dateFrom: РЎ СЌС‚РѕР№ РґР°С‚С‹
+        :param dateTo: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ
+        :param date: РџСЂРѕСЃС‚Рѕ РґР°С‚Р°
+        :param flag: Р¤Р»Р°Рі (1 РёР»Рё 0)
+        :param filterNmID: РќРµ РїРѕРјРЅСЋ # TODO: РґРѕРїРёСЃР°С‚СЊ РѕРїРёСЃР°РЅРёРµ
+        :param limit: Р›РёРјРёС‚ РєРѕР»РёС‡РµСЃС‚РІР° СЃС‚СЂРѕРє РІ Р·Р°РїСЂРѕСЃРµ
+        :param from_rk: РЎ СЌС‚РѕР№ РґР°С‚С‹ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :param to_rk: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° СЂР°Р±РѕС‚С‹ РІСЃРµС… РґРµР№СЃС‚РІРёР№ (РїСЂРё РЅРµСѓСЃРїРµС…Рµ РѕРґРЅРѕРіРѕ РёР· РЅРёС…, РІРѕР·РІСЂР°С‰Р°РµС‚ False
+        Рё РѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ)
         """
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
@@ -183,40 +183,40 @@ class ApiNew(Converter):
     def start_work_with_request(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str, date: str, flag: str,
                                 filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
         """
-        Функция, в которой посылается и обрабатывается запрос на сервера WildBerries. Обработка зависит от
-        названия name_of_sheet.
-        :param name_of_sheet: Название листа
-        :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
-        :return: Возвращает bool ответ результата запроса
+        Р¤СѓРЅРєС†РёСЏ, РІ РєРѕС‚РѕСЂРѕР№ РїРѕСЃС‹Р»Р°РµС‚СЃСЏ Рё РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ Р·Р°РїСЂРѕСЃ РЅР° СЃРµСЂРІРµСЂР° WildBerries. РћР±СЂР°Р±РѕС‚РєР° Р·Р°РІРёСЃРёС‚ РѕС‚
+        РЅР°Р·РІР°РЅРёСЏ name_of_sheet.
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :param who_is: Р§РµР№ С‚РѕРєРµРЅ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+        :param dateFrom: РЎ СЌС‚РѕР№ РґР°С‚С‹
+        :param dateTo: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ
+        :param date: РџСЂРѕСЃС‚Рѕ РґР°С‚Р°
+        :param flag: Р¤Р»Р°Рі (1 РёР»Рё 0)
+        :param filterNmID: РќРµ РїРѕРјРЅСЋ # TODO: РґРѕРїРёСЃР°С‚СЊ РѕРїРёСЃР°РЅРёРµ
+        :param limit: Р›РёРјРёС‚ РєРѕР»РёС‡РµСЃС‚РІР° СЃС‚СЂРѕРє РІ Р·Р°РїСЂРѕСЃРµ
+        :param from_rk: РЎ СЌС‚РѕР№ РґР°С‚С‹ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :param to_rk: РџРѕ СЌС‚Сѓ РґР°С‚Сѓ РґР»СЏ СЂРµРєР»Р°РјРЅС‹С… РєРѕРјРїР°РЅРёР№
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° Р·Р°РїСЂРѕСЃР°
         """
         requestWB = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                                flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                                from_rk=from_rk, to_rk=to_rk)
         match requestWB:
             case 'Missing json file':
-                self.result = 'ERROR: Не получен файл с WildBerries'
-            case 'Проблема с соединением':
-                self.result = 'ERROR: Проблема с соединением'
+                self.result = 'ERROR: РќРµ РїРѕР»СѓС‡РµРЅ С„Р°Р№Р» СЃ WildBerries'
+            case 'РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј':
+                self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
         try:
             json_response, status_code = requestWB
         except TypeError:
-            logging.warning(f"Нет доступа к файлу")
-            print(f"Нет доступа к файлу")
+            logging.warning(f"РќРµС‚ РґРѕСЃС‚СѓРїР° Рє С„Р°Р№Р»Сѓ")
+            print(f"РќРµС‚ РґРѕСЃС‚СѓРїР° Рє С„Р°Р№Р»Сѓ")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
             case 'download':
                 logging.warning("Downloaded")
                 print(f"Downloaded {name_of_sheet}")
-                self.result = 'Зачем-то скачен файл'
+                self.result = 'Р—Р°С‡РµРј-С‚Рѕ СЃРєР°С‡РµРЅ С„Р°Р№Р»'
                 return True
             case 'is None':
                 logging.warning("File = None")
@@ -233,13 +233,13 @@ class ApiNew(Converter):
 
     def private_create(self, name_of_sheet: str) -> bool:
         """
-        Функция, создающая лист под названием name_of_sheet.
+        Р¤СѓРЅРєС†РёСЏ, СЃРѕР·РґР°СЋС‰Р°СЏ Р»РёСЃС‚ РїРѕРґ РЅР°Р·РІР°РЅРёРµРј name_of_sheet.
 
-        ВНИМАНИЕ!!! Не следует создавать лист при наличии листа с тем же названием. Не известны последствия
-        :param name_of_sheet: Название листа
-        :return: Возвращает bool ответ результата создания
+        Р’РќРРњРђРќРР•!!! РќРµ СЃР»РµРґСѓРµС‚ СЃРѕР·РґР°РІР°С‚СЊ Р»РёСЃС‚ РїСЂРё РЅР°Р»РёС‡РёРё Р»РёСЃС‚Р° СЃ С‚РµРј Р¶Рµ РЅР°Р·РІР°РЅРёРµРј. РќРµ РёР·РІРµСЃС‚РЅС‹ РїРѕСЃР»РµРґСЃС‚РІРёСЏ
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° СЃРѕР·РґР°РЅРёСЏ
         """
-        columnCount = len(self.values[0])  # кол-во столбцов
+        columnCount = len(self.values[0])  # РєРѕР»-РІРѕ СЃС‚РѕР»Р±С†РѕРІ
         name_of_sheet = name_of_sheet
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -256,7 +256,7 @@ class ApiNew(Converter):
                 }]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return True
         logging.info(f"Created new sheet '{name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
@@ -264,9 +264,9 @@ class ApiNew(Converter):
 
     def private_clear(self, name_of_sheet: str) -> bool:
         """
-        Функция, очищающая лист под название name_of_sheet
-        :param name_of_sheet: Название листа
-        :return: Возвращает bool ответ результата очистки
+        Р¤СѓРЅРєС†РёСЏ, РѕС‡РёС‰Р°СЋС‰Р°СЏ Р»РёСЃС‚ РїРѕРґ РЅР°Р·РІР°РЅРёРµ name_of_sheet
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° РѕС‡РёСЃС‚РєРё
         """
         if '!' in name_of_sheet:
             print(f"\nStart clearing sheet '{name_of_sheet[:name_of_sheet.index('!')]}'...")
@@ -276,7 +276,7 @@ class ApiNew(Converter):
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return True
         logging.info("Clearing complete!")
         print("Clearing complete!")
@@ -284,13 +284,13 @@ class ApiNew(Converter):
 
     def private_update(self, name_of_sheet: str) -> bool:
         """
-        Функция, обновляющий лист под название name_of_sheet.
-        :param name_of_sheet: Название листа
-        :return: Возвращает bool ответ результата обновления
+        Р¤СѓРЅРєС†РёСЏ, РѕР±РЅРѕРІР»СЏСЋС‰РёР№ Р»РёСЃС‚ РїРѕРґ РЅР°Р·РІР°РЅРёРµ name_of_sheet.
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°
+        :return: Р’РѕР·РІСЂР°С‰Р°РµС‚ bool РѕС‚РІРµС‚ СЂРµР·СѓР»СЊС‚Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ
         """
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
-        majorDimension = "ROWS"  # список - строка
+        majorDimension = "ROWS"  # СЃРїРёСЃРѕРє - СЃС‚СЂРѕРєР°
         print("\nStart updating sheet...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -303,7 +303,7 @@ class ApiNew(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return True
         logging.info("Updating complete")
         print("Updating complete!")
@@ -315,10 +315,10 @@ class ApiNew(Converter):
 
     def change_formats(self, needed_keys: list | None, sheetId: str):
         """
-        При наличии столбцов, требующих изменения формата на число с двумя знаками посе запятой, функция изменяет
-        формат конкретно этих столбцов.
-        :param needed_keys: Список индексов столбцов
-        :param sheetId: Id листа, в котором работаем
+        РџСЂРё РЅР°Р»РёС‡РёРё СЃС‚РѕР»Р±С†РѕРІ, С‚СЂРµР±СѓСЋС‰РёС… РёР·РјРµРЅРµРЅРёСЏ С„РѕСЂРјР°С‚Р° РЅР° С‡РёСЃР»Рѕ СЃ РґРІСѓРјСЏ Р·РЅР°РєР°РјРё РїРѕСЃРµ Р·Р°РїСЏС‚РѕР№, С„СѓРЅРєС†РёСЏ РёР·РјРµРЅСЏРµС‚
+        С„РѕСЂРјР°С‚ РєРѕРЅРєСЂРµС‚РЅРѕ СЌС‚РёС… СЃС‚РѕР»Р±С†РѕРІ.
+        :param needed_keys: РЎРїРёСЃРѕРє РёРЅРґРµРєСЃРѕРІ СЃС‚РѕР»Р±С†РѕРІ
+        :param sheetId: Id Р»РёСЃС‚Р°, РІ РєРѕС‚РѕСЂРѕРј СЂР°Р±РѕС‚Р°РµРј
         :return:
         """
         if needed_keys == None:
@@ -339,18 +339,18 @@ class ApiNew(Converter):
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return False
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
         """
-        Пишет результат работы с листом в таблицу 'Result'. При отстутсвии таковой создаёт её и только после этого
-        добавляет туда результат.
+        РџРёС€РµС‚ СЂРµР·СѓР»СЊС‚Р°С‚ СЂР°Р±РѕС‚С‹ СЃ Р»РёСЃС‚РѕРј РІ С‚Р°Р±Р»РёС†Сѓ 'Result'. РџСЂРё РѕС‚СЃС‚СѓС‚СЃРІРёРё С‚Р°РєРѕРІРѕР№ СЃРѕР·РґР°С‘С‚ РµС‘ Рё С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ СЌС‚РѕРіРѕ
+        РґРѕР±Р°РІР»СЏРµС‚ С‚СѓРґР° СЂРµР·СѓР»СЊС‚Р°С‚.
 
-        В результате пишутся дата обновления и результат (количество успешно записанных строк или ошибку)
-        :param name_of_sheet: Название листа, в котором пытались сделать обновление
-        :param bad: Успешно или нет
+        Р’ СЂРµР·СѓР»СЊС‚Р°С‚Рµ РїРёС€СѓС‚СЃСЏ РґР°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Рё СЂРµР·СѓР»СЊС‚Р°С‚ (РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРЅС‹С… СЃС‚СЂРѕРє РёР»Рё РѕС€РёР±РєСѓ)
+        :param name_of_sheet: РќР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р°, РІ РєРѕС‚РѕСЂРѕРј РїС‹С‚Р°Р»РёСЃСЊ СЃРґРµР»Р°С‚СЊ РѕР±РЅРѕРІР»РµРЅРёРµ
+        :param bad: РЈСЃРїРµС€РЅРѕ РёР»Рё РЅРµС‚
         :return:
         """
         if not self.create_result():
@@ -367,11 +367,11 @@ class ApiNew(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return
 
         values = getted['valueRanges'][0]['values']
-        # очистка от лишних пустых элементов списка (а они бывают)
+        # РѕС‡РёСЃС‚РєР° РѕС‚ Р»РёС€РЅРёС… РїСѓСЃС‚С‹С… СЌР»РµРјРµРЅС‚РѕРІ СЃРїРёСЃРєР° (Р° РѕРЅРё Р±С‹РІР°СЋС‚)
         for i in range(len(values)):
             if '' in values[i]:
                 values[i] = values[i][:values[i].index('')]
@@ -380,20 +380,20 @@ class ApiNew(Converter):
         if bad:
             if len(values[ind]) == 4:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind].extend(f"Ошибка: {self.result}")
+                values[ind].extend(f"РћС€РёР±РєР°: {self.result}")
             elif len(values[ind]) > 4:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"Ошибка: {self.result}"
+                values[ind][4] = f"РћС€РёР±РєР°: {self.result}"
             else:
                 values[ind].extend(
-                    [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
+                    [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"РЈСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРѕ СЃС‚СЂРѕРє: {self.dist}"])
         else:
             if len(values[ind]) > 3:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"Успешно записано строк: {self.dist}"
+                values[ind][4] = f"РЈСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРѕ СЃС‚СЂРѕРє: {self.dist}"
             else:
                 values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                    f"Успешно записано строк: {self.dist}"])
+                                    f"РЈСЃРїРµС€РЅРѕ Р·Р°РїРёСЃР°РЅРѕ СЃС‚СЂРѕРє: {self.dist}"])
 
         # with open('data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
@@ -402,7 +402,7 @@ class ApiNew(Converter):
         self.private_clear(name_of_sheet="Result!A:E")
 
         valueInputOption = "USER_ENTERED"
-        majorDimension = "ROWS"  # список - строка
+        majorDimension = "ROWS"  # СЃРїРёСЃРѕРє - СЃС‚СЂРѕРєР°
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
@@ -414,12 +414,12 @@ class ApiNew(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
             return
 
     def create_result(self) -> bool:
         """
-        При отсутствии листа Result создаёт таковой по макету.
+        РџСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё Р»РёСЃС‚Р° Result СЃРѕР·РґР°С‘С‚ С‚Р°РєРѕРІРѕР№ РїРѕ РјР°РєРµС‚Сѓ.
         :return:
         """
         with open('data/sheets.txt', 'r') as txt:
@@ -441,7 +441,7 @@ class ApiNew(Converter):
                         }]
                     }).execute()
                 except googleapiclient.errors.HttpError:
-                    self.result = 'ERROR: Проблема с соединением'
+                    self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
                     return False
                 values = list()
                 with open('data/info_about_Result.csv', 'r') as file:
@@ -462,6 +462,6 @@ class ApiNew(Converter):
                         ]
                     }).execute()
                 except googleapiclient.errors.HttpError:
-                    self.result = 'ERROR: Проблема с соединением'
+                    self.result = 'ERROR: РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
                     return False
                 return True

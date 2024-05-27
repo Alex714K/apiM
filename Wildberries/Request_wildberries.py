@@ -10,23 +10,23 @@ from Initers import Getter
 class RequestWildberries(Getter):
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
             (tuple[list | dict, int] | tuple[int, str] | str):
-        """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
-        вводимых параветров). При успешнов получении возвращает json-объект. При ошибке ничего не возвращает и
-        пишет ошибку в консоль"""
-        # Даты
+        """Р¤РѕСЂРјРёСЂСѓРµС‚ СЃ РѕС‚РїСЂР°РІР»СЏРµС‚ Р·Р°РїСЂРѕСЃ РЅР° СЃРµСЂРІРµСЂР° Wildberries РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ СЂР°Р·Р»РёС‡РЅС‹С… РґР°РЅРЅС‹С… (РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚
+        РІРІРѕРґРёРјС‹С… РїР°СЂР°РІРµС‚СЂРѕРІ). РџСЂРё СѓСЃРїРµС€РЅРѕРІ РїРѕР»СѓС‡РµРЅРёРё РІРѕР·РІСЂР°С‰Р°РµС‚ json-РѕР±СЉРµРєС‚. РџСЂРё РѕС€РёР±РєРµ РЅРёС‡РµРіРѕ РЅРµ РІРѕР·РІСЂР°С‰Р°РµС‚ Рё
+        РїРёС€РµС‚ РѕС€РёР±РєСѓ РІ РєРѕРЅСЃРѕР»СЊ"""
+        # Р”Р°С‚С‹
         kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
                                                                                  kwargs['dateTo'])
 
-        # Ссылка
+        # РЎСЃС‹Р»РєР°
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
             print("Wrong name of sheet")
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
-        # Ссылка запроса
+        # РЎСЃС‹Р»РєР° Р·Р°РїСЂРѕСЃР°
         request = self.make_request(url, kwargs)
-        # Токен
+        # РўРѕРєРµРЅ
         with open('data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         authorization = tokens[who_is]
@@ -34,7 +34,7 @@ class RequestWildberries(Getter):
             'Authorization': authorization
         }
 
-        # Выполняем запрос
+        # Р’С‹РїРѕР»РЅСЏРµРј Р·Р°РїСЂРѕСЃ
         try:
             response = requests.get(request, headers=headers)
         except socket.gaierror:
@@ -42,36 +42,36 @@ class RequestWildberries(Getter):
             logging.error("IN WB")
             print('IN WB')
             print("The 'gaierror' has come!\n")
-            return 'Проблема с соединением'
+            return 'РџСЂРѕР±Р»РµРјР° СЃ СЃРѕРµРґРёРЅРµРЅРёРµРј'
         if not response:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
-            print("Ошибка выполнения запроса:")
+            logging.warning(f"РћС€РёР±РєР° РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РїСЂРѕСЃР°:\nHttp СЃС‚Р°С‚СѓСЃ: {response.status_code} ( {response.reason} )")
+            print("РћС€РёР±РєР° РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РїСЂРѕСЃР°:")
             print(request)
-            print(f"Http статус: {response.status_code} ( {response.reason} )")
+            print(f"Http СЃС‚Р°С‚СѓСЃ: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
             return response.status_code, response.reason
         else:
             try:
-                # Преобразуем ответ в json-объект
+                # РџСЂРµРѕР±СЂР°Р·СѓРµРј РѕС‚РІРµС‚ РІ json-РѕР±СЉРµРєС‚
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 print('Missing json file')
                 return 'Missing json file'
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл
+            # Р—Р°РїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ РІ С„Р°Р№Р»
             with open('data.json', 'w') as d:
                 # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 json.dump(json_response, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}")
-            print("Успешно")
+            logging.info(f"Http СЃС‚Р°С‚СѓСЃ: {response.status_code}")
+            print("РЈСЃРїРµС€РЅРѕ")
             print(request)
-            print(f"Http статус: {response.status_code}")
+            print(f"Http СЃС‚Р°С‚СѓСЃ: {response.status_code}")
             return json_response, response.status_code
 
     @staticmethod
     def make_request(url, kwargs: dict) -> str:
-        """Формируей ссылку для отправки запроса на сервер Wildberries"""
+        """Р¤РѕСЂРјРёСЂСѓРµР№ СЃСЃС‹Р»РєСѓ РґР»СЏ РѕС‚РїСЂР°РІРєРё Р·Р°РїСЂРѕСЃР° РЅР° СЃРµСЂРІРµСЂ Wildberries"""
         if kwargs == {}:
             fin_url = f"{url}"
         else:
@@ -96,7 +96,7 @@ class RequestWildberries(Getter):
 
     @staticmethod
     def choose_dates(dateFrom: str = None, date: str = None, dateTo: str = None) -> tuple[str, str, str]:
-        """Если вводиться не дата, а слова: today, 2days, 1week, 1mnth; то выводятся сегодняшняя дата и до -30 дней"""
+        """Р•СЃР»Рё РІРІРѕРґРёС‚СЊСЃСЏ РЅРµ РґР°С‚Р°, Р° СЃР»РѕРІР°: today, 2days, 1week, 1mnth; С‚Рѕ РІС‹РІРѕРґСЏС‚СЃСЏ СЃРµРіРѕРґРЅСЏС€РЅСЏСЏ РґР°С‚Р° Рё РґРѕ -30 РґРЅРµР№"""
         match dateFrom:
             case 'today':
                 dateFrom = datetime.date.today()
