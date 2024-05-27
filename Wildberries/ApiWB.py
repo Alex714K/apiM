@@ -356,7 +356,10 @@ class ApiNew(Converter):
 
         ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
         if bad:
-            if len(values[ind]) > 3:
+            if len(values[ind]) == 4:
+                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind].extend(f"Ошибка: {self.result}")
+            elif len(values[ind]) > 4:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 values[ind][4] = f"Ошибка: {self.result}"
             else:
