@@ -52,6 +52,8 @@ class ApiNew(Converter):
                                       to_rk=to_rk)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        elif self.result is not None:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
         else:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
@@ -64,8 +66,10 @@ class ApiNew(Converter):
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return 'error'
         except httplib2.error.ServerNotFoundError:
+            self.result = 'ERROR: Проблема с соединением'
             return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -109,10 +113,12 @@ class ApiNew(Converter):
         except httplib2.error.ServerNotFoundError:
             logging.error("Google: ServerNotFound")
             print("Google: 'ServerNotFound'...\nHOW?!\n")
+            self.result = 'ERROR: Проблема с соединением'
             return False
         except socket.gaierror:
             logging.error("gaierror")
             print("The 'gaierror' has come!\n")
+            self.result = 'ERROR: Проблема с соединением'
             return False
         finally:
             print('Connected to Google')
@@ -191,11 +197,16 @@ class ApiNew(Converter):
         :param to_rk: По эту дату для рекламных компаний
         :return: Возвращает bool ответ результата запроса
         """
+        requestWB = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
+                                               flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                               from_rk=from_rk, to_rk=to_rk)
+        match requestWB:
+            case 'Missing json file':
+                self.result = 'ERROR: Не получен файл с WildBerries'
+            case 'Проблема с соединением':
+                self.result = 'ERROR: Проблема с соединением'
         try:
-            json_response, status_code = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is,
-                                                                    dateFrom=dateFrom, date=date, flag=flag,
-                                                                    filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                                                    from_rk=from_rk, to_rk=to_rk)
+            json_response, status_code = requestWB
         except TypeError:
             logging.warning(f"Нет доступа к файлу")
             print(f"Нет доступа к файлу")
@@ -205,14 +216,17 @@ class ApiNew(Converter):
             case 'download':
                 logging.warning("Downloaded")
                 print(f"Downloaded {name_of_sheet}")
+                self.result = 'Зачем-то скачен файл'
                 return True
             case 'is None':
                 logging.warning("File = None")
                 print("File = None")
+                self.result = 'ERROR: File=None'
                 return True
             case 'is empty':
                 logging.warning("File is empty")
                 print("File is empty")
+                self.result = 'ERROR: File is empty'
                 return True
         self.values, self.dist, self.needed_keys = result
         return False
@@ -221,7 +235,7 @@ class ApiNew(Converter):
         """
         Функция, создающая лист под названием name_of_sheet.
 
-        ВНИМАНИЕ!!! Не следует создавать лист при наличии листа с тем же названием
+        ВНИМАНИЕ!!! Не следует создавать лист при наличии листа с тем же названием. Не известны последствия
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата создания
         """
@@ -242,6 +256,7 @@ class ApiNew(Converter):
                 }]
             }).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return True
         logging.info(f"Created new sheet '{name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
@@ -259,8 +274,9 @@ class ApiNew(Converter):
             print(f"\nStart clearing sheet '{name_of_sheet}'...")
         try:
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
-                                                                 ).execute()
+                                                                ).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return True
         logging.info("Clearing complete!")
         print("Clearing complete!")
@@ -287,6 +303,7 @@ class ApiNew(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return True
         logging.info("Updating complete")
         print("Updating complete!")
@@ -322,6 +339,7 @@ class ApiNew(Converter):
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return False
         return True
 
@@ -349,6 +367,7 @@ class ApiNew(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return
 
         values = getted['valueRanges'][0]['values']
@@ -395,6 +414,7 @@ class ApiNew(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
             return
 
     def create_result(self) -> bool:
@@ -421,6 +441,7 @@ class ApiNew(Converter):
                         }]
                     }).execute()
                 except googleapiclient.errors.HttpError:
+                    self.result = 'ERROR: Проблема с соединением'
                     return False
                 values = list()
                 with open('data/info_about_Result.csv', 'r') as file:
@@ -441,5 +462,6 @@ class ApiNew(Converter):
                         ]
                     }).execute()
                 except googleapiclient.errors.HttpError:
+                    self.result = 'ERROR: Проблема с соединением'
                     return False
                 return True

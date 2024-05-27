@@ -9,7 +9,7 @@ from Initers import Getter
 
 class RequestWildberries(Getter):
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
-            (tuple[list | dict, int] | None):
+            (tuple[list | dict, int] | tuple[int, str] | str):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешнов получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
@@ -42,7 +42,7 @@ class RequestWildberries(Getter):
             logging.error("IN WB")
             print('IN WB')
             print("The 'gaierror' has come!\n")
-            return
+            return 'Проблема с соединением'
         if not response:
             logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             print("Ошибка выполнения запроса:")
@@ -50,14 +50,14 @@ class RequestWildberries(Getter):
             print(f"Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
-            return
+            return response.status_code, response.reason
         else:
             try:
                 # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 print('Missing json file')
-                return
+                return 'Missing json file'
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл
             with open('data.json', 'w') as d:
