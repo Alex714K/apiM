@@ -335,18 +335,21 @@ class ApiNew(Converter):
         :param bad: Успешно или нет
         :return:
         """
-        self.create_result()
+        if not self.create_result():
+            return
         # with open('data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')
         #     for i in csv_file:
         #         ans.append(i)
-
-        getted = self.service.spreadsheets().values().batchGet(
-            spreadsheetId=self.spreadsheetId,
-            ranges="Result!A:E",
-            valueRenderOption='FORMATTED_VALUE',
-            dateTimeRenderOption='FORMATTED_STRING'
-        ).execute()
+        try:
+            getted = self.service.spreadsheets().values().batchGet(
+                spreadsheetId=self.spreadsheetId,
+                ranges="Result!A:E",
+                valueRenderOption='FORMATTED_VALUE',
+                dateTimeRenderOption='FORMATTED_STRING'
+            ).execute()
+        except googleapiclient.errors.HttpError:
+            return
 
         values = getted['valueRanges'][0]['values']
         # очистка от лишних пустых элементов списка (а они бывают)
@@ -370,7 +373,8 @@ class ApiNew(Converter):
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 values[ind][4] = f"Успешно записано строк: {self.dist}"
             else:
-                values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
+                values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                    f"Успешно записано строк: {self.dist}"])
 
         # with open('data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
@@ -393,7 +397,7 @@ class ApiNew(Converter):
         except googleapiclient.errors.HttpError:
             return
 
-    def create_result(self):
+    def create_result(self) -> bool:
         """
         При отсутствии листа Result создаёт таковой по макету.
         :return:
@@ -402,19 +406,22 @@ class ApiNew(Converter):
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
             except KeyError:
-                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                    "requests": [{
-                        "addSheet": {
-                            "properties": {
-                                "title": "Result",
-                                "gridProperties": {
-                                    "rowCount": 100,
-                                    "columnCount": 26
+                try:
+                    getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                        "requests": [{
+                            "addSheet": {
+                                "properties": {
+                                    "title": "Result",
+                                    "gridProperties": {
+                                        "rowCount": 100,
+                                        "columnCount": 26
+                                    }
                                 }
                             }
-                        }
-                    }]
-                }).execute()
+                        }]
+                    }).execute()
+                except googleapiclient.errors.HttpError:
+                    return False
                 values = list()
                 with open('data/info_about_Result.csv', 'r') as file:
                     csv_file = csv.reader(file)
@@ -423,12 +430,16 @@ class ApiNew(Converter):
                             continue
                         else:
                             values.append(i)
-                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                    "valueInputOption": "USER_ENTERED",
-                    "data": [
-                        {"range": "Result!A:E",
-                         "majorDimension": "ROWS",
-                         "values": values
-                         }
-                    ]
-                }).execute()
+                try:
+                    getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                        "valueInputOption": "USER_ENTERED",
+                        "data": [
+                            {"range": "Result!A:E",
+                             "majorDimension": "ROWS",
+                             "values": values
+                             }
+                        ]
+                    }).execute()
+                except googleapiclient.errors.HttpError:
+                    return False
+                return True
