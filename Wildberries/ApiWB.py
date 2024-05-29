@@ -8,7 +8,8 @@ from Wildberries.Converter_to_list import Converter
 from Wildberries.Request_wildberries import RequestWildberries
 import logging
 import csv
-from datetime import datetime
+from datetime import timedelta
+import datetime
 
 
 class ApiNew(Converter):
@@ -30,7 +31,7 @@ class ApiNew(Converter):
         :param dateTo: По эту дату
         :param date: Просто дата
         :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
+        :param filterNmID: Не используется
         :param limit: Лимит количества строк в запросе
         :param from_rk: С этой даты для рекламных компаний
         :param to_rk: По эту дату для рекламных компаний
@@ -38,6 +39,11 @@ class ApiNew(Converter):
         """
         self.choose_spreadsheetId(who_is=who_is)
         if not self.connect_to_Google():
+            return
+        if name_of_sheet == 'statements':
+            self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom,
+                                            dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
+                                            from_rk=from_rk, to_rk=to_rk)
             return
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
@@ -60,6 +66,8 @@ class ApiNew(Converter):
     def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
         """
         Определяет, нужен ли создать новый лист или нет.
+
+        P.S. Не читать код, пожалеете =)
         :param name_of_sheet: Название листа
         :return: Возващает bool | str ответ результата определения
         """
@@ -136,7 +144,7 @@ class ApiNew(Converter):
         :param dateTo: По эту дату
         :param date: Просто дата
         :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
+        :param filterNmID: Не используется
         :param limit: Лимит количества строк в запросе
         :param from_rk: С этой даты для рекламных компаний
         :param to_rk: По эту дату для рекламных компаний
@@ -162,7 +170,7 @@ class ApiNew(Converter):
         :param dateTo: По эту дату
         :param date: Просто дата
         :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
+        :param filterNmID: Не используется
         :param limit: Лимит количества строк в запросе
         :param from_rk: С этой даты для рекламных компаний
         :param to_rk: По эту дату для рекламных компаний
@@ -191,7 +199,7 @@ class ApiNew(Converter):
         :param dateTo: По эту дату
         :param date: Просто дата
         :param flag: Флаг (1 или 0)
-        :param filterNmID: Не помню # TODO: дописать описание
+        :param filterNmID: Не используется
         :param limit: Лимит количества строк в запросе
         :param from_rk: С этой даты для рекламных компаний
         :param to_rk: По эту дату для рекламных компаний
@@ -385,23 +393,23 @@ class ApiNew(Converter):
         ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
         if bad:
             if len(values[ind]) == 4:
-                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind].extend(f"Ошибка: {self.result}")
+                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind].extend(f"{self.result}")
             elif len(values[ind]) > 4:
-                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"Ошибка: {self.result}"
+                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind][4] = f"{self.result}"
             else:
                 values[ind].extend(
-                    [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
+                    [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
         else:
             if len(values[ind]) == 4:
-                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 values[ind].extend(f"Успешно записано строк: {self.dist}")
             elif len(values[ind]) > 4:
-                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 values[ind][4] = f"Успешно записано строк: {self.dist}"
             else:
-                values[ind].extend([datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                values[ind].extend([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                     f"Успешно записано строк: {self.dist}"])
 
         # with open('data/info_about_Result.csv', 'w') as file:
@@ -475,3 +483,57 @@ class ApiNew(Converter):
                     self.result = 'ERROR: Проблема с соединением'
                     return False
             return True
+
+    def start_work_with_statements(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
+                                   date: str = None, flag=None, filterNmID: str = None, limit: str = None,
+                                   from_rk: str = None, to_rk: str = None):
+        new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        if new_or_not == 'error':
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            return
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
+                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                             from_rk=from_rk, to_rk=to_rk)
+        if check:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            return
+        # if new_or_not:
+            # if self.private_create(name_of_sheet):
+            #     check = False
+        if self.private_update_statements(name_of_sheet):
+            check = False
+        if check:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        elif self.result is not None:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+        else:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+
+    def private_update_statements(self, name_of_sheet):
+        # getted = self.service.spreadsheets().
+        # get(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE').execute()
+        # getted = getted['sheets']
+        # need = list()
+        # for info in getted:
+        #     need.append([info['properties']['title'], info['properties']['sheetId']])
+        try:
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+                                                                ).execute()
+        except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
+            return True
+        last_week = (datetime.date.today() - timedelta(days=7)).isocalendar()[1]
+        try:
+            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
+                "valueInputOption": 'USER_ENTERED',
+                "data": [
+                    {"range": str(last_week),
+                     "majorDimension": 'ROWS',
+                     "values": self.values
+                     }
+                ]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
+            return True
+        return False
