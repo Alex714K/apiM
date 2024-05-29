@@ -368,6 +368,7 @@ class ApiNew(Converter):
             ).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
 
         values = getted['valueRanges'][0]['values']
@@ -388,7 +389,10 @@ class ApiNew(Converter):
                 values[ind].extend(
                     [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"])
         else:
-            if len(values[ind]) > 3:
+            if len(values[ind]) == 4:
+                values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                values[ind].extend(f"Успешно записано строк: {self.dist}")
+            elif len(values[ind]) > 4:
                 values[ind][3] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 values[ind][4] = f"Успешно записано строк: {self.dist}"
             else:
@@ -415,6 +419,7 @@ class ApiNew(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
 
     def create_result(self) -> bool:
@@ -464,4 +469,4 @@ class ApiNew(Converter):
                 except googleapiclient.errors.HttpError:
                     self.result = 'ERROR: Проблема с соединением'
                     return False
-                return True
+            return True
