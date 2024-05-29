@@ -63,6 +63,7 @@ def WB_cycle():
     schedule.every().day.at("03:35").do(API.start, 'orders_today', 'planeta', 'WB', dateFrom='today', flag='1')
     schedule.every().day.at("03:40").do(API.start, 'tariffs_boxes', 'planeta', 'WB', date='tariffs')
     schedule.every().day.at("03:45").do(API.start, 'tariffs_pallet', 'planeta', 'WB', date='tariffs')
+    schedule.every().day.at("03:50").do(API.start, 'statements', 'planeta', 'WB', dateFrom='statements')
     # День планета
     schedule.every(10).minutes.do(API.start, 'prices', 'planeta', 'WB', limit='1000')
     schedule.every().day.at("15:15").do(API.start, 'stocks', 'planeta', 'WB', dateFrom='2019-06-20')
@@ -72,3 +73,4 @@ def WB_cycle():
     schedule.every().day.at("15:35").do(API.start, 'orders_today', 'planeta', 'WB', dateFrom='today', flag='1')
     schedule.every().day.at("15:40").do(API.start, 'tariffs_boxes', 'planeta', 'WB', date='tariffs')
     schedule.every().day.at("15:45").do(API.start, 'tariffs_pallet', 'planeta', 'WB', date='tariffs')
+    schedule.every().day.at("15:50").do(API.start, 'statements', 'planeta', 'WB', dateFrom='statements')
