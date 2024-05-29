@@ -60,7 +60,7 @@ class RequestWildberries(Getter):
                 return 'Missing json file'
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл
-            with open('data.json', 'w') as d:
+            with open('data.json', 'w', encoding='UTF-8') as d:
                 # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 json.dump(json_response, d, ensure_ascii=False, indent=4)
             logging.info(f"Http статус: {response.status_code}")
@@ -107,7 +107,7 @@ class RequestWildberries(Getter):
             case '1mnth':
                 dateFrom = datetime.date.today() - datetime.timedelta(days=30)
             case 'statements':
-                first_day = datetime.date.today().weekday() % 7 + 7
+                first_day = datetime.date.today().weekday() + 7
                 last_day = first_day - 6
                 dateFrom = datetime.date.today() - datetime.timedelta(days=first_day)
                 dateTo = datetime.date.today() - datetime.timedelta(days=last_day)
