@@ -203,8 +203,13 @@ class ApiNew(Converter):
         match requestWB:
             case 'Missing json file':
                 self.result = 'ERROR: Не получен файл с WildBerries'
+                return True
             case 'Проблема с соединением':
                 self.result = 'ERROR: Проблема с соединением'
+                return True
+        if type(requestWB[0]) == int and requestWB[0] != 200:
+            self.result = f'ERROR: {requestWB[1]}'
+            return True
         try:
             json_response, status_code = requestWB
         except TypeError:
