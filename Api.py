@@ -11,7 +11,7 @@ class Api(Initer):
               to_rk: str = None):
         """Основной старт. От него зависит, что запуститься. Ничего не возвращает."""
         print('-------------------------------------------------------------------------------------------------------')
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), name_of_sheet, who_is)
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':
