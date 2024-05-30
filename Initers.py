@@ -12,7 +12,7 @@ class Initer:
         self.parameters = None
         # self.logger = Logger.get_logger("Apister")
         current_date = datetime.datetime.now()
-        logging.basicConfig(level=logging.DEBUG, filename=f"logs/{current_date.strftime('%m-%d-%y %H-%M-%S')}.log",
+        logging.basicConfig(level=logging.FATAL, filename=f"logs/{current_date.strftime('%m-%d-%y %H-%M-%S')}.log",
                             filemode="w", format="%(asctime)s %(levelname)s %(message)s", )
 
     def get_parameters(self):
