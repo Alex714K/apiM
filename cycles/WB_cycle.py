@@ -38,7 +38,7 @@ def WB_cycle():
     schedule.every().day.at("14:25").do(API.start, 'orders_today', 'terehov', 'WB', dateFrom='today', flag='1')
     schedule.every().day.at("14:30").do(API.start, 'tariffs_boxes', 'terehov', 'WB', date='tariffs')
     schedule.every().day.at("14:35").do(API.start, 'tariffs_pallet', 'terehov', 'WB', date='tariffs')
-    # Утро дкн
+    # Утро днк
     schedule.every().day.at("02:40").do(API.start, 'stocks', 'dnk', 'WB', dateFrom='2019-06-20')
     schedule.every().day.at("02:45").do(API.start, 'orders_1mnth', 'dnk', 'WB', dateFrom='1mnth')
     schedule.every().day.at("02:50").do(API.start, 'orders_1week', 'dnk', 'WB', dateFrom='1week')
