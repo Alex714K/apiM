@@ -79,6 +79,10 @@ class ApiNew(Converter):
         except httplib2.error.ServerNotFoundError:
             self.result = 'ERROR: Проблема с соединением'
             return 'error'
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
         for one_sheet in sheets:
@@ -271,6 +275,10 @@ class ApiNew(Converter):
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
             return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            return True
         logging.info(f"Created new sheet '{name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
         return False
@@ -290,6 +298,10 @@ class ApiNew(Converter):
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         logging.info("Clearing complete!")
         print("Clearing complete!")
@@ -317,6 +329,10 @@ class ApiNew(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         logging.info("Updating complete")
         print("Updating complete!")
@@ -354,6 +370,10 @@ class ApiNew(Converter):
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
             return False
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            return False
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
@@ -381,6 +401,11 @@ class ApiNew(Converter):
             ).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            return
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
 
@@ -434,6 +459,11 @@ class ApiNew(Converter):
             self.result = 'ERROR: Проблема с соединением'
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            return
 
     def create_result(self) -> bool:
         """
@@ -461,6 +491,10 @@ class ApiNew(Converter):
                 except googleapiclient.errors.HttpError:
                     self.result = 'ERROR: Проблема с соединением'
                     return False
+                except TimeoutError:
+                    self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+                    logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    return False
                 values = list()
                 with open('data/info_about_Result.csv', 'r') as file:
                     csv_file = csv.reader(file)
@@ -482,6 +516,10 @@ class ApiNew(Converter):
                 except googleapiclient.errors.HttpError:
                     self.result = 'ERROR: Проблема с соединением'
                     return False
+                except TimeoutError:
+                    self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+                    logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    return False
             return True
 
     def start_work_with_statements(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
@@ -500,9 +538,10 @@ class ApiNew(Converter):
         # if new_or_not:
             # if self.private_create(name_of_sheet):
             #     check = False
+        check1 = True
         if self.private_update_statements(name_of_sheet):
-            check = False
-        if check:
+            check1 = False
+        if check1:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         elif self.result is not None:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
@@ -522,6 +561,10 @@ class ApiNew(Converter):
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
             return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            return True
         last_week = (datetime.date.today() - timedelta(days=7)).isocalendar()[1]
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
@@ -535,5 +578,9 @@ class ApiNew(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         return False
