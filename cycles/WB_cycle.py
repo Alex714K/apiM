@@ -74,3 +74,5 @@ def WB_cycle():
     schedule.every().day.at("15:40").do(API.start, 'tariffs_boxes', 'planeta', 'WB', date='tariffs')
     schedule.every().day.at("15:45").do(API.start, 'tariffs_pallet', 'planeta', 'WB', date='tariffs')
     schedule.every().day.at("15:50").do(API.start, 'statements', 'planeta', 'WB', dateFrom='statements')
+    # Платное хранение
+    # schedule.every().day.at('00:00').do(API.start, 'storage_paid', 'planeta', 'WB', dateFrom='storage_paid')
