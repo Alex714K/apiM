@@ -1,4 +1,5 @@
 import socket
+import time
 
 import googleapiclient.errors
 import httplib2
@@ -10,6 +11,7 @@ import logging
 import csv
 from datetime import timedelta
 import datetime
+import calendar
 
 
 class ApiNew(Converter):
@@ -45,6 +47,10 @@ class ApiNew(Converter):
                                             dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
                                             from_rk=from_rk, to_rk=to_rk)
             return
+        if name_of_sheet == 'storage_paid':
+            self.start_work_with_storage_paid(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom,
+                                              dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
+                                              from_rk=from_rk, to_rk=to_rk)
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
@@ -525,10 +531,6 @@ class ApiNew(Converter):
     def start_work_with_statements(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
                                    date: str = None, flag=None, filterNmID: str = None, limit: str = None,
                                    from_rk: str = None, to_rk: str = None):
-        new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
-        if new_or_not == 'error':
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-            return
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
                                              flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
                                              from_rk=from_rk, to_rk=to_rk)
@@ -536,8 +538,8 @@ class ApiNew(Converter):
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
         # if new_or_not:
-            # if self.private_create(name_of_sheet):
-            #     check = False
+        # if self.private_create(name_of_sheet):
+        #     check = False
         check1 = True
         if self.private_update_statements(name_of_sheet):
             check1 = False
@@ -548,7 +550,7 @@ class ApiNew(Converter):
         else:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
-    def private_update_statements(self, name_of_sheet):
+    def private_update_statements(self, name_of_sheet: str):
         # getted = self.service.spreadsheets().
         # get(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE').execute()
         # getted = getted['sheets']
@@ -567,15 +569,67 @@ class ApiNew(Converter):
             return True
         last_week = (datetime.date.today() - timedelta(days=7)).isocalendar()[1]
         try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
-                "valueInputOption": 'USER_ENTERED',
-                "data": [
-                    {"range": str(last_week),
-                     "majorDimension": 'ROWS',
-                     "values": self.values
-                     }
-                ]
-            }).execute()
+            getted = self.service.spreadsheets().values().batchUpdate(
+                spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
+                    "valueInputOption": 'USER_ENTERED',
+                    "data": [
+                        {"range": str(last_week),
+                         "majorDimension": 'ROWS',
+                         "values": self.values
+                         }
+                    ]
+                }).execute()
+        except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
+            return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            return True
+        return False
+
+    def start_work_with_storage_paid(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
+                                     date: str = None, flag=None, filterNmID: str = None, limit: str = None,
+                                     from_rk: str = None, to_rk: str = None):
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
+                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
+                                             from_rk=from_rk, to_rk=to_rk)
+        if check:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            return
+        check1 = True
+        if self.private_update_storage_paid(name_of_sheet=name_of_sheet):
+            check1 = False
+        if check1:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        elif self.result is not None:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+        else:
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+
+    def private_update_storage_paid(self, name_of_sheet: str):
+        try:
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+                                                                ).execute()
+        except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
+            return True
+        except TimeoutError:
+            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
+            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            return True
+        month_of_request = datetime.date.today().strftime('%B')
+        try:
+            getted = self.service.spreadsheets().values().batchUpdate(
+                spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
+                    "valueInputOption": 'USER_ENTERED',
+                    "data": [
+                        {"range": month_of_request,
+                         "majorDimension": 'ROWS',
+                         "values": self.values
+                         }
+                    ]
+                }).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
             return True
