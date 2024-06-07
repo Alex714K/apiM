@@ -1,3 +1,4 @@
+import calendar
 import logging
 import sys
 import requests
@@ -11,8 +12,10 @@ class RequestWildberries(Getter):
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
             (tuple[list | dict, int] | tuple[int, str] | str):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
-        вводимых параветров). При успешнов получении возвращает json-объект. При ошибке ничего не возвращает и
+        вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
+        if name_of_sheet == 'storage_paid':
+            return self.request_storage_paid(who_is)
         # Даты
         kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
                                                                                  kwargs['dateTo'])
@@ -141,3 +144,60 @@ class RequestWildberries(Getter):
             case '1mnth':
                 dateTo = datetime.date.today() - datetime.timedelta(days=30)
         return dateFrom, date, dateTo
+
+    def request_storage_paid(self, who_is: str):
+        # Токен
+        with open('data/tokens.txt') as txt:
+            tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        authorization = tokens[who_is]
+        headers = {
+            'Authorization': authorization
+        }
+
+        Ids_of_requests = list()
+        days = calendar.monthrange(datetime.date.today().year, datetime.date.today().month - 1)[1]
+        for i in range(1, days, 8):
+            first = i
+            if i > days - 7:
+                last = days
+            else:
+                last = i+8
+            year = datetime.date.today().year
+            month = datetime.date.today().month - 1
+            request = (f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?"
+                       f"dateFrom={f'{year}-{month}-{first}'}&dateTo={f'{year}-{month}-{last}'}")
+
+            # Выполняем запрос
+            try:
+                response = requests.get(request, headers=headers)
+            except socket.gaierror:
+                logging.error("gaierror")
+                logging.error("IN WB")
+                print('IN WB')
+                print("The 'gaierror' has come!\n")
+                return 'Проблема с соединением'
+            if not response:
+                logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+                print("Ошибка выполнения запроса:")
+                print(request)
+                print(f"Http статус: {response.status_code} ( {response.reason} )")
+                # with open('data.json') as data:
+                #     return json.load(data)
+                # return response.status_code, response.reason
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    print('Missing json file')
+                    return 'Missing json file'
+                # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                # Записываем данные в файл
+                with open('data.json', 'w', encoding='UTF-8') as d:
+                    # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                    json.dump(json_response, d, ensure_ascii=False, indent=4)
+                Ids_of_requests.append(json_response['data'])
+                logging.info(f"Http статус: {response.status_code}")
+                print("Успешно")
+                print(request)
+                print(f"Http статус: {response.status_code}")
