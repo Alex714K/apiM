@@ -7,5 +7,6 @@ orders_today,Заказы за сегодня,1 раз в день
 tariffs_boxes,?,1 раз в день
 tariffs_pallet,?,1 раз в день
 rk,Рекламные компании,?
-prices,?,30 мин
+prices,?,10 мин
+fixed_prices,?,
 statements,Финансовые отчёты,?
