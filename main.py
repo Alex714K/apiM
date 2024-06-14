@@ -11,6 +11,7 @@ if __name__ == "__main__":
     # API.start('tariffs_boxes', 'planeta', 'WB', date='tariffs')
     # API.start('tariffs_pallet', 'planeta', 'WB', date='tariffs')
     # API.start('prices', 'planeta', 'WB', limit='1000')
+    # API.start('fixed_prices', 'planeta', 'WB', limit='1000')
     # API.start('storage_paid', 'planeta', 'WB', dateFrom='storage_paid') not work
     # API.start('rk', 'planeta', 'WB', from_rk='2024-02-01', to_rk='2024-02-29')
     # API.start('statements', 'planeta', 'WB', dateFrom='statements')

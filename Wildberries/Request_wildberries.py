@@ -145,7 +145,8 @@ class RequestWildberries(Getter):
                 dateTo = datetime.date.today() - datetime.timedelta(days=30)
         return dateFrom, date, dateTo
 
-    def request_storage_paid(self, who_is: str):
+    @staticmethod
+    def request_storage_paid(who_is: str):
         # Токен
         with open('data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))

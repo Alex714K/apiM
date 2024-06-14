@@ -18,7 +18,7 @@ class Converter:
             return self.list_with_dict(file=file)
         elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
             return self.orders_not_today(file=file)
-        elif name_of_sheet == 'prices':
+        elif name_of_sheet in ['prices', 'fixed_prices']:
             return self.prices(file=file)
         elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
             return self.tariffs(file=file)

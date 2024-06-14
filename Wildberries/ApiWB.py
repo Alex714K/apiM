@@ -51,6 +51,7 @@ class ApiNew(Converter):
             self.start_work_with_storage_paid(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom,
                                               dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
                                               from_rk=from_rk, to_rk=to_rk)
+            return
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
