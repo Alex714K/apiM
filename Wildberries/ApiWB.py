@@ -503,7 +503,7 @@ class ApiNew(Converter):
                     logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
-                with open('data/info_about_Result.csv', 'r') as file:
+                with open('data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
                     csv_file = csv.reader(file)
                     for i in csv_file:
                         if '' == i:
