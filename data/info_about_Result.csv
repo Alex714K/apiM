@@ -9,4 +9,4 @@ tariffs_pallet,?,1 раз в день
 rk,Рекламные компании,?
 prices,?,10 мин
 fixed_prices,?,1 день,
-statements,Финансовые отчёты,?
+statements,Финансовые отчёты,1 день
