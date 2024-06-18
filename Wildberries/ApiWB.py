@@ -288,6 +288,7 @@ class ApiNew(Converter):
             return True
         logging.info(f"Created new sheet '{name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
+        self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
 
     def private_clear(self, name_of_sheet: str) -> bool:
