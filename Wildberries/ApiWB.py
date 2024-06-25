@@ -14,7 +14,7 @@ import datetime
 import calendar
 
 
-class ApiNew(Converter):
+class ApiWB(Converter):
     def __init__(self):
         super().__init__()
         self.spreadsheetId = None

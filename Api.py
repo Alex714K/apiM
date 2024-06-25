@@ -1,6 +1,6 @@
 from Initers import Initer
 import logging
-from Wildberries.ApiWB import ApiNew
+from Wildberries.ApiWB import ApiWB
 from datetime import datetime
 
 
@@ -15,5 +15,5 @@ class Api(Initer):
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':
-                ApiNew().start(name_of_sheet, who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
-                               filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+                ApiWB().start(name_of_sheet, who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
+                              filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
