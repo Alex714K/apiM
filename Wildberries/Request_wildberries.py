@@ -62,10 +62,10 @@ class RequestWildberries(Getter):
                 print('Missing json file')
                 return 'Missing json file'
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл
-            with open('data.json', 'w', encoding='UTF-8') as d:
-                # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                json.dump(json_response, d, ensure_ascii=False, indent=4)
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             logging.info(f"Http статус: {response.status_code}")
             print("Успешно")
             print(request)
