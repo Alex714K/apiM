@@ -5,7 +5,7 @@ import googleapiclient.errors
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
-from Wildberries.Converter_to_list import Converter
+from Wildberries.Converter_to_list_WB import Converter
 from Wildberries.Request_wildberries import RequestWildberries
 import logging
 import csv
