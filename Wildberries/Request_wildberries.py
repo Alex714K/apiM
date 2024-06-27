@@ -43,7 +43,7 @@ class RequestWildberries(Getter):
         except socket.gaierror:
             logging.error("gaierror")
             logging.error("IN WB")
-            print('IN WB')
+            print('In WB')
             print("The 'gaierror' has come!\n")
             return 'Проблема с соединением'
         if not response:
