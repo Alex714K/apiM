@@ -166,8 +166,10 @@ class ApiWB(Converter):
                                              from_rk=from_rk, to_rk=to_rk)
         if check:
             return False
-        self.private_create(name_of_sheet=name_of_sheet)
-        self.private_update(name_of_sheet=name_of_sheet)
+        if self.private_create(name_of_sheet=name_of_sheet):
+            return False
+        if self.private_update(name_of_sheet=name_of_sheet):
+            return False
         return True
 
     def update_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
