@@ -15,3 +15,5 @@ if __name__ == "__main__":
     # API.start('storage_paid', 'planeta', 'WB', dateFrom='storage_paid') not work
     # API.start('rk', 'planeta', 'WB', from_rk='2024-02-01', to_rk='2024-02-29')
     # API.start('statements', 'planeta', 'WB', dateFrom='statements')
+
+    # API.start('analytics', 'grand', 'Ozon')

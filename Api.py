@@ -1,6 +1,7 @@
 from Initers import Initer
 import logging
 from Wildberries.ApiWB import ApiWB
+from Ozon.ApiOzon import ApiOzon
 from datetime import datetime
 
 
@@ -11,9 +12,11 @@ class Api(Initer):
               to_rk: str = None):
         """Основной старт. От него зависит, что запуститься. Ничего не возвращает."""
         print('-------------------------------------------------------------------------------------------------------')
-        print(f"{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {name_of_sheet}, {who_is}")
+        print(f"{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':
                 ApiWB().start(name_of_sheet, who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
                               filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+            case 'Ozon':
+                ApiOzon().start(name_of_sheet, who_is)
