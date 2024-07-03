@@ -9,8 +9,7 @@ from Initers import Getter
 
 
 class RequestWildberries(Getter):
-    def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs) -> \
-            (tuple[list | dict, int] | tuple[int, str] | str):
+    def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
