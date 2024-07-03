@@ -3,6 +3,7 @@ import logging
 from Wildberries.ApiWB import ApiWB
 from Ozon.ApiOzon import ApiOzon
 from datetime import datetime
+import threading
 
 
 class Api(Initer):
@@ -16,7 +17,11 @@ class Api(Initer):
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':
-                ApiWB().start(name_of_sheet, who_is, dateFrom=dateFrom, dateTo=dateTo, date=date, flag=flag,
-                              filterNmID=filterNmID, limit=limit, from_rk=from_rk, to_rk=to_rk)
+                wb_thread = threading.Thread(target=ApiWB().start,
+                                             args=(name_of_sheet, who_is, dateFrom, dateTo, date, flag, filterNmID,
+                                                   limit, from_rk, to_rk))
+                wb_thread.start()
             case 'Ozon':
-                ApiOzon().start(name_of_sheet, who_is)
+                ozon_thread = threading.Thread(target=ApiOzon().start,
+                                               args=(name_of_sheet, who_is))
+                ozon_thread.start()
