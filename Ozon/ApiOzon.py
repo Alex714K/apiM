@@ -48,7 +48,7 @@ class ApiOzon(Converter):
             case 'Проблема с соединением':
                 self.result = 'ERROR: Проблема с соединением'
                 return True
-        if type(requestOzon[0]) == int and requestOzon[0] != 200:
+        if type(requestOzon) == int and requestOzon != 200:
             self.result = f'ERROR: {requestOzon[1]}'
             return True
         try:
@@ -318,13 +318,11 @@ class ApiOzon(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
 
         values = getted['valueRanges'][0]['values']
@@ -332,28 +330,31 @@ class ApiOzon(Converter):
         for i in range(len(values)):
             if '' in values[i]:
                 values[i] = values[i][:values[i].index('')]
-
-        ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
-        if bad:
-            if len(values[ind]) == 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind].extend(f"{self.result}")
-            elif len(values[ind]) > 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"{self.result}"
-            else:
-                values[ind].extend(
-                    [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
+        try:
+            ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
+        except ValueError:
+            values.append([name_of_sheet, '?', '?', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
         else:
-            if len(values[ind]) == 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind].extend(f"Успешно записано строк: {self.dist}")
-            elif len(values[ind]) > 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"Успешно записано строк: {self.dist}"
+            if bad:
+                if len(values[ind]) == 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind].extend(f"{self.result}")
+                elif len(values[ind]) > 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind][4] = f"{self.result}"
+                else:
+                    values[ind].extend(
+                        [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
             else:
-                values[ind].extend([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                    f"Успешно записано строк: {self.dist}"])
+                if len(values[ind]) == 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind].extend(f"Успешно записано строк: {self.dist}")
+                elif len(values[ind]) > 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind][4] = f"Успешно записано строк: {self.dist}"
+                else:
+                    values[ind].extend([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                        f"Успешно записано строк: {self.dist}"])
 
         # with open('data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
@@ -414,7 +415,7 @@ class ApiOzon(Converter):
                     logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
-                with open('data/Ozon/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
+                with open('Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
                     csv_file = csv.reader(file)
                     for i in csv_file:
                         if '' == i:

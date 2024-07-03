@@ -1,0 +1,1 @@
+stock_on_warehouses=https://api-seller.ozon.ru/v2/analytics/stock_on_warehouses
