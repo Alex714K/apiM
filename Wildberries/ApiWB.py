@@ -22,9 +22,9 @@ class ApiWB(Converter):
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
 
-    def start(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
-              date: str = None, flag=None, filterNmID: str = None, limit: str = None, from_rk: str = None,
-              to_rk: str = None):
+    def start(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str,
+              date: str, flag, filterNmID: str, limit: str, from_rk: str,
+              to_rk: str):
         """
         Запуск работы с запросом на сервера WildBerries.
         :param name_of_sheet: Название листа
