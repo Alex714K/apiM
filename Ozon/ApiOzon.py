@@ -244,9 +244,9 @@ class ApiOzon(Converter):
                      }
                 ]
             }).execute()
-        except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
-            return True
+        # except googleapiclient.errors.HttpError:
+        #     self.result = 'ERROR: Проблема с соединением'
+        #     return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')

@@ -1,6 +1,7 @@
 import json
 import sys
 import numpy
+import time
 import datetime
 import logging
 
@@ -23,8 +24,12 @@ class Converter:
 
     def products(self, file):
         keys = ["code", "status", "error", "file", "report_type", "params", "created_at"]
+        if file["result"]["params"] != {}:
+            print(file["result"]["params"])
+        file["result"]["params"] = ''
         ans = [keys, list(file["result"].values())]
         needed_keys = self.check_keys(keys)
+        time.sleep(5)
         return ans, len(ans), needed_keys
 
     def stock_on_warehouses(self, file):
