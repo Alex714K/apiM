@@ -18,6 +18,14 @@ class Converter:
             return self.analytics(file=file)
         elif name_of_sheet == 'stock_on_warehouses':
             return self.stock_on_warehouses(file=file)
+        elif name_of_sheet == 'products':
+            return self.products(file=file)
+
+    def products(self, file):
+        keys = ["code", "status", "error", "file", "report_type", "params", "created_at"]
+        ans = [keys, list(file["result"].values())]
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
 
     def stock_on_warehouses(self, file):
         keys = ["sku", "warehouse_name", "item_code", "item_name", "promised_amount", "free_to_sell_amount",

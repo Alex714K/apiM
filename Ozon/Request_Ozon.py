@@ -13,6 +13,69 @@ class RequestOzon:
                 return self.analytics(who_is)
             case 'stock_on_warehouses':
                 return self.stock_on_warehouses(name_of_sheet, who_is)
+            case 'products':
+                return self.products(name_of_sheet, who_is)
+
+    def products(self, name_of_sheet: str, who_is: str):
+        headers = {}
+        with open("Ozon/data/id's.txt") as txt:
+            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        for key, value in data.items():
+            headers[key] = value
+        url = self.get_url('products')
+        params = {
+            "language": "RU",
+            "visibility": "ALL"
+        }
+        try:
+            response = requests.post(url=url, headers=headers, json=params)
+        except socket.gaierror:
+            logging.error(f"gaierror {name_of_sheet}")
+            print(f"The 'gaierror' has come ({name_of_sheet})!\n")
+            return 'Проблема с соединением'
+        if not response:
+            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            print("Ошибка выполнения запроса:")
+            print(url)
+            print(f"Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            return response.status_code, response.reason
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                print(f'Missing json file in {name_of_sheet}')
+                return 'Missing json file'
+        code_of_report = json_response["result"]["code"]
+
+        url = self.get_url('products_get')
+        params = {
+            "code": code_of_report
+        }
+        try:
+            response = requests.post(url=url, headers=headers, json=params)
+        except socket.gaierror:
+            logging.error(f"gaierror {name_of_sheet}")
+            print(f"The 'gaierror' has come ({name_of_sheet})!\n")
+            return 'Проблема с соединением'
+        if not response:
+            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            print("Ошибка выполнения запроса:")
+            print(url)
+            print(f"Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            return response.status_code, response.reason
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                print(f'Missing json file in {name_of_sheet}')
+                return 'Missing json file'
+        return json_response
 
     def stock_on_warehouses(self, name_of_sheet: str, who_is: str):
         headers = {}
@@ -20,7 +83,7 @@ class RequestOzon:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
-        url = self.get_url(name_of_sheet)
+        url = self.get_url('stock_on_warehouses')
         params1 = {
             "limit": 1000,
             "offset": 0

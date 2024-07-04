@@ -198,7 +198,7 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Created new sheet '{self.name_of_sheet}'")
+        logging.info(f"Created new sheet '{name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
@@ -209,7 +209,7 @@ class ApiOzon(Converter):
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
-        print(f"\nStart clearing sheet '{self.name_of_sheet}'...")
+        print(f"\nStart clearing sheet '{name_of_sheet}'...")
         try:
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
@@ -220,8 +220,8 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Clearing complete ({self.name_of_sheet})")
-        print(f"Clearing complete ({self.name_of_sheet})!")
+        logging.info(f"Clearing complete ({name_of_sheet})")
+        print(f"Clearing complete ({name_of_sheet})!")
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:
@@ -233,7 +233,7 @@ class ApiOzon(Converter):
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        print(f"\nStart updating sheet {self.name_of_sheet}...")
+        print(f"\nStart updating sheet {name_of_sheet}...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
@@ -251,8 +251,8 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Updating complete ({self.name_of_sheet})")
-        print(f"Updating complete ({self.name_of_sheet})!")
+        logging.info(f"Updating complete ({name_of_sheet})")
+        print(f"Updating complete ({name_of_sheet})!")
         with open('Ozon/data/sheets_Ozon.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]

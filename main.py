@@ -18,3 +18,4 @@ if __name__ == "__main__":
     #
     # API.start('analytics', 'grand', 'Ozon')
     # API.start('stock_on_warehouses', 'grand', 'Ozon')
+    # API.start('products', 'grand', 'Ozon')
