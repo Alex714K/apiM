@@ -11,9 +11,10 @@ class Api(Initer):
     def start(name_of_sheet: str, who_is: str, folder: str, dateFrom: str = None, date: str = None,
               flag: str = None, filterNmID=None, limit: str = None, dateTo: str = None, from_rk: str = None,
               to_rk: str = None):
-        """Основной старт. От него зависит, что запуститься. Ничего не возвращает."""
-        print('-------------------------------------------------------------------------------------------------------')
-        print(f"{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
+        """
+        Основной старт. От него зависит, что запуститься. Ничего не возвращает.
+        """
+        print(f"Started: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':

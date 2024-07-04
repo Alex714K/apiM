@@ -9,10 +9,15 @@ from Initers import Getter
 
 
 class RequestWildberries(Getter):
+    def __init__(self):
+        super().__init__()
+        self.name_of_sheet = None
+
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
+        self.name_of_sheet = name_of_sheet
         if name_of_sheet == 'storage_paid':
             return self.request_storage_paid(who_is)
         # Даты
@@ -40,10 +45,8 @@ class RequestWildberries(Getter):
         try:
             response = requests.get(request, headers=headers)
         except socket.gaierror:
-            logging.error("gaierror")
-            logging.error("In WB")
-            print('In WB')
-            print("The 'gaierror' has come!\n")
+            logging.error(f"gaierror ({self.name_of_sheet})")
+            print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
             logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
@@ -58,14 +61,14 @@ class RequestWildberries(Getter):
                 # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
-                print('Missing json file')
+                print(f'Missing json file in {self.name_of_sheet}')
                 return 'Missing json file'
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}")
+            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             print("Успешно")
             print(request)
             print(f"Http статус: {response.status_code}")
@@ -144,8 +147,8 @@ class RequestWildberries(Getter):
                 dateTo = datetime.date.today() - datetime.timedelta(days=30)
         return dateFrom, date, dateTo
 
-    @staticmethod
-    def request_storage_paid(who_is: str):
+
+    def request_storage_paid(self, who_is: str):
         # Токен
         with open('data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
@@ -171,10 +174,8 @@ class RequestWildberries(Getter):
             try:
                 response = requests.get(request, headers=headers)
             except socket.gaierror:
-                logging.error("gaierror")
-                logging.error("IN WB")
-                print('IN WB')
-                print("The 'gaierror' has come!\n")
+                logging.error(f"gaierror ({self.name_of_sheet})")
+                print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
                 return 'Проблема с соединением'
             if not response:
                 logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
@@ -189,7 +190,7 @@ class RequestWildberries(Getter):
                     # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
-                    print('Missing json file')
+                    print(f'Missing json file in {self.name_of_sheet}')
                     return 'Missing json file'
                 # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 # Записываем данные в файл
@@ -197,7 +198,7 @@ class RequestWildberries(Getter):
                     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                     json.dump(json_response, d, ensure_ascii=False, indent=4)
                 Ids_of_requests.append(json_response['data'])
-                logging.info(f"Http статус: {response.status_code}")
+                logging.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
                 print("Успешно")
                 print(request)
                 print(f"Http статус: {response.status_code}")

@@ -18,8 +18,10 @@ class ApiOzon(Converter):
         self.service = None
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
+        self.name_of_sheet = None
 
     def start(self, name_of_sheet: str, who_is: str, **parameters):
+        self.name_of_sheet = name_of_sheet
         self.choose_spreadsheetId(who_is)
         if not self.connect_to_Google():
             return
@@ -55,7 +57,7 @@ class ApiOzon(Converter):
             json_response = requestOzon
         except TypeError:
             logging.warning(f"Нет доступа к файлу")
-            print(f"Нет доступа к файлу")
+            print(f"Нет доступа к файлу ({self.name_of_sheet})")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
@@ -66,12 +68,12 @@ class ApiOzon(Converter):
                 return True
             case 'is None':
                 logging.warning("File = None")
-                print("File = None")
+                print(f"File({self.name_of_sheet}) = None")
                 self.result = 'ERROR: File=None'
                 return True
             case 'is empty':
                 logging.warning("File is empty")
-                print("File is empty")
+                print(f"File({self.name_of_sheet}) is empty")
                 self.result = 'ERROR: File is empty'
                 return True
         self.values, self.dist, self.needed_keys = result
@@ -104,17 +106,17 @@ class ApiOzon(Converter):
             # Выбираем работу с таблицами и 4 версию API
             service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
         except httplib2.error.ServerNotFoundError:
-            logging.error("Google: ServerNotFound")
-            print("Google: 'ServerNotFound'...\nHOW?!\n")
+            logging.error(f"Google ({self.name_of_sheet}): ServerNotFound")
+            print(f"Google ({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
             self.result = 'ERROR: Проблема с соединением'
             return False
         except socket.gaierror:
-            logging.error("gaierror")
-            print("The 'gaierror' has come!\n")
+            logging.error(f"gaierror ({self.name_of_sheet})")
+            print(f"The 'gaierror' has come! ({self.name_of_sheet})\n")
             self.result = 'ERROR: Проблема с соединением'
             return False
         finally:
-            print('Connected to Google')
+            print(f'Connected to Google ({self.name_of_sheet})')
         self.service = service
         return True
 
@@ -196,7 +198,7 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Created new sheet '{name_of_sheet}'")
+        logging.info(f"Created new sheet '{self.name_of_sheet}'")
         print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
@@ -207,10 +209,7 @@ class ApiOzon(Converter):
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
-        if '!' in name_of_sheet:
-            print(f"\nStart clearing sheet '{name_of_sheet[:name_of_sheet.index('!')]}'...")
-        else:
-            print(f"\nStart clearing sheet '{name_of_sheet}'...")
+        print(f"\nStart clearing sheet '{self.name_of_sheet}'...")
         try:
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
@@ -221,8 +220,8 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info("Clearing complete!")
-        print("Clearing complete!")
+        logging.info(f"Clearing complete ({self.name_of_sheet})")
+        print(f"Clearing complete ({self.name_of_sheet})!")
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:
@@ -234,7 +233,7 @@ class ApiOzon(Converter):
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        print("\nStart updating sheet...")
+        print(f"\nStart updating sheet {self.name_of_sheet}...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
@@ -252,8 +251,8 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info("Updating complete")
-        print("Updating complete!")
+        logging.info(f"Updating complete ({self.name_of_sheet})")
+        print(f"Updating complete ({self.name_of_sheet})!")
         with open('Ozon/data/sheets_Ozon.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
