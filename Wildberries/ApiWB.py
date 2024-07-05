@@ -301,7 +301,7 @@ class ApiWB(Converter):
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
-        print(f"\nStart clearing sheet '{self.name_of_sheet}'...")
+        print(f"\nStart clearing sheet '{name_of_sheet}'...")
         try:
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
@@ -312,8 +312,8 @@ class ApiWB(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Clearing complete ({self.name_of_sheet})")
-        print(f"Clearing complete ({self.name_of_sheet})!")
+        logging.info(f"Clearing complete ({name_of_sheet})")
+        print(f"Clearing complete ({name_of_sheet})!")
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:
