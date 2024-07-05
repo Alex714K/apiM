@@ -1,7 +1,7 @@
 import socket
 import logging
 import time
-
+import csv
 import requests
 import json
 
@@ -49,7 +49,7 @@ class RequestOzon:
                 print(f'Missing json file in {name_of_sheet}')
                 return 'Missing json file'
         code_of_report = json_response["result"]["code"]
-
+        time.sleep(5)
         url = self.get_url('products_get')
         params = {
             "code": code_of_report
@@ -75,7 +75,19 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 print(f'Missing json file in {name_of_sheet}')
                 return 'Missing json file'
-        return json_response
+        url = json_response["result"]["file"]
+        response = requests.get(url)
+        with open('Ozon/data/products_content.txt', 'wb') as file:
+            file.write(response.content)
+        values = list()
+        with open('Ozon/data/products_content.txt', 'r', encoding='UTF-8') as file:
+            for i in csv.reader(file):
+                if '' == i:
+                    continue
+                else:
+                    value = i[0].split(';')
+                    values.append(value)
+        return values
 
     def stock_on_warehouses(self, name_of_sheet: str, who_is: str):
         headers = {}
