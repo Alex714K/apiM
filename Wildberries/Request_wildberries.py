@@ -22,7 +22,7 @@ class RequestWildberries(Getter):
             case 'nm-report':
                 return self.nm_report(who_is)
         # Параметры
-        params = self.make_params(who_is)
+        params = self.make_params()
         # Ссылка
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
@@ -144,8 +144,8 @@ class RequestWildberries(Getter):
                 dateTo = datetime.date.today() - datetime.timedelta(days=30)
         return dateFrom, date, dateTo
 
-    def make_params(self, who_is: str):
-        match who_is:
+    def make_params(self):
+        match self.name_of_sheet:
             case 'stocks':
                 params = {'dateFrom': '2024-03-25'}
             case 'orders_today':
