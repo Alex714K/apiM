@@ -8,9 +8,7 @@ import threading
 
 class Api(Initer):
     @staticmethod
-    def start(name_of_sheet: str, who_is: str, folder: str, dateFrom: str = None, date: str = None,
-              flag: str = None, filterNmID=None, limit: str = None, dateTo: str = None, from_rk: str = None,
-              to_rk: str = None):
+    def start(name_of_sheet: str, who_is: str, folder: str):
         """
         Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
         """
@@ -19,8 +17,7 @@ class Api(Initer):
         match folder:
             case 'WB':
                 wb_thread = threading.Thread(target=ApiWB().start,
-                                             args=(name_of_sheet, who_is, dateFrom, dateTo, date, flag, filterNmID,
-                                                   limit, from_rk, to_rk))
+                                             args=(name_of_sheet, who_is))
                 wb_thread.start()
             case 'Ozon':
                 ozon_thread = threading.Thread(target=ApiOzon().start,

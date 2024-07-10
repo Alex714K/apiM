@@ -23,21 +23,11 @@ class ApiWB(Converter):
         self.result = None
         self.name_of_sheet = None
 
-    def start(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str,
-              date: str, flag, filterNmID: str, limit: str, from_rk: str,
-              to_rk: str):
+    def start(self, name_of_sheet: str, who_is: str):
         """
         Запуск работы с запросом на сервера WildBerries.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не используется
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
         :return:
         """
         self.name_of_sheet = name_of_sheet
@@ -45,26 +35,15 @@ class ApiWB(Converter):
         if not self.connect_to_Google():
             return
         if name_of_sheet == 'statements':
-            self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom,
-                                            dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
-                                            from_rk=from_rk, to_rk=to_rk)
-            return
-        if name_of_sheet == 'storage_paid':
-            self.start_work_with_storage_paid(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom,
-                                              dateTo=dateTo, date=date, flag=flag, filterNmID=filterNmID, limit=limit,
-                                              from_rk=from_rk, to_rk=to_rk)
+            self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is)
             return
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
         if new_or_not:
-            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo,
-                                      date=date, flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk,
-                                      to_rk=to_rk)
+            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
         else:
-            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, dateTo=dateTo,
-                                      date=date, flag=flag, filterNmID=filterNmID, limit=limit, from_rk=from_rk,
-                                      to_rk=to_rk)
+            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         elif self.result is not None:
@@ -146,26 +125,15 @@ class ApiWB(Converter):
         self.service = service
         return True
 
-    def create_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
-                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
+    def create_sheet(self, name_of_sheet: str, who_is: str) -> bool:
         """
         Посылает запрос на сервера WildBerries, обрабатывает его, создаёт и обновляет лист под названием
         name_of_sheet с данными запроса.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не используется
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
         :return: Возвращает bool ответ результата работы всех действий (при неуспехе одного из них, возвращает False
         """
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
-                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                             from_rk=from_rk, to_rk=to_rk)
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             return False
         if self.private_create(name_of_sheet=name_of_sheet):
@@ -174,27 +142,16 @@ class ApiWB(Converter):
             return False
         return True
 
-    def update_sheet(self, name_of_sheet: str, who_is: str, dateFrom: str,
-                     dateTo: str, date: str, flag: str, filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
+    def update_sheet(self, name_of_sheet: str, who_is: str) -> bool:
         """
         Посылает запрос на сервера WildBerries, обрабатывает его, очищает и обновляет лист под названием name_of_sheet
         name_of_sheet данными с запроса.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не используется
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
         :return: Возвращает bool ответ результата работы всех действий (при неуспехе одного из них, возвращает False
         и останавливается)
         """
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
-                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                             from_rk=from_rk, to_rk=to_rk)
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             return False
         if self.private_clear(name_of_sheet=name_of_sheet):
@@ -203,26 +160,15 @@ class ApiWB(Converter):
             return False
         return True
 
-    def start_work_with_request(self, name_of_sheet: str, who_is: str, dateFrom: str, dateTo: str, date: str, flag: str,
-                                filterNmID: str, limit: str, from_rk: str, to_rk: str) -> bool:
+    def start_work_with_request(self, name_of_sheet: str, who_is: str) -> bool:
         """
         Функция, в которой посылается и обрабатывается запрос на сервера WildBerries. Обработка зависит от
         названия name_of_sheet.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :param dateFrom: С этой даты
-        :param dateTo: По эту дату
-        :param date: Просто дата
-        :param flag: Флаг (1 или 0)
-        :param filterNmID: Не используется
-        :param limit: Лимит количества строк в запросе
-        :param from_rk: С этой даты для рекламных компаний
-        :param to_rk: По эту дату для рекламных компаний
         :return: Возвращает bool ответ результата запроса
         """
-        requestWB = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
-                                               flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                               from_rk=from_rk, to_rk=to_rk)
+        requestWB = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is)
         match requestWB:
             case 'Missing json file':
                 self.result = 'ERROR: Не получен файл с WildBerries'
@@ -534,12 +480,8 @@ class ApiWB(Converter):
                     return False
             return True
 
-    def start_work_with_statements(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
-                                   date: str = None, flag=None, filterNmID: str = None, limit: str = None,
-                                   from_rk: str = None, to_rk: str = None):
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
-                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                             from_rk=from_rk, to_rk=to_rk)
+    def start_work_with_statements(self, name_of_sheet: str, who_is: str):
+        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
@@ -594,53 +536,5 @@ class ApiWB(Converter):
             return True
         return False
 
-    def start_work_with_storage_paid(self, name_of_sheet: str, who_is: str, dateFrom: str = None, dateTo: str = None,
-                                     date: str = None, flag=None, filterNmID: str = None, limit: str = None,
-                                     from_rk: str = None, to_rk: str = None):
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is, dateFrom=dateFrom, date=date,
-                                             flag=flag, filterNmID=filterNmID, limit=limit, dateTo=dateTo,
-                                             from_rk=from_rk, to_rk=to_rk)
-        if check:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-            return
-        check1 = True
-        if self.private_update_storage_paid(name_of_sheet=name_of_sheet):
-            check1 = False
-        if check1:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-        elif self.result is not None:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-        else:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-
-    def private_update_storage_paid(self, name_of_sheet: str):
-        try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
-                                                                ).execute()
-        except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
-            return True
-        except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
-            return True
-        month_of_request = datetime.date.today().strftime('%B')
-        try:
-            getted = self.service.spreadsheets().values().batchUpdate(
-                spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
-                    "valueInputOption": 'USER_ENTERED',
-                    "data": [
-                        {"range": month_of_request,
-                         "majorDimension": 'ROWS',
-                         "values": self.values
-                         }
-                    ]
-                }).execute()
-        except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
-            return True
-        except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
-            return True
-        return False
+    def nm_report(self, who_is: str):
+        check = self.start_work_with_request(self.name_of_sheet, who_is)

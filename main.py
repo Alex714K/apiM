@@ -4,18 +4,19 @@ from Api import Api
 if __name__ == "__main__":
     API = Api()
     # Wildberries
-    # API.start('stocks', 'planeta', 'WB', dateFrom='2024-03-25')
-    # API.start('orders_1mnth', 'planeta', 'WB', dateFrom='1mnth')
-    # API.start('orders_1week', 'planeta', 'WB', dateFrom='1week')
-    # API.start('orders_2days', 'planeta', 'WB', dateFrom='2days')
-    # API.start('orders_today', 'planeta', 'WB', dateFrom='today', flag='1')
-    # API.start('tariffs_boxes', 'planeta', 'WB', date='tariffs')
-    # API.start('tariffs_pallet', 'planeta', 'WB', date='tariffs')
-    # API.start('prices', 'planeta', 'WB', limit='1000')
-    # API.start('fixed_prices', 'planeta', 'WB', limit='1000')
-    # API.start('storage_paid', 'planeta', 'WB', dateFrom='storage_paid') not work
-    # API.start('rk', 'planeta', 'WB', from_rk='2024-02-01', to_rk='2024-02-29')
+    # API.start('stocks', 'planeta', 'WB')
+    # API.start('orders_1mnth', 'planeta', 'WB')
+    # API.start('orders_1week', 'planeta', 'WB')
+    # API.start('orders_2days', 'planeta', 'WB')
+    # API.start('orders_today', 'planeta', 'WB')
+    # API.start('tariffs_boxes', 'planeta', 'WB')
+    # API.start('tariffs_pallet', 'planeta', 'WB')
+    # API.start('prices', 'planeta', 'WB')
+    # API.start('fixed_prices', 'planeta', 'WB')
+    # API.start('storage_paid', 'planeta', 'WB') not work
+    # API.start('rk', 'planeta', 'WB')
     # API.start('statements', 'planeta', 'WB', dateFrom='statements')
+    # API.start('nm_report', 'planeta', 'WB')
     # Ozon
     # API.start('analytics', 'grand', 'Ozon')
     # API.start('stock_on_warehouses', 'grand', 'Ozon')

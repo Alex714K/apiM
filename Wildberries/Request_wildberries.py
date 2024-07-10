@@ -13,17 +13,16 @@ class RequestWildberries(Getter):
         super().__init__()
         self.name_of_sheet = None
 
-    def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False, **kwargs):
+    def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
         self.name_of_sheet = name_of_sheet
-        if name_of_sheet == 'storage_paid':
-            return self.request_storage_paid(who_is)
-        # Даты
-        kwargs['dateFrom'], kwargs['date'], kwargs['dateTo'] = self.choose_dates(kwargs['dateFrom'], kwargs['date'],
-                                                                                 kwargs['dateTo'])
-
+        match name_of_sheet:
+            case 'nm-report':
+                return self.nm_report(who_is)
+        # Параметры
+        params = self.make_params(who_is)
         # Ссылка
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
@@ -31,8 +30,6 @@ class RequestWildberries(Getter):
             print("Wrong name of sheet")
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
-        # Ссылка запроса
-        request = self.make_request(url, kwargs)
         # Токен
         with open('Wildberries/data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
@@ -43,7 +40,7 @@ class RequestWildberries(Getter):
 
         # Выполняем запрос
         try:
-            response = requests.get(request, headers=headers)
+            response = requests.get(url, headers=headers, json=params)
         except socket.gaierror:
             logging.error(f"gaierror ({self.name_of_sheet})")
             print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
@@ -51,7 +48,7 @@ class RequestWildberries(Getter):
         if not response:
             logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             print("Ошибка выполнения запроса:")
-            print(request)
+            print(url)
             print(f"Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
@@ -70,7 +67,7 @@ class RequestWildberries(Getter):
             #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             logging.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             print("Успешно")
-            print(request)
+            print(url)
             print(f"Http статус: {response.status_code}")
             return json_response, response.status_code
 
@@ -100,7 +97,7 @@ class RequestWildberries(Getter):
         return fin_url
 
     @staticmethod
-    def choose_dates(dateFrom: str = None, date: str = None, dateTo: str = None) -> tuple[str, str, str]:
+    def choose_dates_old(dateFrom: str = None, date: str = None, dateTo: str = None) -> tuple[str, str, str]:
         """Если вводиться не дата, а слова: today, 2days, 1week, 1mnth; то выводятся сегодняшняя дата и до -30 дней"""
         match dateFrom:
             case 'today':
@@ -147,58 +144,44 @@ class RequestWildberries(Getter):
                 dateTo = datetime.date.today() - datetime.timedelta(days=30)
         return dateFrom, date, dateTo
 
+    def make_params(self, who_is: str):
+        match who_is:
+            case 'stocks':
+                params = {'dateFrom': '2024-03-25'}
+            case 'orders_today':
+                params = {
+                    'dateFrom': datetime.date.today(),
+                    'flag': 1
+                }
+            case 'orders_2days':
+                params = {'dateFrom': datetime.date.today() - datetime.timedelta(days=2)}
+            case 'orders_1week':
+                params = {'dateFrom': datetime.date.today() - datetime.timedelta(weeks=1)}
+            case 'orders_1mnth':
+                params = {'dateFrom': datetime.date.today() - datetime.timedelta(days=30)}
+            case 'tariffs_boxes':
+                params = {'date': open('Wildberries/data/date_of_tariffs.txt', 'r').read()}
+            case 'tariffs_pallet':
+                params = {'date': open('Wildberries/data/date_of_tariffs.txt', 'r').read()}
+            case 'prices':
+                params = {'limit': 1000}
+            case 'fixed_prices':
+                params = {'limit': 1000}
+            case 'rk':
+                params = {
+                    'from_rk': '2024-02-01',
+                    'to_rk': '2024-02-29'
+                }
+            case 'statements':
+                first_day = datetime.date.today().weekday() + 7
+                last_day = first_day - 6
+                params = {
+                    'dateFrom': datetime.date.today() - datetime.timedelta(days=first_day),
+                    'dateTo': datetime.date.today() - datetime.timedelta(days=last_day)
+                }
+            case _:
+                params = {}
+        return params
 
-    def request_storage_paid(self, who_is: str):
-        # Токен
-        with open('Wildberries/data/tokens.txt') as txt:
-            tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        authorization = tokens[who_is]
-        headers = {
-            'Authorization': authorization
-        }
-
-        Ids_of_requests = list()
-        days = calendar.monthrange(datetime.date.today().year, datetime.date.today().month - 1)[1]
-        for i in range(1, days, 8):
-            first = i
-            if i > days - 7:
-                last = days
-            else:
-                last = i+8
-            year = datetime.date.today().year
-            month = datetime.date.today().month - 1
-            request = (f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?"
-                       f"dateFrom={f'{year}-{month}-{first}'}&dateTo={f'{year}-{month}-{last}'}")
-
-            # Выполняем запрос
-            try:
-                response = requests.get(request, headers=headers)
-            except socket.gaierror:
-                logging.error(f"gaierror ({self.name_of_sheet})")
-                print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
-                return 'Проблема с соединением'
-            if not response:
-                logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
-                print("Ошибка выполнения запроса:")
-                print(request)
-                print(f"Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
-                #     return json.load(data)
-                # return response.status_code, response.reason
-            else:
-                try:
-                    # Преобразуем ответ в json-объект
-                    json_response = response.json()
-                except requests.exceptions.JSONDecodeError:
-                    print(f'Missing json file in {self.name_of_sheet}')
-                    return 'Missing json file'
-                # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                # Записываем данные в файл
-                with open('data.json', 'w', encoding='UTF-8') as d:
-                    # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                    json.dump(json_response, d, ensure_ascii=False, indent=4)
-                Ids_of_requests.append(json_response['data'])
-                logging.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
-                print("Успешно")
-                print(request)
-                print(f"Http статус: {response.status_code}")
+    def nm_report(self, who_is):
+        pass
