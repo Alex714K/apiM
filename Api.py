@@ -12,7 +12,7 @@ class Api(Initer):
               flag: str = None, filterNmID=None, limit: str = None, dateTo: str = None, from_rk: str = None,
               to_rk: str = None):
         """
-        Основной старт. От него зависит, что запуститься. Ничего не возвращает.
+        Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
         """
         print(f"Started: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
         logging.info(f"Started '{name_of_sheet}'")
