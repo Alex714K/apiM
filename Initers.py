@@ -17,7 +17,7 @@ class Initer:
 
     def get_parameters(self):
         """Достаёт словарь параметров в all_urls.txt"""
-        with open('data/all_urls.txt', 'r') as txt:
+        with open('Wildberries/data/all_urls.txt', 'r') as txt:
             param = txt.read().split('\n')
         self.parameters = dict(map(lambda x: x.split('='), param))
 
@@ -33,6 +33,6 @@ class Getter:
 
     def get_parameters(self):
         """Достаёт словарь параметров в all_urls.txt"""
-        with open('data/all_urls.txt', 'r') as txt:
+        with open('Wildberries/data/all_urls.txt', 'r') as txt:
             param = txt.read().split('\n')
         self.parameters = dict(map(lambda x: x.split('='), param))

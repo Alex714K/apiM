@@ -34,7 +34,7 @@ class RequestWildberries(Getter):
         # Ссылка запроса
         request = self.make_request(url, kwargs)
         # Токен
-        with open('data/tokens.txt') as txt:
+        with open('Wildberries/data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         authorization = tokens[who_is]
         headers = {
@@ -133,7 +133,7 @@ class RequestWildberries(Getter):
             case '1mnth':
                 date = datetime.date.today() - datetime.timedelta(days=30)
             case 'tariffs':
-                with open('data/date_of_tariffs.txt', 'r') as txt:
+                with open('Wildberries/data/date_of_tariffs.txt', 'r') as txt:
                     date = txt.read()
 
         match dateTo:
@@ -150,7 +150,7 @@ class RequestWildberries(Getter):
 
     def request_storage_paid(self, who_is: str):
         # Токен
-        with open('data/tokens.txt') as txt:
+        with open('Wildberries/data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         authorization = tokens[who_is]
         headers = {
