@@ -18,10 +18,10 @@ class Api(Initer):
             case 'WB':
                 wb_thread = threading.Thread(target=ApiWB().start,
                                              args=(name_of_sheet, who_is),
-                                             name=f"WB_{name_of_sheet}_{who_is}")
+                                             name=f"WB, {name_of_sheet}, {who_is}")
                 wb_thread.start()
             case 'Ozon':
                 ozon_thread = threading.Thread(target=ApiOzon().start,
                                                args=(name_of_sheet, who_is),
-                                               name=f"Ozon_{name_of_sheet}_{who_is}")
+                                               name=f"Ozon, {name_of_sheet}, {who_is}")
                 ozon_thread.start()
