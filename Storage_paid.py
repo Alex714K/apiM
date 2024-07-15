@@ -85,7 +85,7 @@ class StoragePaid(Getter, Converter):
         }).execute()
         logging.info("Updating complete")
         print("Updating complete!")
-        with open('data/sheets.txt', 'r') as txt:
+        with open('Wildberries/data/sheets.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(service, spreadsheetId, needed_keys=self.needed_keys, sheetId=sheetId)
