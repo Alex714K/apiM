@@ -1,6 +1,5 @@
 import socket
 import time
-
 import googleapiclient.errors
 import httplib2
 import apiclient
@@ -11,7 +10,6 @@ import logging
 import csv
 from datetime import timedelta
 import datetime
-import calendar
 
 
 class ApiWB(Converter):
@@ -31,6 +29,8 @@ class ApiWB(Converter):
         :return:
         """
         self.name_of_sheet = name_of_sheet
+        if name_of_sheet == 'nm_report':
+            return self.nm_report(who_is)
         self.choose_spreadsheetId(who_is=who_is)
         if not self.connect_to_Google():
             return
@@ -247,7 +247,6 @@ class ApiWB(Converter):
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
-        print(f"\nStart clearing sheet '{name_of_sheet}'...")
         try:
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
@@ -258,8 +257,7 @@ class ApiWB(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Clearing complete ({name_of_sheet})")
-        print(f"Clearing complete ({name_of_sheet})!")
+        logging.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:

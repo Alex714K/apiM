@@ -15,8 +15,8 @@ if __name__ == "__main__":
     # API.start('fixed_prices', 'planeta', 'WB')
     # API.start('storage_paid', 'planeta', 'WB') not work
     # API.start('rk', 'planeta', 'WB')
-    # API.start('statements', 'planeta', 'WB', dateFrom='statements')
-    # API.start('nm_report', 'planeta', 'WB')
+    # API.start('statements', 'planeta', 'WB')
+    # API.start('nm_report', 'grand', 'WB')
     # Ozon
     # API.start('analytics', 'grand', 'Ozon')
     # API.start('stock_on_warehouses', 'grand', 'Ozon')
