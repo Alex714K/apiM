@@ -14,12 +14,89 @@ class Converter:
                 return 'is None'
             case []:
                 return 'is empty'
-        if name_of_sheet == 'analytics':
-            return self.analytics(file=file)
-        elif name_of_sheet == 'stock_on_warehouses':
-            return self.stock_on_warehouses(file=file)
-        elif name_of_sheet == 'products':
-            return self.products(file=file)
+        match name_of_sheet:
+            case 'analytics':
+                return self.analytics(file=file)
+            case 'stock_on_warehouses':
+                return self.stock_on_warehouses(file=file)
+            case 'products':
+                return self.products(file=file)
+            case 'prices':
+                return self.prices(file=file)
+
+    def prices(self, file):
+        keys = ['acquiring', "product_id", "offer_id", "currency_code", "price", "old_price", "retail_price", "vat",
+                "min_ozon_price", "marketing_price", "marketing_seller_price", "auto_action_enabled", "minimal_price",
+                "minimal_price_currency", "price_index_value", "minimal_price", "minimal_price_currency",
+                "price_index_value", "price_index", "minimal_price", "minimal_price_currency", "price_index_value",
+                "sales_percent", "sales_percent_fbo", "sales_percent_fbs", "fbo_fulfillment_amount",
+                "fbo_direct_flow_trans_min_amount", "fbo_direct_flow_trans_max_amount", "fbo_deliv_to_customer_amount",
+                "fbo_return_flow_amount", "fbo_return_flow_trans_min_amount", "fbo_return_flow_trans_max_amount",
+                "fbs_first_mile_min_amount", "fbs_first_mile_max_amount", "fbs_direct_flow_trans_min_amount",
+                "fbs_direct_flow_trans_max_amount", "fbs_deliv_to_customer_amount", "fbs_return_flow_amount",
+                "fbs_return_flow_trans_min_amount", "fbs_return_flow_trans_max_amount", "marketing_actions",
+                "volume_weight"]
+        keys = ["acquiring", "product_id", "offer_id", "currency_code", "price", "old_price", "retail_price", "vat",
+                "min_ozon_price", "marketing_price", "marketing_seller_price", "auto_action_enabled",
+                "external_minimal_price", "external_minimal_price_currency", "external_price_index_value",
+                "ozon_minimal_price", "ozon_minimal_price_currency", "ozon_price_index_value", "price_index",
+                "self_marketplaces_minimal_price", "self_marketplaces_minimal_price_currency",
+                "self_marketplaces_price_index_value", "sales_percent", "sales_percent_fbo", "sales_percent_fbs",
+                "fbo_fulfillment_amount", "fbo_direct_flow_trans_min_amount", "fbo_direct_flow_trans_max_amount",
+                "fbo_deliv_to_customer_amount", "fbo_return_flow_amount", "fbo_return_flow_trans_min_amount",
+                "fbo_return_flow_trans_max_amount", "fbs_first_mile_min_amount", "fbs_first_mile_max_amount",
+                "fbs_direct_flow_trans_min_amount", "fbs_direct_flow_trans_max_amount", "fbs_deliv_to_customer_amount",
+                "fbs_return_flow_amount", "fbs_return_flow_trans_min_amount", "fbs_return_flow_trans_max_amount",
+                "volume_weight"]
+        ans = numpy.array([keys])
+        for row in file:
+            values = list()
+            values.append(row["acquiring"])
+            values.append(row["product_id"])
+            values.append(row["offer_id"])
+            values.append(row["price"]["currency_code"])
+            values.append(row["price"]["price"])
+            values.append(row["price"]["old_price"])
+            values.append(row["price"]["retail_price"])
+            values.append(row["price"]["vat"])
+            values.append(row["price"]["min_ozon_price"])
+            values.append(row["price"]["marketing_price"])
+            values.append(row["price"]["marketing_seller_price"])
+            values.append(row["price"]["auto_action_enabled"])
+            values.append(row["price_indexes"]["external_index_data"]["minimal_price"])
+            values.append(row["price_indexes"]["external_index_data"]["minimal_price_currency"])
+            values.append(row["price_indexes"]["external_index_data"]["price_index_value"])
+            values.append(row["price_indexes"]["ozon_index_data"]["minimal_price"])
+            values.append(row["price_indexes"]["ozon_index_data"]["minimal_price_currency"])
+            values.append(row["price_indexes"]["ozon_index_data"]["price_index_value"])
+            values.append(row["price_index"])
+            values.append(row["price_indexes"]["self_marketplaces_index_data"]["minimal_price"])
+            values.append(row["price_indexes"]["self_marketplaces_index_data"]["minimal_price_currency"])
+            values.append(row["price_indexes"]["self_marketplaces_index_data"]["price_index_value"])
+            values.append(row["commissions"]["sales_percent"])
+            values.append(row["commissions"]["sales_percent_fbo"])
+            values.append(row["commissions"]["sales_percent_fbs"])
+            values.append(row["commissions"]["fbo_fulfillment_amount"])
+            values.append(row["commissions"]["fbo_direct_flow_trans_min_amount"])
+            values.append(row["commissions"]["fbo_direct_flow_trans_max_amount"])
+            values.append(row["commissions"]["fbo_deliv_to_customer_amount"])
+            values.append(row["commissions"]["fbo_return_flow_amount"])
+            values.append(row["commissions"]["fbo_return_flow_trans_min_amount"])
+            values.append(row["commissions"]["fbo_return_flow_trans_max_amount"])
+            values.append(row["commissions"]["fbs_first_mile_min_amount"])
+            values.append(row["commissions"]["fbs_first_mile_max_amount"])
+            values.append(row["commissions"]["fbs_direct_flow_trans_min_amount"])
+            values.append(row["commissions"]["fbs_direct_flow_trans_max_amount"])
+            values.append(row["commissions"]["fbs_deliv_to_customer_amount"])
+            values.append(row["commissions"]["fbs_return_flow_amount"])
+            values.append(row["commissions"]["fbs_return_flow_trans_min_amount"])
+            values.append(row["commissions"]["fbs_return_flow_trans_max_amount"])
+            values.append(row["volume_weight"])
+            # используем numpy для быстроты программы
+            values = numpy.array([values])
+            ans = numpy.concatenate((ans, values), axis=0)
+        needed_keys = self.check_keys(keys)
+        return ans.tolist(), ans.shape[0], needed_keys
 
     def products(self, file):
         # ans = arr_ans.tolist()
@@ -32,8 +109,7 @@ class Converter:
                 "reserved_amount"]
         ans = numpy.array([keys])
         for row in file:
-            values = list()
-            values.extend(row.values())
+            values = [row.values()]
             # используем numpy для быстроты программы
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
@@ -60,6 +136,21 @@ class Converter:
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
+
+    def get_values_from_dict(self, object_with_or_without_dict: str | int | list):
+        if type(object_with_or_without_dict) == list:
+            ans = list()
+            print(object_with_or_without_dict)
+            for value in object_with_or_without_dict:
+                if type(value) == dict:
+                    ans.extend(self.get_values_from_dict(list(value.values())))
+                elif type(value) == list:
+                    pass
+                else:
+                    ans.append(value)
+            return ans
+        else:
+            return [object_with_or_without_dict]
 
     @staticmethod
     def check_keys(keys: list) -> list | None:

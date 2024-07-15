@@ -15,6 +15,8 @@ class RequestOzon:
                 return self.stock_on_warehouses(name_of_sheet, who_is)
             case 'products':
                 return self.products(name_of_sheet, who_is)
+            case 'prices':
+                return self.prices(who_is)
 
     def products(self, name_of_sheet: str, who_is: str):
         headers = {}
@@ -176,7 +178,7 @@ class RequestOzon:
         return url
 
     @staticmethod
-    def get_params(name_of_sheet) -> dict | tuple[dict, dict] | None:
+    def make_params(name_of_sheet) -> dict | tuple[dict, dict] | None:
         match name_of_sheet:
             case _:
                 params = None
@@ -291,3 +293,57 @@ class RequestOzon:
         #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
         #     json.dump(first_part, d, ensure_ascii=False, indent=4)
         return first_part
+
+    def prices(self, who_is):
+        headers = {}
+        with open("Ozon/data/id's.txt") as txt:
+            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        for key, value in data.items():
+            headers[key] = value
+        url = self.get_url('prices')
+        last_id = ""
+        file = list()
+        while True:
+            params = {
+                "limit": 1000,
+                "last_id": last_id,
+                "filter": {"visibility": "ALL"}
+            }
+            try:
+                response = requests.post(url=url, headers=headers, json=params)
+            except socket.gaierror:
+                logging.error(f"gaierror prices")
+                print(f"The 'gaierror' has come (prices)!\n")
+                return 'Проблема с соединением'
+            if not response:
+                logging.warning(
+                    f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+                print("Ошибка выполнения запроса:")
+                print(url)
+                print(f"Http статус: {response.status_code} ( {response.reason} )")
+                # with open('data.json') as data:
+                #     return json.load(data)
+                return response.status_code, response.reason
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    print(f'Missing json file in prices')
+                    return 'Missing json file'
+            # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
+            logging.info(f"Http статус: {response.status_code}, name_of_sheet: prices")
+            print("Успешно")
+            print(url)
+            print(f"Http статус: {response.status_code}")
+            file.extend(json_response["result"]["items"])
+            if len(json_response["result"]["items"]) == 1000:
+                last_id = json_response["result"]["last_id"]
+                print(last_id)
+            else:
+                break
+        return file
