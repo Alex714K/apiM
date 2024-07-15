@@ -397,7 +397,7 @@ class ApiWB(Converter):
         #     csv_file = csv.writer(file, lineterminator='\r')
         #     csv_file.writerows(ans)
 
-        self.private_clear(name_of_sheet="Result!A:E")
+        # self.private_clear(name_of_sheet="Result!A:E")
 
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
