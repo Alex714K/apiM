@@ -77,7 +77,9 @@ class RequestOzon:
                 return 'Missing json file'
         url = json_response["result"]["file"]
         response = requests.get(url)
-        return list(map(lambda x: x.split(';'), response.content.decode("utf-8").split('\n')))
+        file = list(map(lambda x: x[1:-1].split("\";\""), response.content.decode("utf-8-sig").split('\n')))
+        print(file)
+        return file
 
     def stock_on_warehouses(self, name_of_sheet: str, who_is: str):
         headers = {}
