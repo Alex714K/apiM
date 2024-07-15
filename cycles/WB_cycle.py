@@ -18,7 +18,7 @@ def WB_cycle():
     schedule.every().day.at("23:15").do(API.start, 'fixed_prices', 'planeta', 'WB')
 
     # Финансовые отчёты
-    schedule.every().day.at("2:00").do(API.start, 'statements', 'planeta', 'WB')
+    schedule.every().day.at("02:00").do(API.start, 'statements', 'planeta', 'WB')
     schedule.every().day.at("17:00").do(API.start, 'statements', 'planeta', 'WB')
 
     # Утро гранд
