@@ -2,3 +2,4 @@ stock_on_warehouses=https://api-seller.ozon.ru/v2/analytics/stock_on_warehouses
 products=https://api-seller.ozon.ru/v1/report/products/create
 products_get=https://api-seller.ozon.ru/v1/report/info
 prices=https://api-seller.ozon.ru/v4/product/info/prices
+orders=https://api-seller.ozon.ru/v1/analytics/data

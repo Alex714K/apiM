@@ -22,3 +22,6 @@ if __name__ == "__main__":
     # API.start('stock_on_warehouses', 'grand', 'Ozon')
     # API.start('products', 'grand', 'Ozon')
     # API.start('prices', 'grand', 'Ozon')
+    # API.start('orders_1mnth', 'grand', 'Ozon')
+    # API.start('orders_1week', 'grand', 'Ozon')
+    # API.start('orders_2days', 'grand', 'Ozon')

@@ -1,3 +1,4 @@
+import datetime
 import socket
 import logging
 import time
@@ -17,6 +18,67 @@ class RequestOzon:
                 return self.products(name_of_sheet, who_is)
             case 'prices':
                 return self.prices(who_is)
+        if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
+            return self.orders(name_of_sheet, who_is)
+
+    def orders(self, name_of_sheet: str, who_is: str):
+        headers = {}
+        with open("Ozon/data/id's.txt") as txt:
+            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        for key, value in data.items():
+            headers[key] = value
+        url = self.get_url('orders')
+        today = datetime.date.today()
+        match name_of_sheet:
+            case 'orders_1mnth':
+                date_from = today - datetime.timedelta(days=30)
+            case 'orders_1week':
+                date_from = today - datetime.timedelta(days=7)
+            case 'orders_2days':
+                date_from = today - datetime.timedelta(days=2)
+            case _:
+                date_from = today
+        params = {
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+            "metrics": ["ordered_units"],
+            "dimension": [
+                "sku", "day"
+            ],
+            "limit": 1000
+        }
+        try:
+            response = requests.post(url=url, headers=headers, json=params)
+        except socket.gaierror:
+            logging.error(f"gaierror {name_of_sheet}")
+            print(f"The 'gaierror' has come ({name_of_sheet})!\n")
+            return 'Проблема с соединением'
+        if not response:
+            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            print("Ошибка выполнения запроса:")
+            print(url)
+            print(f"Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            return response.status_code, response.reason
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                print(f'Missing json file in {name_of_sheet}')
+                return 'Missing json file'
+            # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
+            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            print("Успешно")
+            print(url)
+            print(f"Http статус: {response.status_code}")
+        return json_response
+
 
     def products(self, name_of_sheet: str, who_is: str):
         headers = {}
@@ -50,6 +112,15 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 print(f'Missing json file in {name_of_sheet}')
                 return 'Missing json file'
+            # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
+            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            print("Успешно")
+            print(url)
+            print(f"Http статус: {response.status_code}")
         code_of_report = json_response["result"]["code"]
         time.sleep(5)
         url = self.get_url('products_get')
@@ -77,6 +148,15 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 print(f'Missing json file in {name_of_sheet}')
                 return 'Missing json file'
+            # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
+            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            print("Успешно")
+            print(url)
+            print(f"Http статус: {response.status_code}")
         url = json_response["result"]["file"]
         response = requests.get(url)
         file = list(map(lambda x: x[1:-1].split("\";\""), response.content.decode("utf-8-sig").split('\n')))
@@ -178,7 +258,7 @@ class RequestOzon:
         return url
 
     @staticmethod
-    def make_params(name_of_sheet) -> dict | tuple[dict, dict] | None:
+    def make_params(name_of_sheet: str) -> dict | tuple[dict, dict] | None:
         match name_of_sheet:
             case _:
                 params = None
@@ -200,7 +280,7 @@ class RequestOzon:
                 "hits_tocart_search", "hits_tocart_pdp", "hits_tocart", "session_view_search"
             ],
             "dimension": [
-                "sku", "spu", "day"
+                "sku", "day"
             ],
             "limit": 1000
         }
@@ -212,7 +292,7 @@ class RequestOzon:
                 "cancellations", "delivered_units", "position_category"
             ],
             "dimension": [
-                "sku", "spu", "day"
+                "sku", "day"
             ],
             "limit": 1000
         }
@@ -294,7 +374,7 @@ class RequestOzon:
         #     json.dump(first_part, d, ensure_ascii=False, indent=4)
         return first_part
 
-    def prices(self, who_is):
+    def prices(self, who_is: str):
         headers = {}
         with open("Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))

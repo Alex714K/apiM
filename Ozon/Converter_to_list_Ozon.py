@@ -23,8 +23,28 @@ class Converter:
                 return self.products(file=file)
             case 'prices':
                 return self.prices(file=file)
+        if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
+            return self.orders(file)
 
-    def prices(self, file):
+    def orders(self, file: list | dict):
+        keys = ["sku_id", "sku_name", "day", "ordered_units"]
+        ans = numpy.array([keys])
+        for row in file["result"]["data"]:
+            values = list()
+            dimensions = row["dimensions"]
+            # добавляем dimensions
+            values.append(dimensions[0]["id"])
+            values.append(dimensions[0]["name"])
+            values.append(dimensions[1]["id"])
+            # добавляем metrics
+            values.extend(row["metrics"])
+            # используем numpy для быстроты программы
+            values = numpy.array([values])
+            ans = numpy.concatenate((ans, values), axis=0)
+        needed_keys = self.check_keys(keys)
+        return ans.tolist(), ans.shape[0], needed_keys
+
+    def prices(self, file: list | dict):
         keys = ['acquiring', "product_id", "offer_id", "currency_code", "price", "old_price", "retail_price", "vat",
                 "min_ozon_price", "marketing_price", "marketing_seller_price", "auto_action_enabled", "minimal_price",
                 "minimal_price_currency", "price_index_value", "minimal_price", "minimal_price_currency",
@@ -98,13 +118,13 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
-    def products(self, file):
+    def products(self, file: list | dict):
         # ans = arr_ans.tolist()
         ans = file
         needed_keys = self.check_keys(ans)
         return ans, len(ans), needed_keys
 
-    def stock_on_warehouses(self, file):
+    def stock_on_warehouses(self, file: list | dict):
         keys = ["sku", "warehouse_name", "item_code", "item_name", "promised_amount", "free_to_sell_amount",
                 "reserved_amount"]
         ans = numpy.array([keys])
@@ -116,7 +136,7 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
-    def analytics(self, file: list) -> tuple[list, int, list | None]:
+    def analytics(self, file: list | dict) -> tuple[list, int, list | None]:
         keys = ["sku_id", "sku_name", "day", "revenue", "ordered_units", "hits_view_search", "hits_view_pdp",
                 "hits_view", "hits_tocart_search", "hits_tocart_pdp", "hits_tocart", "session_view_search",
                 "session_view_pdp", "session_view", "conv_tocart_search", "conv_tocart_pdp", "conv_tocart", "returns",
@@ -169,7 +189,7 @@ class Converter:
         #     return
 
     @staticmethod
-    def download(file: dict, name: str) -> str:
+    def download(file: list | dict, name: str) -> str:
         match name:
             case 'statements':
                 with open('../Финансовые отчёты.json', 'w') as d:
