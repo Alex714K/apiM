@@ -117,11 +117,11 @@ class Converter:
     def download(file: dict, name: str) -> str:
         match name:
             case 'statements':
-                with open('../Финансовые отчёты.json', 'w') as d:
+                with open('data/Финансовые отчёты.json', 'w') as d:
                     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                     json.dump(file, d, ensure_ascii=False, indent=4)
             case 'statements_old':
-                with open('../Финансовые отчёты.json', 'w') as d:
+                with open('data/Финансовые отчёты.json', 'w') as d:
                     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                     json.dump(file, d, ensure_ascii=False, indent=4)
         return 'download'
