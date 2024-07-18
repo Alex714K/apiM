@@ -129,7 +129,7 @@ class Converter:
                 "reserved_amount"]
         ans = numpy.array([keys])
         for row in file:
-            values = [row.values()]
+            values = list(row.values())
             # используем numpy для быстроты программы
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
