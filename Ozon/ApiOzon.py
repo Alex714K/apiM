@@ -22,13 +22,24 @@ class ApiOzon(Converter):
         self.result = None
         self.name_of_sheet = None
 
-    def start(self, name_of_sheet: str, who_is: str, **parameters):
+    def start(self, name_of_sheet: str, who_is: str):
+        if self.standart_start(name_of_sheet, who_is):
+            return
+        match name_of_sheet:
+            case 'analytics':
+                self.analytics_start(who_is)
+            case _:
+                self.standart_update(name_of_sheet, who_is)
+
+    def standart_start(self, name_of_sheet: str, who_is: str):
         self.name_of_sheet = name_of_sheet
         self.choose_spreadsheetId(who_is)
         if not self.connect_to_Google():
-            return
+            return True
         if self.start_work_with_request(name_of_sheet, who_is):
-            return False
+            return True
+
+    def standart_update(self, name_of_sheet: str, who_is: str):
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
@@ -42,6 +53,22 @@ class ApiOzon(Converter):
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
         else:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+
+    def analytics_start(self, who_is: str):
+        name_of_sheet = datetime.date.today().strftime("%b")
+        new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        if new_or_not == 'error':
+            return
+        if new_or_not:
+            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+        else:
+            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+        if check:
+            self.start_work_with_list_result(name_of_sheet="analytics")
+        elif self.result is not None:
+            self.start_work_with_list_result(name_of_sheet="analytics", bad=True)
+        else:
+            self.start_work_with_list_result(name_of_sheet="analytics", bad=True)
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
         requestOzon = RequestOzon().start(name_of_sheet, who_is)
@@ -122,7 +149,7 @@ class ApiOzon(Converter):
         self.service = service
         return True
 
-    def choose_name_of_sheet(self, name_of_sheet) -> bool | str:
+    def choose_name_of_sheet(self, name_of_sheet: str) -> bool | str:
         """
         Определяет, нужен ли создать новый лист или нет.
 
