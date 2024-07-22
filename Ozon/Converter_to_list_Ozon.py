@@ -150,10 +150,14 @@ class Converter:
             values.append(dimensions[0]["name"])
             values.append(dimensions[1]["id"])
             # добавляем metrics
-            values.extend(row["metrics"])
+            values.extend(list(map(lambda x: str(x).replace('.', ','), row["metrics"])))
             # используем numpy для быстроты программы
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
+        # Записываем данные в файл (убирать комментарий при необходимости)
+        with open('data.json', 'w', encoding='UTF-8') as d:
+            # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            json.dump(ans.tolist(), d, ensure_ascii=False, indent=4)
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
@@ -174,7 +178,7 @@ class Converter:
 
     @staticmethod
     def check_keys(keys: list) -> list | None:
-        need_to_check = ["conv_tocart_search", "conv_tocart_pdp", "conv_tocart", "position_category"]
+        need_to_check = []
         needed_keys = list()
         for i in need_to_check:
             if i in keys:
