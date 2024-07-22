@@ -239,8 +239,9 @@ class ApiOzon(Converter):
         :return: Возвращает bool ответ результата очистки
         """
         print(f"\nStart clearing sheet '{name_of_sheet}'...")
+        needed_letter = chr(ord('A') + len(self.values[0]) - 1)
         try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=f"{name_of_sheet}!A:{needed_letter}"
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
