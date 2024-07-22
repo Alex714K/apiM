@@ -1,4 +1,3 @@
-import Logger
 import logging
 import datetime
 
