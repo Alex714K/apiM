@@ -174,7 +174,7 @@ class Converter:
 
     @staticmethod
     def check_keys(keys: list) -> list | None:
-        need_to_check = []
+        need_to_check = ["conv_tocart_search", "conv_tocart_pdp", "conv_tocart", "position_category"]
         needed_keys = list()
         for i in need_to_check:
             if i in keys:
