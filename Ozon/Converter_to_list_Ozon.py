@@ -178,7 +178,7 @@ class Converter:
 
     @staticmethod
     def check_keys(keys: list) -> list | None:
-        need_to_check = ["sku_id"]
+        need_to_check = ["sku_id", "sku", "FBO OZON SKU ID", "FBS OZON SKU ID", "Ozon Product ID"]
         needed_keys = list()
         for i in need_to_check:
             if i in keys:
