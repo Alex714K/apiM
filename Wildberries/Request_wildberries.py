@@ -1,5 +1,6 @@
 import logging
 import sys
+from threading import RLock
 import uuid
 import requests
 import datetime
@@ -9,9 +10,10 @@ from Initers import Getter
 
 
 class RequestWildberries(Getter):
-    def __init__(self):
+    def __init__(self, lock_wb_request: RLock):
         super().__init__()
         self.name_of_sheet = None
+        self.lock_wb_request = lock_wb_request
 
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от

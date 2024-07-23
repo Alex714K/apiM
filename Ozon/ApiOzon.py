@@ -2,7 +2,7 @@ import datetime
 import logging
 import socket
 import sys
-
+import threading
 import googleapiclient.errors
 import httplib2
 import apiclient
@@ -14,13 +14,15 @@ from Ozon.Request_Ozon import RequestOzon
 
 
 class ApiOzon(Converter):
-    def __init__(self):
+    def __init__(self, lock_ozon_request: threading.RLock, lock_ozon_result: threading.RLock):
         super().__init__()
         self.spreadsheetId = None
         self.service = None
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
+        self.lock_ozon_request = lock_ozon_request
+        self.lock_ozon_result = lock_ozon_result
 
     def start(self, name_of_sheet: str, who_is: str):
         if self.standart_start(name_of_sheet, who_is):
@@ -71,7 +73,7 @@ class ApiOzon(Converter):
             self.start_work_with_list_result(name_of_sheet="analytics", bad=True)
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
-        requestOzon = RequestOzon().start(name_of_sheet, who_is)
+        requestOzon = RequestOzon(self.lock_ozon_request).start(name_of_sheet, who_is)
         match requestOzon:
             case 'Missing json file':
                 self.result = 'ERROR: Не получен файл с WildBerries'
@@ -345,6 +347,7 @@ class ApiOzon(Converter):
         :param bad: Успешно или нет
         :return:
         """
+        self.lock_ozon_result.acquire()
         if not self.create_result():
             return
         # with open('data/info_about_Result.csv', 'r') as file:
@@ -359,14 +362,22 @@ class ApiOzon(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
+            self.result = 'ERROR: Проблема с соединением'
+            self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
 
-        values = getted['valueRanges'][0]['values']
+        try:
+            values = getted['valueRanges'][0]['values']
+        except KeyError:
+            self.lock_ozon_result.release()
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+            return
         # очистка от лишних пустых элементов списка (а они бывают)
         for i in range(len(values)):
             if '' in values[i]:
@@ -417,13 +428,16 @@ class ApiOzon(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
+        self.lock_ozon_result.release()
 
     def create_result(self) -> bool:
         """

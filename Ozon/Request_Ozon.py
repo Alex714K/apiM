@@ -1,6 +1,7 @@
 import datetime
 import socket
 import logging
+from threading import RLock
 import time
 import requests
 import json
@@ -9,6 +10,9 @@ import numpy
 
 
 class RequestOzon:
+    def __init__(self, lock_ozon_request: RLock):
+        self.lock_ozon_request = lock_ozon_request
+
     def start(self, name_of_sheet: str, who_is: str):
         match name_of_sheet:
             case 'analytics':

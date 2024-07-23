@@ -1,4 +1,5 @@
 import socket
+import threading
 import time
 import googleapiclient.errors
 import httplib2
@@ -13,13 +14,15 @@ import datetime
 
 
 class ApiWB(Converter):
-    def __init__(self):
+    def __init__(self, lock_wb_request: threading.RLock, lock_wb_result: threading.RLock):
         super().__init__()
         self.spreadsheetId = None
         self.service = None
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
+        self.lock_wb_request = lock_wb_request
+        self.lock_wb_result = lock_wb_result
 
     def start(self, name_of_sheet: str, who_is: str):
         """
@@ -168,7 +171,7 @@ class ApiWB(Converter):
         :param who_is: Чей токен используется
         :return: Возвращает bool ответ результата запроса
         """
-        requestWB = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is)
+        requestWB = RequestWildberries(self.lock_wb_request).start(name_of_sheet=name_of_sheet, who_is=who_is)
         match requestWB:
             case 'Missing json file':
                 self.result = 'ERROR: Не получен файл с WildBerries'
@@ -339,6 +342,7 @@ class ApiWB(Converter):
         :param bad: Успешно или нет
         :return:
         """
+        self.lock_wb_result.acquire()
         if not self.create_result():
             return
         # with open('Wildberries/data/info_about_Result.csv', 'r') as file:
@@ -354,16 +358,19 @@ class ApiWB(Converter):
             ).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
         try:
             values = getted['valueRanges'][0]['values']
         except KeyError:
+            self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         # очистка от лишних пустых элементов списка (а они бывают)
@@ -413,11 +420,13 @@ class ApiWB(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
+            self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
 
