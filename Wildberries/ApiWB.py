@@ -264,7 +264,7 @@ class ApiWB(Converter):
         else:
             r = name_of_sheet
         try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
             self.result = 'ERROR: Проблема с соединением'
