@@ -250,6 +250,19 @@ class ApiWB(Converter):
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
+        if name_of_sheet != "Result!A:E":
+            dist = len(self.values[0])
+            if dist % 26 == 0:
+                needed_letter = chr(ord('A') + 26 - 1)
+            else:
+                needed_letter = chr(ord('A') + dist % 26 - 1)
+            if dist > 26 and dist % 26 == 0:
+                needed_letter = f"{chr(ord("A") - 1 + (dist // 26 - 1))}{needed_letter}"
+            elif dist > 26:
+                needed_letter = f"{chr(ord("A") - 1 + (dist // 26))}{needed_letter}"
+            r = f"{name_of_sheet}!A:{needed_letter}"
+        else:
+            r = name_of_sheet
         try:
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
