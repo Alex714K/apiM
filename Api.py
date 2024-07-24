@@ -26,10 +26,8 @@ class Api(Initer):
                                              args=(name_of_sheet, who_is),
                                              name=f"WB, {name_of_sheet}, {who_is}")
                 wb_thread.start()
-                wb_thread.join()
             case 'Ozon':
                 ozon_thread = threading.Thread(target=ApiOzon(self.lock_ozon_request, self.lock_ozon_result).start,
                                                args=(name_of_sheet, who_is),
                                                name=f"Ozon, {name_of_sheet}, {who_is}")
                 ozon_thread.start()
-                ozon_thread.join()

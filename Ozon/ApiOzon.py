@@ -349,6 +349,7 @@ class ApiOzon(Converter):
         """
         self.lock_ozon_result.acquire()
         if not self.create_result():
+            self.lock_ozon_result.release()
             return
         # with open('data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')

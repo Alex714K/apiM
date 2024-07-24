@@ -356,7 +356,9 @@ class ApiWB(Converter):
         :return:
         """
         self.lock_wb_result.acquire()
+        print('Work result')
         if not self.create_result():
+            self.lock_wb_result.release()
             return
         # with open('Wildberries/data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')
@@ -442,6 +444,7 @@ class ApiWB(Converter):
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
+        self.lock_wb_result.release()
 
     def create_result(self) -> bool:
         """
