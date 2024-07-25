@@ -436,7 +436,7 @@ class RequestOzon:
                 metrics_in_second_part = parts["second"][ids_of_second_part.index(id_in_first_part)]["metrics"]
                 parts["first"][ind]["metrics"].extend(metrics_in_second_part)
             except ValueError:
-                logging.warning("WTF - analytics, Ozon")
+                logging.error("WTF - analytics, Ozon")
                 # print("WTF")
         # # Записываем данные в файл (убирать комментарий при необходимости)
         # with open('data.json', 'w', encoding='UTF-8') as d:
