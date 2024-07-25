@@ -27,7 +27,7 @@ class RequestWildberries(Getter):
         try:
             url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
-            print("Wrong name of sheet")
+            # print("Wrong name of sheet")
             logging.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Токен
@@ -53,13 +53,13 @@ class RequestWildberries(Getter):
                 sys.exit('Man, you forget smth in Request_wildberries.py')
         except socket.gaierror:
             logging.error(f"gaierror ({self.name_of_sheet})")
-            print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
+            # print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
             logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
-            print("Ошибка выполнения запроса:")
-            print(url)
-            print(f"Http статус: {response.status_code} ( {response.reason} )")
+            # print("Ошибка выполнения запроса:")
+            # print(url)
+            # print(f"Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
             return response.status_code, response.reason
@@ -68,17 +68,17 @@ class RequestWildberries(Getter):
                 # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
-                print(f'Missing json file in {self.name_of_sheet}')
+                # print(f'Missing json file in {self.name_of_sheet}')
                 return 'Missing json file'
-            # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
             # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             logging.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
-            print("Успешно")
-            print(url)
-            print(f"Http статус: {response.status_code}")
+            # print("Успешно")
+            # print(url)
+            # print(f"Http статус: {response.status_code}")
             return json_response, response.status_code
 
     @staticmethod
@@ -219,7 +219,7 @@ class RequestWildberries(Getter):
                 response = requests.get(url, headers=headers)
                 json_response = response.json()
                 if json_response["data"] is None:
-                    print(json_response)
+                    # print(json_response)
                     break
                 for element in json_response["data"]:
                     if element['id'] == iduu and element['status'] == "SUCCESS":

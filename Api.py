@@ -18,7 +18,7 @@ class Api(Initer):
         """
         Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
         """
-        print(f"Started: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
+        # print(f"Started: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
         logging.info(f"Started '{name_of_sheet}'")
         match folder:
             case 'WB':

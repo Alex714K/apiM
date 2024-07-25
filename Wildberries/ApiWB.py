@@ -115,16 +115,16 @@ class ApiWB(Converter):
             service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
         except httplib2.error.ServerNotFoundError:
             logging.error(f"Google ({self.name_of_sheet}): ServerNotFound")
-            print(f"Google({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
+            # print(f"Google({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
             self.result = 'ERROR: Проблема с соединением'
             return False
         except socket.gaierror:
             logging.error(f"gaierror ({self.name_of_sheet})")
-            print(f"The 'gaierror' has come!({self.name_of_sheet})\n")
+            # print(f"The 'gaierror' has come!({self.name_of_sheet})\n")
             self.result = 'ERROR: Проблема с соединением'
             return False
-        finally:
-            print(f'Connected to Google({self.name_of_sheet})')
+        # finally:
+            # print(f'Connected to Google({self.name_of_sheet})')
         self.service = service
         return True
 
@@ -186,23 +186,23 @@ class ApiWB(Converter):
             json_response, status_code = requestWB
         except TypeError:
             logging.warning(f"Нет доступа к файлу")
-            print(f"Нет доступа к файлу ({self.name_of_sheet})")
+            # print(f"Нет доступа к файлу ({self.name_of_sheet})")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
             case 'download':
                 logging.warning("Downloaded")
-                print(f"Downloaded {name_of_sheet}")
+                # print(f"Downloaded {name_of_sheet}")
                 self.result = 'Зачем-то скачен файл'
                 return True
             case 'is None':
                 logging.warning("File = None")
-                print(f"File({self.name_of_sheet}) = None")
+                # print(f"File({self.name_of_sheet}) = None")
                 self.result = 'ERROR: File=None'
                 return True
             case 'is empty':
                 logging.warning("File is empty")
-                print(f"File({self.name_of_sheet}) is empty")
+                # print(f"File({self.name_of_sheet}) is empty")
                 self.result = 'ERROR: File is empty'
                 return True
         self.values, self.dist, self.needed_keys = result
@@ -240,7 +240,7 @@ class ApiWB(Converter):
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         logging.info(f"Created new sheet '{name_of_sheet}'")
-        print(f"\nCreated new sheet '{name_of_sheet}'")
+        # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
 
@@ -285,7 +285,7 @@ class ApiWB(Converter):
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        print(f"\nStart updating sheet {self.name_of_sheet}...")
+        # print(f"\nStart updating sheet {self.name_of_sheet}...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
@@ -304,7 +304,7 @@ class ApiWB(Converter):
             logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         logging.info(f"Updating complete ({self.name_of_sheet})")
-        print(f"Updating complete ({self.name_of_sheet})!")
+        # print(f"Updating complete ({self.name_of_sheet})!")
         with open('Wildberries/data/sheets.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
@@ -356,7 +356,7 @@ class ApiWB(Converter):
         :return:
         """
         self.lock_wb_result.acquire()
-        print('Work result')
+        # print('Work result')
         if not self.create_result():
             self.lock_wb_result.release()
             return
