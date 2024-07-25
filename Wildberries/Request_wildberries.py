@@ -68,7 +68,7 @@ class RequestWildberries(Getter):
                 # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
-                # print(f'Missing json file in {self.name_of_sheet}')
+                # print(f"Missing json file in {self.name_of_sheet}")
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
