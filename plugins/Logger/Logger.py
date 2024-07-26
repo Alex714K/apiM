@@ -31,6 +31,10 @@ def getLogger(name_of_logger: str):
                 "handlers": ["rootHandler"],
                 "level": "DEBUG",
             },
+            "extraInfo": {
+                "handlers": ["fileHandler", "consoleHandler"],
+                "level": "INFO",
+            },
             "RequestWB": {
                 "handlers": ["fileHandler"],
                 "level": "DEBUG"
