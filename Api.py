@@ -1,15 +1,10 @@
-from Initers import Initer
-import logging
 from Wildberries.ApiWB import ApiWB
 from Ozon.ApiOzon import ApiOzon
-from datetime import datetime
 import threading
-from Logger.Logger import getLogger
 
 
-class Api(Initer):
+class Api:
     def __init__(self):
-        super().__init__()
         self.lock_wb_request = threading.RLock()
         self.lock_ozon_request = threading.RLock()
         self.lock_wb_result = threading.RLock()
@@ -19,9 +14,6 @@ class Api(Initer):
         """
         Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
         """
-        # print(f"Started: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, {folder}, {who_is}, {name_of_sheet}")
-        # logging.info(f"Started: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, folder={folder}, "
-        #              f"who_is={who_is}, name_of_sheet={name_of_sheet}")
         match folder:
             case 'WB':
                 wb_thread = threading.Thread(target=ApiWB(self.lock_wb_request, self.lock_wb_result).start,
