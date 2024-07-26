@@ -9,14 +9,14 @@ def getLogger(name_of_logger: str):
             "fileHandler": {
                 "class": "logging.FileHandler",
                 "formatter": "myFormatter",
-                "filename": "Logger/logs.log",
+                "filename": "data/logs/logs.log",
                 "level": "INFO",
                 "encoding": "UTF-8"
             },
             "rootHandler": {
                 "class": "logging.FileHandler",
                 "formatter": "myFormatter",
-                "filename": "Logger/all_trash.log",
+                "filename": "data/logs/all_trash.log",
                 "level": "DEBUG",
                 "encoding": "UTF-8"
             },
