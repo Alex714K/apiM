@@ -12,7 +12,7 @@ class Initer:
         # self.logger = Logger.get_logger("Apister")
         current_date = datetime.datetime.now()
         logging.basicConfig(level=logging.DEBUG, filename=f"logs/{current_date.strftime('%Y-%m')}.log",
-                            filemode="w", format="%(asctime)s %(levelname)s %(message)s", )
+                            filemode="w", format="%(asctime)s %(levelname)s %(message)s", encoding="UTF-8")
 
     def get_parameters(self):
         """Достаёт словарь параметров в all_urls.txt"""
