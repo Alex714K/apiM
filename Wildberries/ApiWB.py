@@ -4,8 +4,8 @@ import socket
 import threading
 import googleapiclient.errors
 import httplib2
-import apiclient
-from google import auth
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 import csv
 from Wildberries.Converter_to_list_WB import Converter
 from Wildberries.Request_wildberries import RequestWildberries
@@ -106,14 +106,14 @@ class ApiWB(Converter):
         """
         CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
-        credentials = auth.load_credentials_from_file(CREDENTIALS_FILE,
-                                                      ['https://www.googleapis.com/auth/spreadsheets',
-                                                       'https://www.googleapis.com/auth/drive'])
+        scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+        credentials = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE,
+                                                                            scopes=scopes)
         try:
             # Авторизуемся в системе
-            httpAuth = credentials.authorize(httplib2.Http())
+            # httpAuth = credentials.authorize(httplib2.Http())
             # Выбираем работу с таблицами и 4 версию API
-            service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
+            service = build('sheets', 'v4', credentials=credentials)
         except httplib2.error.ServerNotFoundError:
             self.logger.error(f"Google ({self.name_of_sheet}): ServerNotFound")
             # print(f"Google({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
@@ -475,7 +475,8 @@ class ApiWB(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.log(level=logging.CRITICAL,
+                                    msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
                 with open('Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
@@ -500,7 +501,8 @@ class ApiWB(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.log(level=logging.CRITICAL,
+                                    msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
             return True
 

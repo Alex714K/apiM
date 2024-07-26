@@ -4,8 +4,8 @@ import socket
 import threading
 import googleapiclient.errors
 import httplib2
-import apiclient
-from google import auth
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 import csv
 from Ozon.Converter_to_list_Ozon import Converter
 from Ozon.Request_Ozon import RequestOzon
@@ -128,14 +128,14 @@ class ApiOzon(Converter):
         """
         CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
-        credentials = auth.load_credentials_from_file(CREDENTIALS_FILE,
-                                                      ['https://www.googleapis.com/auth/spreadsheets',
-                                                       'https://www.googleapis.com/auth/drive'])
+        scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+        credentials = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE,
+                                                                            scopes=scopes)
         try:
             # Авторизуемся в системе
-            httpAuth = credentials.authorize(httplib2.Http())
+            # httpAuth = credentials.authorize(httplib2.Http())
             # Выбираем работу с таблицами и 4 версию API
-            service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
+            service = build('sheets', 'v4', credentials=credentials)
         except httplib2.error.ServerNotFoundError:
             self.logger.error(f"Google ({self.name_of_sheet}): ServerNotFound - connect_to_Google")
             self.result = 'ERROR: Проблема с соединением'
@@ -145,7 +145,7 @@ class ApiOzon(Converter):
             self.result = 'ERROR: Проблема с соединением'
             return False
         finally:
-            self.logger.info("Connected to Google({self.name_of_sheet})")
+            self.logger.info(f"Connected to Google({self.name_of_sheet})")
         self.service = service
         return True
 
