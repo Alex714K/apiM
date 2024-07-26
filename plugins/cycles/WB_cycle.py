@@ -1,5 +1,5 @@
 import schedule
-from Api import Api
+from plugins.Api import Api
 
 
 def WB_cycle():

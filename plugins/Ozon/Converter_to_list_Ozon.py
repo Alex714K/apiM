@@ -155,7 +155,7 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         # Записываем данные в файл (убирать комментарий при необходимости)
-        with open('data.json', 'w', encoding='UTF-8') as d:
+        with open('data/data.json', 'w', encoding='UTF-8') as d:
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             json.dump(ans.tolist(), d, ensure_ascii=False, indent=4)
         needed_keys = self.check_keys(keys)

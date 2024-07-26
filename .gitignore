@@ -1,5 +1,4 @@
 /.idea/
-/test/
 update_all_statements.py
 data.*
 *.log

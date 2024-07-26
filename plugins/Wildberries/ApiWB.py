@@ -7,9 +7,9 @@ import httplib2
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import csv
-from Wildberries.Converter_to_list_WB import Converter
-from Wildberries.Request_wildberries import RequestWildberries
-from Logger.Logger import getLogger
+from plugins.Wildberries.Converter_to_list_WB import Converter
+from plugins.Wildberries.Request_wildberries import RequestWildberries
+from plugins.Logger.Logger import getLogger
 
 
 class ApiWB(Converter):
@@ -81,7 +81,7 @@ class ApiWB(Converter):
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
             names_of_lists_and_codes.append([title, str(sheet_id)])
-        with open('Wildberries/data/sheets.txt', 'w', encoding="UTF-8") as txt:
+        with open('plugins/Wildberries/data/sheets.txt', 'w', encoding="UTF-8") as txt:
             txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
@@ -94,7 +94,7 @@ class ApiWB(Converter):
         :param who_is:
         :return:
         """
-        with open('Wildberries/data/spreadsheetIds.txt', 'r') as txt:
+        with open('plugins/Wildberries/data/spreadsheetIds.txt', 'r') as txt:
             data = txt.read().split('\n')
         data = dict(map(lambda x: x.split('='), data))
         self.spreadsheetId = data[who_is]
@@ -306,7 +306,7 @@ class ApiWB(Converter):
             return True
         self.logger.info(f"Updating complete ({self.name_of_sheet})")
         # print(f"Updating complete ({self.name_of_sheet})!")
-        with open('Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
@@ -361,7 +361,7 @@ class ApiWB(Converter):
         if not self.create_result():
             self.lock_wb_result.release()
             return
-        # with open('Wildberries/data/info_about_Result.csv', 'r') as file:
+        # with open('plugins/Wildberries/data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')
         #     for i in csv_file:
         #         ans.append(i)
@@ -416,7 +416,7 @@ class ApiWB(Converter):
                 values[ind].extend([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                     f"Успешно записано строк: {self.dist}"])
 
-        # with open('Wildberries/data/info_about_Result.csv', 'w') as file:
+        # with open('plugins/Wildberries/data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
         #     csv_file.writerows(ans)
 
@@ -452,7 +452,7 @@ class ApiWB(Converter):
         При отсутствии листа Result создаёт таковой по макету.
         :return:
         """
-        with open('Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
             except KeyError:
@@ -479,7 +479,7 @@ class ApiWB(Converter):
                                     msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
-                with open('Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
+                with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
                     csv_file = csv.reader(file)
                     for i in csv_file:
                         if '' == i:

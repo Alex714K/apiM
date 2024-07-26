@@ -1,13 +1,11 @@
 import datetime
 import socket
-import logging
 from threading import RLock
 import time
 import requests
-import json
 import calendar
 import numpy
-from Logger.Logger import getLogger
+from plugins.Logger.Logger import getLogger
 
 
 class RequestOzon:
@@ -38,7 +36,7 @@ class RequestOzon:
         # # print(json_response)
 
     def check_token(self):
-        with open("Ozon/data/token_and_time.txt", 'r') as txt:
+        with open("plugins/Ozon/data/token_and_time.txt", 'r') as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         time_in_file = datetime.datetime.strptime(data['time'], "%Y-%m-%d %H:%M:%S")
         time_now = datetime.datetime.today() + datetime.timedelta(seconds=1)
@@ -60,7 +58,7 @@ class RequestOzon:
 
     def orders(self, name_of_sheet: str, who_is: str):
         headers = {}
-        with open("Ozon/data/id's.txt") as txt:
+        with open("plugins/Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
@@ -95,7 +93,7 @@ class RequestOzon:
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
+            # with open('data/data.json') as data:
             #     return json.load(data)
             return response.status_code, response.reason
         else:
@@ -107,7 +105,7 @@ class RequestOzon:
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
             self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
@@ -118,7 +116,7 @@ class RequestOzon:
 
     def products(self, name_of_sheet: str, who_is: str):
         headers = {}
-        with open("Ozon/data/id's.txt") as txt:
+        with open("plugins/Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
@@ -138,7 +136,7 @@ class RequestOzon:
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
+            # with open('data/data.json') as data:
             #     return json.load(data)
             return response.status_code, response.reason
         else:
@@ -150,7 +148,7 @@ class RequestOzon:
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
             self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
@@ -174,7 +172,7 @@ class RequestOzon:
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
+            # with open('data/data.json') as data:
             #     return json.load(data)
             return response.status_code, response.reason
         else:
@@ -186,7 +184,7 @@ class RequestOzon:
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
             self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
@@ -200,7 +198,7 @@ class RequestOzon:
 
     def stock_on_warehouses(self, name_of_sheet: str, who_is: str):
         headers = {}
-        with open("Ozon/data/id's.txt") as txt:
+        with open("plugins/Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
@@ -227,7 +225,7 @@ class RequestOzon:
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response1.status_code} ( {response1.reason} )")
-            # with open('data.json') as data:
+            # with open('data/data.json') as data:
             #     return json.load(data)
             return response1.status_code, response1.reason
         else:
@@ -239,7 +237,7 @@ class RequestOzon:
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
             self.logger.info(f"Http статус: {response1.status_code}, name_of_sheet: {name_of_sheet}")
@@ -261,7 +259,7 @@ class RequestOzon:
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response2.status_code} ( {response2.reason} )")
-            # with open('data.json') as data:
+            # with open('data/data.json') as data:
             #     return json.load(data)
             return response2.status_code, response2.reason
         else:
@@ -273,7 +271,7 @@ class RequestOzon:
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response2, d, ensure_ascii=False, indent=4)
             self.logger.info(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}")
@@ -287,7 +285,7 @@ class RequestOzon:
     @staticmethod
     def get_url(name_of_sheet: str):
         try:
-            with open("Ozon/data/all_urls_Ozon.txt") as txt:
+            with open("plugins/Ozon/data/all_urls_Ozon.txt") as txt:
                 url = dict(map(lambda x: x.split('='), txt.read().split('\n')))[name_of_sheet]
         except KeyError:
             return "Wrong 'name_of_sheet"
@@ -302,7 +300,7 @@ class RequestOzon:
 
     def analytics(self, who_is: str) -> tuple[int, str] | str:
         headers = {}
-        with open("Ozon/data/id's.txt") as txt:
+        with open("plugins/Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
@@ -361,7 +359,7 @@ class RequestOzon:
                 # print("Ошибка выполнения запроса:")
                 # print(url)
                 # print(f"Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
+                # with open('data/data.json') as data:
                 #     return json.load(data)
                 return response.status_code, response.reason
             else:
@@ -373,7 +371,7 @@ class RequestOzon:
                     return 'Missing json file'
                 # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
+                # with open('data/data.json', 'w', encoding='UTF-8') as d:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
                 self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: analytics")
@@ -401,7 +399,7 @@ class RequestOzon:
                 # print("Ошибка выполнения запроса:")
                 # print(url)
                 # print(f"Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
+                # with open('data/data.json') as data:
                 #     return json.load(data)
                 return response.status_code, response.reason
             else:
@@ -413,7 +411,7 @@ class RequestOzon:
                     return 'Missing json file'
                 # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
+                # with open('data/data.json', 'w', encoding='UTF-8') as d:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
                 self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: analytics")
@@ -440,14 +438,14 @@ class RequestOzon:
                 self.logger.error("WTF - analytics, Ozon")
                 # print("WTF")
         # # Записываем данные в файл (убирать комментарий при необходимости)
-        # with open('data.json', 'w', encoding='UTF-8') as d:
+        # with open('data/data.json', 'w', encoding='UTF-8') as d:
         #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
         #     json.dump(parts["first"], d, ensure_ascii=False, indent=4)
         return parts["first"]
 
     def prices(self, who_is: str):
         headers = {}
-        with open("Ozon/data/id's.txt") as txt:
+        with open("plugins/Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
@@ -472,7 +470,7 @@ class RequestOzon:
                 # print("Ошибка выполнения запроса:")
                 # print(url)
                 # print(f"Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
+                # with open('data/data.json') as data:
                 #     return json.load(data)
                 return response.status_code, response.reason
             else:
@@ -484,7 +482,7 @@ class RequestOzon:
                     return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
             self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: prices")

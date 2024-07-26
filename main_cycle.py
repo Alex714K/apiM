@@ -1,6 +1,6 @@
 import schedule
-from cycles.WB_cycle import WB_cycle
-from cycles.Ozon_cycle import Ozon_cycle
+from plugins.cycles.WB_cycle import WB_cycle
+from plugins.cycles.Ozon_cycle import Ozon_cycle
 
 
 if __name__ == "__main__":

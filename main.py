@@ -1,4 +1,4 @@
-from Api import Api
+from plugins.Api import Api
 
 
 if __name__ == "__main__":

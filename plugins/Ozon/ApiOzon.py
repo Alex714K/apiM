@@ -7,9 +7,9 @@ import httplib2
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import csv
-from Ozon.Converter_to_list_Ozon import Converter
-from Ozon.Request_Ozon import RequestOzon
-from Logger.Logger import getLogger
+from plugins.Ozon.Converter_to_list_Ozon import Converter
+from plugins.Ozon.Request_Ozon import RequestOzon
+from plugins.Logger.Logger import getLogger
 
 
 class ApiOzon(Converter):
@@ -116,7 +116,7 @@ class ApiOzon(Converter):
         :param who_is:
         :return:
         """
-        with open('Ozon/data/spreadsheetIds_Ozon.txt', 'r') as txt:
+        with open('plugins/Ozon/data/spreadsheetIds_Ozon.txt', 'r') as txt:
             data = txt.read().split('\n')
         data = dict(map(lambda x: x.split('='), data))
         self.spreadsheetId = data[who_is]
@@ -175,7 +175,7 @@ class ApiOzon(Converter):
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
             names_of_lists_and_codes.append([title, str(sheet_id)])
-        with open('Ozon/data/sheets_Ozon.txt', 'w', encoding="UTF-8") as txt:
+        with open('plugins/Ozon/data/sheets_Ozon.txt', 'w', encoding="UTF-8") as txt:
             txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
@@ -295,7 +295,7 @@ class ApiOzon(Converter):
             return True
         self.logger.info(f"Updating complete ({name_of_sheet})")
         # print(f"Updating complete ({name_of_sheet})!")
-        with open('Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
+        with open('plugins/Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
@@ -349,10 +349,6 @@ class ApiOzon(Converter):
         if not self.create_result():
             self.lock_ozon_result.release()
             return
-        # with open('data/info_about_Result.csv', 'r') as file:
-        #     csv_file = csv.reader(file, lineterminator='\r')
-        #     for i in csv_file:
-        #         ans.append(i)
         try:
             getted = self.service.spreadsheets().values().batchGet(
                 spreadsheetId=self.spreadsheetId,
@@ -443,7 +439,7 @@ class ApiOzon(Converter):
         При отсутствии листа Result создаёт таковой по макету.
         :return:
         """
-        with open('Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
+        with open('plugins/Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
             except KeyError:
@@ -469,7 +465,7 @@ class ApiOzon(Converter):
                     self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
-                with open('Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
+                with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
                     csv_file = csv.reader(file)
                     for i in csv_file:
                         if '' == i:

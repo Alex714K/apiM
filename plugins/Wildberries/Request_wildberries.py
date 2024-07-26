@@ -1,13 +1,11 @@
-import logging
 import sys
 from threading import RLock
 import uuid
 import requests
 import datetime
-import json
 import socket
-from Initers import Getter
-from Logger.Logger import getLogger
+from plugins.Initers import Getter
+from plugins.Logger.Logger import getLogger
 
 
 class RequestWildberries(Getter):
@@ -33,7 +31,7 @@ class RequestWildberries(Getter):
             self.logger.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Токен
-        with open('Wildberries/data/tokens.txt') as txt:
+        with open('plugins/Wildberries/data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         authorization = tokens[who_is]
         headers = {
@@ -142,7 +140,7 @@ class RequestWildberries(Getter):
             case '1mnth':
                 date = datetime.date.today() - datetime.timedelta(days=30)
             case 'tariffs':
-                with open('Wildberries/data/date_of_tariffs.txt', 'r') as txt:
+                with open('plugins/Wildberries/data/date_of_tariffs.txt', 'r') as txt:
                     date = txt.read()
 
         match dateTo:
@@ -199,7 +197,7 @@ class RequestWildberries(Getter):
         url = 'https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads'
         iduu = str(uuid.uuid4())
         # Токен
-        with open('Wildberries/data/tokens.txt') as txt:
+        with open('plugins/Wildberries/data/tokens.txt') as txt:
             tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         authorization = tokens[who_is]
         headers = {

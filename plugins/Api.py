@@ -1,5 +1,5 @@
-from Wildberries.ApiWB import ApiWB
-from Ozon.ApiOzon import ApiOzon
+from plugins.Wildberries.ApiWB import ApiWB
+from plugins.Ozon.ApiOzon import ApiOzon
 import threading
 
 
