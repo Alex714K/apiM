@@ -2,3 +2,5 @@
 plugins/update_all_statements.py
 data.*
 *.log
+/dist/
+/build/
