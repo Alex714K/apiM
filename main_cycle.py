@@ -7,6 +7,5 @@ if __name__ == "__main__":
     WB_cycle()
     Ozon_cycle()
 
-    print(schedule.get_jobs())
     while True:
         schedule.run_pending()
