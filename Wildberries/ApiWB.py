@@ -11,6 +11,7 @@ import logging
 import csv
 from datetime import timedelta
 import datetime
+from Logger.Logger import getLogger
 
 
 class ApiWB(Converter):
@@ -23,6 +24,7 @@ class ApiWB(Converter):
         self.name_of_sheet = None
         self.lock_wb_request = lock_wb_request
         self.lock_wb_result = lock_wb_result
+        self.logger = getLogger("ApiWB")
 
     def start(self, name_of_sheet: str, who_is: str):
         """
@@ -31,6 +33,7 @@ class ApiWB(Converter):
         :param who_is: Чей токен используется
         :return:
         """
+        self.logger.info(f"Started: folder=WB, who_is={who_is}, name_of_sheet={name_of_sheet}")
         self.name_of_sheet = name_of_sheet
         if name_of_sheet == 'nm_report':
             return self.nm_report(who_is)
@@ -72,7 +75,7 @@ class ApiWB(Converter):
             return 'error'
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -114,17 +117,17 @@ class ApiWB(Converter):
             # Выбираем работу с таблицами и 4 версию API
             service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
         except httplib2.error.ServerNotFoundError:
-            logging.error(f"Google ({self.name_of_sheet}): ServerNotFound")
+            self.logger.error(f"Google ({self.name_of_sheet}): ServerNotFound")
             # print(f"Google({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
             self.result = 'ERROR: Проблема с соединением'
             return False
         except socket.gaierror:
-            logging.error(f"gaierror ({self.name_of_sheet})")
+            self.logger.error(f"gaierror ({self.name_of_sheet})")
             # print(f"The 'gaierror' has come!({self.name_of_sheet})\n")
             self.result = 'ERROR: Проблема с соединением'
             return False
-        # finally:
-            # print(f'Connected to Google({self.name_of_sheet})')
+        finally:
+            self.logger.info(f"Connected to Google({self.name_of_sheet})")
         self.service = service
         return True
 
@@ -185,23 +188,23 @@ class ApiWB(Converter):
         try:
             json_response, status_code = requestWB
         except TypeError:
-            logging.warning(f"Нет доступа к файлу")
+            self.logger.warning(f"Нет доступа к файлу")
             # print(f"Нет доступа к файлу ({self.name_of_sheet})")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
             case 'download':
-                logging.warning("Downloaded")
+                self.logger.warning("Downloaded")
                 # print(f"Downloaded {name_of_sheet}")
                 self.result = 'Зачем-то скачен файл'
                 return True
             case 'is None':
-                logging.warning("File = None")
+                self.logger.warning("File = None")
                 # print(f"File({self.name_of_sheet}) = None")
                 self.result = 'ERROR: File=None'
                 return True
             case 'is empty':
-                logging.warning("File is empty")
+                self.logger.warning("File is empty")
                 # print(f"File({self.name_of_sheet}) is empty")
                 self.result = 'ERROR: File is empty'
                 return True
@@ -237,9 +240,9 @@ class ApiWB(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Created new sheet '{name_of_sheet}'")
+        self.logger.info(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
@@ -271,9 +274,9 @@ class ApiWB(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.debug(f"Clearing complete ({name_of_sheet})")
+        self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:
@@ -301,9 +304,9 @@ class ApiWB(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Updating complete ({self.name_of_sheet})")
+        self.logger.info(f"Updating complete ({self.name_of_sheet})")
         # print(f"Updating complete ({self.name_of_sheet})!")
         with open('Wildberries/data/sheets.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
@@ -341,7 +344,7 @@ class ApiWB(Converter):
             return False
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return False
         return True
 
@@ -378,7 +381,7 @@ class ApiWB(Converter):
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
@@ -440,7 +443,7 @@ class ApiWB(Converter):
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
@@ -474,7 +477,7 @@ class ApiWB(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
                 with open('Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
@@ -499,7 +502,7 @@ class ApiWB(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
             return True
 
@@ -536,7 +539,7 @@ class ApiWB(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         last_week = (datetime.date.today() - timedelta(days=7)).isocalendar()[1]
         try:
@@ -555,7 +558,7 @@ class ApiWB(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
         return False
 

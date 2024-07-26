@@ -7,11 +7,13 @@ import requests
 import json
 import calendar
 import numpy
+from Logger.Logger import getLogger
 
 
 class RequestOzon:
     def __init__(self, lock_ozon_request: RLock):
         self.lock_ozon_request = lock_ozon_request
+        self.logger = getLogger("RequestOzon")
 
     def start(self, name_of_sheet: str, who_is: str):
         match name_of_sheet:
@@ -85,11 +87,11 @@ class RequestOzon:
         try:
             response = requests.post(url=url, headers=headers, json=params)
         except socket.gaierror:
-            logging.error(f"gaierror {name_of_sheet}")
+            self.logger.error(f"gaierror {name_of_sheet}")
             # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -108,7 +110,7 @@ class RequestOzon:
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response.status_code}")
@@ -128,11 +130,11 @@ class RequestOzon:
         try:
             response = requests.post(url=url, headers=headers, json=params)
         except socket.gaierror:
-            logging.error(f"gaierror {name_of_sheet}")
+            self.logger.error(f"gaierror {name_of_sheet}")
             # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -151,7 +153,7 @@ class RequestOzon:
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response.status_code}")
@@ -164,11 +166,11 @@ class RequestOzon:
         try:
             response = requests.post(url=url, headers=headers, json=params)
         except socket.gaierror:
-            logging.error(f"gaierror {name_of_sheet}")
+            self.logger.error(f"gaierror {name_of_sheet}")
             # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -187,7 +189,7 @@ class RequestOzon:
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response.status_code}")
@@ -217,11 +219,11 @@ class RequestOzon:
         try:
             response1 = requests.post(url, headers=headers, json=params1)
         except socket.gaierror:
-            logging.error(f"gaierror {name_of_sheet}")
+            self.logger.error(f"gaierror {name_of_sheet}")
             # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response1:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response1.status_code} ( {response1.reason} )")
+            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response1.status_code} ( {response1.reason} )")
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response1.status_code} ( {response1.reason} )")
@@ -240,7 +242,7 @@ class RequestOzon:
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response1.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.info(f"Http статус: {response1.status_code}, name_of_sheet: {name_of_sheet}")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response1.status_code}")
@@ -251,11 +253,11 @@ class RequestOzon:
         try:
             response2 = requests.post(url, headers=headers, json=params2)
         except socket.gaierror:
-            logging.error(f"gaierror {name_of_sheet}")
+            self.logger.error(f"gaierror {name_of_sheet}")
             # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response2:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response2.status_code} ( {response2.reason} )")
+            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response2.status_code} ( {response2.reason} )")
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response2.status_code} ( {response2.reason} )")
@@ -274,7 +276,7 @@ class RequestOzon:
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response2, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.info(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response2.status_code}")
@@ -298,8 +300,7 @@ class RequestOzon:
                 params = None
         return params
 
-    @staticmethod
-    def analytics(who_is: str) -> tuple[int, str] | str:
+    def analytics(self, who_is: str) -> tuple[int, str] | str:
         headers = {}
         with open("Ozon/data/id's.txt") as txt:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
@@ -352,11 +353,11 @@ class RequestOzon:
             try:
                 response = requests.post(url, headers=headers, json=params1)
             except socket.gaierror:
-                logging.error("gaierror analytics")
+                self.logger.error("gaierror analytics")
                 # print("The 'gaierror' has come (analytics)!\n")
                 return 'Проблема с соединением'
             if not response:
-                logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+                self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
                 # print("Ошибка выполнения запроса:")
                 # print(url)
                 # print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -375,7 +376,7 @@ class RequestOzon:
                 # with open('data.json', 'w', encoding='UTF-8') as d:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-                logging.info(f"Http статус: {response.status_code}, name_of_sheet: analytics")
+                self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: analytics")
                 # print("Успешно")
                 # print(url)
                 # print(f"Http статус: {response.status_code}")
@@ -392,11 +393,11 @@ class RequestOzon:
             try:
                 response = requests.post(url, headers=headers, json=params2)
             except socket.gaierror:
-                logging.error("gaierror analytics")
+                self.logger.error("gaierror analytics")
                 # print("The 'gaierror' has come (analytics)!\n")
                 return 'Проблема с соединением'
             if not response:
-                logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+                self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
                 # print("Ошибка выполнения запроса:")
                 # print(url)
                 # print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -415,7 +416,7 @@ class RequestOzon:
                 # with open('data.json', 'w', encoding='UTF-8') as d:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-                logging.info(f"Http статус: {response.status_code}, name_of_sheet: analytics")
+                self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: analytics")
                 # print("Успешно")
                 # print(url)
                 # print(f"Http статус: {response.status_code}")
@@ -436,7 +437,7 @@ class RequestOzon:
                 metrics_in_second_part = parts["second"][ids_of_second_part.index(id_in_first_part)]["metrics"]
                 parts["first"][ind]["metrics"].extend(metrics_in_second_part)
             except ValueError:
-                logging.error("WTF - analytics, Ozon")
+                self.logger.error("WTF - analytics, Ozon")
                 # print("WTF")
         # # Записываем данные в файл (убирать комментарий при необходимости)
         # with open('data.json', 'w', encoding='UTF-8') as d:
@@ -462,11 +463,11 @@ class RequestOzon:
             try:
                 response = requests.post(url=url, headers=headers, json=params)
             except socket.gaierror:
-                logging.error(f"gaierror prices")
+                self.logger.error(f"gaierror prices")
                 # print(f"The 'gaierror' has come (prices)!\n")
                 return 'Проблема с соединением'
             if not response:
-                logging.warning(
+                self.logger.warning(
                     f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
                 # print("Ошибка выполнения запроса:")
                 # print(url)
@@ -486,7 +487,7 @@ class RequestOzon:
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}, name_of_sheet: prices")
+            self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: prices")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response.status_code}")

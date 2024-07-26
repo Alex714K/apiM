@@ -8,9 +8,9 @@ import httplib2
 import apiclient
 import csv
 from oauth2client.service_account import ServiceAccountCredentials
-
 from Ozon.Converter_to_list_Ozon import Converter
 from Ozon.Request_Ozon import RequestOzon
+from Logger.Logger import getLogger
 
 
 class ApiOzon(Converter):
@@ -23,8 +23,10 @@ class ApiOzon(Converter):
         self.name_of_sheet = None
         self.lock_ozon_request = lock_ozon_request
         self.lock_ozon_result = lock_ozon_result
+        self.logger = getLogger("ApiOzon")
 
     def start(self, name_of_sheet: str, who_is: str):
+        self.logger.info(f"Started: folder=Ozon, who_is={who_is}, name_of_sheet={name_of_sheet}")
         if self.standart_start(name_of_sheet, who_is):
             return
         match name_of_sheet:
@@ -76,9 +78,11 @@ class ApiOzon(Converter):
         requestOzon = RequestOzon(self.lock_ozon_request).start(name_of_sheet, who_is)
         match requestOzon:
             case 'Missing json file':
-                self.result = 'ERROR: Не получен файл с WildBerries'
+                self.logger.warning("Не получен файл с Ozon")
+                self.result = 'ERROR: Не получен файл с Ozon'
                 return True
             case 'Проблема с соединением':
+                self.logger.warning("Проблема с соединением - RequestOzon")
                 self.result = 'ERROR: Проблема с соединением'
                 return True
         if type(requestOzon) == int and requestOzon != 200:
@@ -87,24 +91,21 @@ class ApiOzon(Converter):
         try:
             json_response = requestOzon
         except TypeError:
-            logging.warning(f"Нет доступа к файлу")
+            self.logger.warning(f"Нет доступа к файлу")
             # print(f"Нет доступа к файлу ({self.name_of_sheet})")
             return True
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
             case 'download':
-                logging.warning("Downloaded")
-                # print(f"Downloaded {name_of_sheet}")
+                self.logger.info("Downloaded")
                 self.result = 'Зачем-то скачен файл'
                 return True
             case 'is None':
-                logging.warning("File = None")
-                # print(f"File({self.name_of_sheet}) = None")
+                self.logger.warning("File = None")
                 self.result = 'ERROR: File=None'
                 return True
             case 'is empty':
-                logging.warning("File is empty")
-                # print(f"File({self.name_of_sheet}) is empty")
+                self.logger.warning("File is empty")
                 self.result = 'ERROR: File is empty'
                 return True
         self.values, self.dist, self.needed_keys = result
@@ -137,17 +138,15 @@ class ApiOzon(Converter):
             # Выбираем работу с таблицами и 4 версию API
             service = apiclient.discovery.build('sheets', 'v4', http=httpAuth)
         except httplib2.error.ServerNotFoundError:
-            logging.error(f"Google ({self.name_of_sheet}): ServerNotFound")
-            # print(f"Google ({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
+            self.logger.error(f"Google ({self.name_of_sheet}): ServerNotFound - connect_to_Google")
             self.result = 'ERROR: Проблема с соединением'
             return False
         except socket.gaierror:
-            logging.error(f"gaierror ({self.name_of_sheet})")
-            # print(f"The 'gaierror' has come! ({self.name_of_sheet})\n")
+            self.logger.error(f"gaierror ({self.name_of_sheet}) - connect_to_Google")
             self.result = 'ERROR: Проблема с соединением'
             return False
-        # finally:
-        #     print(f'Connected to Google ({self.name_of_sheet})')
+        finally:
+            self.logger.info("Connected to Google({self.name_of_sheet})")
         self.service = service
         return True
 
@@ -169,7 +168,7 @@ class ApiOzon(Converter):
             return 'error'
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return 'error'
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -227,9 +226,9 @@ class ApiOzon(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Created new sheet '{name_of_sheet}'")
+        self.logger.info(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
@@ -262,9 +261,9 @@ class ApiOzon(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Clearing complete ({name_of_sheet})")
+        self.logger.info(f"Clearing complete ({name_of_sheet})")
         # print(f"Clearing complete ({name_of_sheet})!")
         return False
 
@@ -293,9 +292,9 @@ class ApiOzon(Converter):
         #     return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        logging.info(f"Updating complete ({name_of_sheet})")
+        self.logger.info(f"Updating complete ({name_of_sheet})")
         # print(f"Updating complete ({name_of_sheet})!")
         with open('Ozon/data/sheets_Ozon.txt', 'r') as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
@@ -333,7 +332,7 @@ class ApiOzon(Converter):
             return False
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return False
         return True
 
@@ -368,7 +367,7 @@ class ApiOzon(Converter):
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
@@ -434,7 +433,7 @@ class ApiOzon(Converter):
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
@@ -468,7 +467,7 @@ class ApiOzon(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
                 with open('Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
@@ -493,6 +492,6 @@ class ApiOzon(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    logging.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
                     return False
             return True

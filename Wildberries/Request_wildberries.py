@@ -7,6 +7,7 @@ import datetime
 import json
 import socket
 from Initers import Getter
+from Logger.Logger import getLogger
 
 
 class RequestWildberries(Getter):
@@ -14,6 +15,7 @@ class RequestWildberries(Getter):
         super().__init__()
         self.name_of_sheet = None
         self.lock_wb_request = lock_wb_request
+        self.logger = getLogger("RequestWildberries")
 
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
@@ -28,7 +30,7 @@ class RequestWildberries(Getter):
             url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
             # print("Wrong name of sheet")
-            logging.critical("Wrong name of sheet!")
+            self.logger.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Токен
         with open('Wildberries/data/tokens.txt') as txt:
@@ -52,11 +54,11 @@ class RequestWildberries(Getter):
             else:
                 sys.exit('Man, you forget smth in Request_wildberries.py')
         except socket.gaierror:
-            logging.error(f"gaierror ({self.name_of_sheet})")
+            self.logger.error(f"gaierror ({self.name_of_sheet})")
             # print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
-            logging.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
+            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
             # print("Ошибка выполнения запроса:")
             # print(url)
             # print(f"Http статус: {response.status_code} ( {response.reason} )")
@@ -75,7 +77,7 @@ class RequestWildberries(Getter):
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            logging.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
+            self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             # print("Успешно")
             # print(url)
             # print(f"Http статус: {response.status_code}")
