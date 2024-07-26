@@ -81,7 +81,7 @@ class ApiWB(Converter):
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
             names_of_lists_and_codes.append([title, str(sheet_id)])
-        with open('Wildberries/data/sheets.txt', 'w') as txt:
+        with open('Wildberries/data/sheets.txt', 'w', encoding="UTF-8") as txt:
             txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
@@ -306,7 +306,7 @@ class ApiWB(Converter):
             return True
         self.logger.info(f"Updating complete ({self.name_of_sheet})")
         # print(f"Updating complete ({self.name_of_sheet})!")
-        with open('Wildberries/data/sheets.txt', 'r') as txt:
+        with open('Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
@@ -452,7 +452,7 @@ class ApiWB(Converter):
         При отсутствии листа Result создаёт таковой по макету.
         :return:
         """
-        with open('Wildberries/data/sheets.txt', 'r') as txt:
+        with open('Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
             except KeyError:
