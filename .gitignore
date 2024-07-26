@@ -1,4 +1,4 @@
 /.idea/
-update_all_statements.py
+plugins/update_all_statements.py
 data.*
 *.log
