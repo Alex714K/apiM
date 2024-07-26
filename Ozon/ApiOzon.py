@@ -1,13 +1,12 @@
 import datetime
 import logging
 import socket
-import sys
 import threading
 import googleapiclient.errors
 import httplib2
 import apiclient
+from google import auth
 import csv
-from oauth2client.service_account import ServiceAccountCredentials
 from Ozon.Converter_to_list_Ozon import Converter
 from Ozon.Request_Ozon import RequestOzon
 from Logger.Logger import getLogger
@@ -129,9 +128,9 @@ class ApiOzon(Converter):
         """
         CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
-                                                                       ['https://www.googleapis.com/auth/spreadsheets',
-                                                                        'https://www.googleapis.com/auth/drive'])
+        credentials = auth.load_credentials_from_file(CREDENTIALS_FILE,
+                                                      ['https://www.googleapis.com/auth/spreadsheets',
+                                                       'https://www.googleapis.com/auth/drive'])
         try:
             # Авторизуемся в системе
             httpAuth = credentials.authorize(httplib2.Http())

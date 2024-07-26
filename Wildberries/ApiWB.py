@@ -1,16 +1,14 @@
+import datetime
+import logging
 import socket
 import threading
-import time
 import googleapiclient.errors
 import httplib2
 import apiclient
-from oauth2client.service_account import ServiceAccountCredentials
+from google import auth
+import csv
 from Wildberries.Converter_to_list_WB import Converter
 from Wildberries.Request_wildberries import RequestWildberries
-import logging
-import csv
-from datetime import timedelta
-import datetime
 from Logger.Logger import getLogger
 
 
@@ -108,9 +106,9 @@ class ApiWB(Converter):
         """
         CREDENTIALS_FILE = 'Alex714K.json'
         # Читаем ключи из файла
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
-                                                                       ['https://www.googleapis.com/auth/spreadsheets',
-                                                                        'https://www.googleapis.com/auth/drive'])
+        credentials = auth.load_credentials_from_file(CREDENTIALS_FILE,
+                                                      ['https://www.googleapis.com/auth/spreadsheets',
+                                                       'https://www.googleapis.com/auth/drive'])
         try:
             # Авторизуемся в системе
             httpAuth = credentials.authorize(httplib2.Http())
@@ -541,7 +539,7 @@ class ApiWB(Converter):
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
             return True
-        last_week = (datetime.date.today() - timedelta(days=7)).isocalendar()[1]
+        last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
             getted = self.service.spreadsheets().values().batchUpdate(
                 spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
