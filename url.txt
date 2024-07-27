@@ -1,5 +1,0 @@
-https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod
-https://statistics-api.wildberries.ru/api/v3/supplier/reportDetailByPeriod
-
-v1 - до 29 января
-v3 - с 29 января
