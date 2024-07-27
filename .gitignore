@@ -4,4 +4,4 @@ data.*
 *.log
 /dist/
 /build/
-/test/
+test/
