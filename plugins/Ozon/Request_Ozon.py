@@ -436,12 +436,15 @@ class RequestOzon:
                 parts["first"][ind]["metrics"].extend(metrics_in_second_part)
             except ValueError:
                 self.logger.error("WTF - analytics, Ozon")
-                # print("WTF")
-        # # Записываем данные в файл (убирать комментарий при необходимости)
-        # with open('data/data.json', 'w', encoding='UTF-8') as d:
-        #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-        #     json.dump(parts["first"], d, ensure_ascii=False, indent=4)
-        return parts["first"]
+                break
+        else:
+            # # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data/data.json', 'w', encoding='UTF-8') as d:
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(parts["first"], d, ensure_ascii=False, indent=4)
+            return parts["first"]
+        parts = None
+        return self.analytics(who_is=who_is)
 
     def prices(self, who_is: str):
         headers = {}
