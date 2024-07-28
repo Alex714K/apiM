@@ -3,6 +3,5 @@ plugins/update_all_statements.py
 data.*
 *.log
 /dist/
-/build/
 test/
 work_with_statements.py
