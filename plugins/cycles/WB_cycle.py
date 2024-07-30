@@ -1,6 +1,7 @@
+import logging
+
 import schedule
 from plugins.Api import Api
-from plugins.Logger.Logger import getLogger
 
 
 def WB_cycle():
@@ -96,4 +97,4 @@ def WB_cycle():
     # Платное хранение
     # schedule.every().day.at('00:00').do(API.start, 'storage_paid', 'planeta', 'WB')
 
-    getLogger("extraInfo").info("WB scheduled")
+    logging.getLogger("extraInfo").info("WB scheduled")

@@ -1,6 +1,6 @@
+import logging
 import schedule
 from plugins.Api import Api
-from plugins.Logger.Logger import getLogger
 
 
 def Ozon_cycle():
@@ -22,4 +22,4 @@ def Ozon_cycle():
     schedule.every().day.at("16:20").do(API.start, 'orders_1week', 'grand', 'Ozon')
     schedule.every().day.at("16:25").do(API.start, 'orders_2days', 'grand', 'Ozon')
 
-    getLogger("extraInfo").info("Ozon scheduled")
+    logging.getLogger("extraInfo").info("Ozon scheduled")
