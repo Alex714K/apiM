@@ -1,4 +1,5 @@
 import datetime
+import os
 import socket
 from threading import RLock
 import time
@@ -57,11 +58,10 @@ class RequestOzon:
             response = requests.post(url=url, headers=headers)
 
     def orders(self, name_of_sheet: str, who_is: str):
-        headers = {}
-        with open("plugins/Ozon/data/id's.txt") as txt:
-            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        for key, value in data.items():
-            headers[key] = value
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
         url = "https://api-seller.ozon.ru/v1/analytics/data"
         today = datetime.date.today()
         match name_of_sheet:
@@ -115,11 +115,10 @@ class RequestOzon:
         return json_response
 
     def products(self, name_of_sheet: str, who_is: str):
-        headers = {}
-        with open("plugins/Ozon/data/id's.txt") as txt:
-            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        for key, value in data.items():
-            headers[key] = value
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
         url = "https://api-seller.ozon.ru/v1/report/products/create"
         params = {
             "language": "RU",
@@ -197,11 +196,10 @@ class RequestOzon:
         return file
 
     def stock_on_warehouses(self, name_of_sheet: str, who_is: str):
-        headers = {}
-        with open("plugins/Ozon/data/id's.txt") as txt:
-            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        for key, value in data.items():
-            headers[key] = value
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
         url = "https://api-seller.ozon.ru/v2/analytics/stock_on_warehouses"
         params1 = {
             "limit": 1000,
@@ -290,11 +288,10 @@ class RequestOzon:
         return params
 
     def analytics(self, who_is: str) -> tuple[int, str] | str:
-        headers = {}
-        with open("plugins/Ozon/data/id's.txt") as txt:
-            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        for key, value in data.items():
-            headers[key] = value
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
         url = "https://api-seller.ozon.ru/v1/analytics/data"
         today = datetime.date.today()
         if today.day == 1 and today.month == 1:
@@ -372,7 +369,6 @@ class RequestOzon:
                 first_part = numpy.array(json_response["result"]["data"])
                 parts["first"] = numpy.concatenate((parts["first"], first_part), axis=0)
                 # parts["first"].extend(first_part)
-                # print(len(json_response["result"]["data"]))
                 if len(json_response["result"]["data"]) != 1000:
                     break
                 time.sleep(60)
@@ -412,7 +408,6 @@ class RequestOzon:
                 second_part = numpy.array(json_response["result"]["data"])
                 parts["second"] = numpy.concatenate((parts["second"], second_part), axis=0)
                 # parts["second"].extend(second_part)
-                # print(len(json_response["result"]["data"]))
                 if len(json_response["result"]["data"]) != 1000:
                     break
                 time.sleep(60)
@@ -438,11 +433,10 @@ class RequestOzon:
         return self.analytics(who_is=who_is)
 
     def prices(self, who_is: str):
-        headers = {}
-        with open("plugins/Ozon/data/id's.txt") as txt:
-            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        for key, value in data.items():
-            headers[key] = value
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
         url = "https://api-seller.ozon.ru/v4/product/info/prices"
         last_id = ""
         file = list()

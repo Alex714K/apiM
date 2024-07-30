@@ -1,2 +1,0 @@
-Client-Id=1839589
-Api-Key=4ce46bf2-425d-4646-860a-7749f4c1fd41
