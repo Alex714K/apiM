@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 import csv
 from plugins.Wildberries.Converter_to_list_WB import Converter
 from plugins.Wildberries.Request_wildberries import RequestWildberries
-from plugins.Logger.Logger import getLogger
+from logging import getLogger
 
 
 class ApiWB(Converter):
@@ -379,7 +379,7 @@ class ApiWB(Converter):
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
@@ -393,28 +393,32 @@ class ApiWB(Converter):
         for i in range(len(values)):
             if '' in values[i]:
                 values[i] = values[i][:values[i].index('')]
-
-        ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
-        if bad:
-            if len(values[ind]) == 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind].extend(f"{self.result}")
-            elif len(values[ind]) > 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"{self.result}"
-            else:
-                values[ind].extend(
-                    [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
+        try:
+            ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
+        except ValueError:
+            values.append(
+                [name_of_sheet, '?', '?', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
         else:
-            if len(values[ind]) == 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind].extend(f"Успешно записано строк: {self.dist}")
-            elif len(values[ind]) > 4:
-                values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                values[ind][4] = f"Успешно записано строк: {self.dist}"
+            if bad:
+                if len(values[ind]) == 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind].extend(f"{self.result}")
+                elif len(values[ind]) > 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind][4] = f"{self.result}"
+                else:
+                    values[ind].extend(
+                        [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
             else:
-                values[ind].extend([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                    f"Успешно записано строк: {self.dist}"])
+                if len(values[ind]) == 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind].extend(f"Успешно записано строк: {self.dist}")
+                elif len(values[ind]) > 4:
+                    values[ind][3] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    values[ind][4] = f"Успешно записано строк: {self.dist}"
+                else:
+                    values[ind].extend([datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                        f"Успешно записано строк: {self.dist}"])
 
         # with open('plugins/Wildberries/data/info_about_Result.csv', 'w') as file:
         #     csv_file = csv.writer(file, lineterminator='\r')
@@ -441,7 +445,7 @@ class ApiWB(Converter):
             return
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
@@ -475,8 +479,7 @@ class ApiWB(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.log(level=logging.CRITICAL,
-                                    msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
                 with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
@@ -501,8 +504,7 @@ class ApiWB(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.log(level=logging.CRITICAL,
-                                    msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
                     return False
             return True
 
@@ -558,7 +560,7 @@ class ApiWB(Converter):
             return True
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
             return True
         return False
 

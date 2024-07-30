@@ -4,13 +4,12 @@ import uuid
 import requests
 import datetime
 import socket
-from plugins.Initers import Getter
-from plugins.Logger.Logger import getLogger
+from logging import getLogger
+import os
 
 
-class RequestWildberries(Getter):
+class RequestWildberries:
     def __init__(self, lock_wb_request: RLock):
-        super().__init__()
         self.name_of_sheet = None
         self.lock_wb_request = lock_wb_request
         self.logger = getLogger("RequestWildberries")
@@ -25,17 +24,21 @@ class RequestWildberries(Getter):
                 return self.nm_report(who_is)
         # Ссылка
         try:
-            url = self.parameters[f"url_{name_of_sheet}"]
+            url = os.getenv(f"Wildberries-url-{name_of_sheet}")
+            # url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
             # print("Wrong name of sheet")
             self.logger.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Токен
-        with open('plugins/Wildberries/data/tokens.txt') as txt:
-            tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        authorization = tokens[who_is]
+        # with open('plugins/Wildberries/data/tokens.txt') as txt:
+        #     tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        # authorization = tokens[who_is]
+        # headers = {
+        #     'Authorization': authorization
+        # }
         headers = {
-            'Authorization': authorization
+            "Authorization": os.getenv(f"Wildberries-token-{who_is}")
         }
         # Выполняем запрос
         try:
@@ -45,7 +48,7 @@ class RequestWildberries(Getter):
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
-            # Если через json
+            # Если через json и ссылк
             elif name_of_sheet in []:
                 params = self.make_params()
                 response = requests.get(url, headers=headers, json=params)
@@ -170,9 +173,9 @@ class RequestWildberries(Getter):
             case 'orders_1mnth':
                 params = {'dateFrom': (datetime.date.today() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")}
             case 'tariffs_boxes':
-                params = {'date': open('Wildberries/data/date_of_tariffs.txt', 'r').read()}
+                params = {'date': open('plugins/Wildberries/data/date_of_tariffs.txt', 'r').read()}
             case 'tariffs_pallet':
-                params = {'date': open('Wildberries/data/date_of_tariffs.txt', 'r').read()}
+                params = {'date': open('plugins/Wildberries/data/date_of_tariffs.txt', 'r').read()}
             case 'prices':
                 params = {'limit': 1000}
             case 'fixed_prices':
@@ -197,11 +200,14 @@ class RequestWildberries(Getter):
         url = 'https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads'
         iduu = str(uuid.uuid4())
         # Токен
-        with open('plugins/Wildberries/data/tokens.txt') as txt:
-            tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        authorization = tokens[who_is]
+        # with open('plugins/Wildberries/data/tokens.txt') as txt:
+        #     tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        # authorization = tokens[who_is]
+        # headers = {
+        #     'Authorization': authorization
+        # }
         headers = {
-            'Authorization': authorization
+            "Authorization": os.getenv(f"Wildberries-token-{who_is}")
         }
         # Параметры
         params = {

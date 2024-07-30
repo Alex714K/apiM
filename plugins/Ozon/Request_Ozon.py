@@ -5,7 +5,7 @@ import time
 import requests
 import calendar
 import numpy
-from plugins.Logger.Logger import getLogger
+from logging import getLogger
 
 
 class RequestOzon:
@@ -62,7 +62,7 @@ class RequestOzon:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
-        url = self.get_url('orders')
+        url = "https://api-seller.ozon.ru/v1/analytics/data"
         today = datetime.date.today()
         match name_of_sheet:
             case 'orders_1mnth':
@@ -120,7 +120,7 @@ class RequestOzon:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
-        url = self.get_url('products')
+        url = "https://api-seller.ozon.ru/v1/report/products/create"
         params = {
             "language": "RU",
             "visibility": "ALL"
@@ -157,7 +157,7 @@ class RequestOzon:
             # print(f"Http статус: {response.status_code}")
         code_of_report = json_response["result"]["code"]
         time.sleep(5)
-        url = self.get_url('products_get')
+        url = "https://api-seller.ozon.ru/v1/report/info"
         params = {
             "code": code_of_report
         }
@@ -202,7 +202,7 @@ class RequestOzon:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
-        url = self.get_url('stock_on_warehouses')
+        url = "https://api-seller.ozon.ru/v2/analytics/stock_on_warehouses"
         params1 = {
             "limit": 1000,
             "offset": 0
@@ -281,15 +281,6 @@ class RequestOzon:
             second_part = json_response2["result"]["rows"]
         first_part.extend(second_part)
         return first_part
-
-    @staticmethod
-    def get_url(name_of_sheet: str):
-        try:
-            with open("plugins/Ozon/data/all_urls_Ozon.txt") as txt:
-                url = dict(map(lambda x: x.split('='), txt.read().split('\n')))[name_of_sheet]
-        except KeyError:
-            return "Wrong 'name_of_sheet"
-        return url
 
     @staticmethod
     def make_params(name_of_sheet: str) -> dict | tuple[dict, dict] | None:
@@ -452,7 +443,7 @@ class RequestOzon:
             data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
         for key, value in data.items():
             headers[key] = value
-        url = self.get_url('prices')
+        url = "https://api-seller.ozon.ru/v4/product/info/prices"
         last_id = ""
         file = list()
         while True:

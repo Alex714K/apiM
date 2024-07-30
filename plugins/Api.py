@@ -1,5 +1,8 @@
+import os
+
 from plugins.Wildberries.ApiWB import ApiWB
 from plugins.Ozon.ApiOzon import ApiOzon
+from dotenv import load_dotenv
 import threading
 
 
@@ -9,6 +12,7 @@ class Api:
         self.lock_ozon_request = threading.RLock()
         self.lock_wb_result = threading.RLock()
         self.lock_ozon_result = threading.RLock()
+        load_dotenv()
 
     def start(self, name_of_sheet: str, who_is: str, folder: str):
         """

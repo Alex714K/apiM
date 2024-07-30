@@ -9,7 +9,8 @@ from googleapiclient.discovery import build
 import csv
 from plugins.Ozon.Converter_to_list_Ozon import Converter
 from plugins.Ozon.Request_Ozon import RequestOzon
-from plugins.Logger.Logger import getLogger
+from logging import getLogger
+import os
 
 
 class ApiOzon(Converter):
@@ -116,10 +117,11 @@ class ApiOzon(Converter):
         :param who_is:
         :return:
         """
-        with open('plugins/Ozon/data/spreadsheetIds_Ozon.txt', 'r') as txt:
-            data = txt.read().split('\n')
-        data = dict(map(lambda x: x.split('='), data))
-        self.spreadsheetId = data[who_is]
+        # with open('plugins/Ozon/data/spreadsheetIds_Ozon.txt', 'r') as txt:
+        #     data = txt.read().split('\n')
+        # data = dict(map(lambda x: x.split('='), data))
+        # self.spreadsheetId = data[who_is]
+        self.spreadsheetId = os.getenv(f"Ozon-spreadsheetid-{who_is}")
 
     def connect_to_Google(self) -> bool:
         """
@@ -331,7 +333,7 @@ class ApiOzon(Converter):
             return False
         except TimeoutError:
             self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
             return False
         return True
 
@@ -462,7 +464,7 @@ class ApiOzon(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
                     return False
                 values = list()
                 with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
@@ -487,6 +489,6 @@ class ApiOzon(Converter):
                     return False
                 except TimeoutError:
                     self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
                     return False
             return True

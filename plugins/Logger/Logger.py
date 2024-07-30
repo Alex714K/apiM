@@ -2,7 +2,7 @@ import logging
 import logging.config
 
 
-def getLogger(name_of_logger: str):
+def activate_loggers():
     dictLogConfig = {
         "version": 1,
         "handlers": {
@@ -59,4 +59,3 @@ def getLogger(name_of_logger: str):
         }
     }
     logging.config.dictConfig(dictLogConfig)
-    return logging.getLogger(name_of_logger)
