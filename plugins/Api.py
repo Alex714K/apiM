@@ -1,9 +1,9 @@
 import os
-
 from plugins.Wildberries.ApiWB import ApiWB
 from plugins.Ozon.ApiOzon import ApiOzon
 from dotenv import load_dotenv
 import threading
+from plugins.Logger.Logger import activate_loggers
 
 
 class Api:
@@ -13,6 +13,7 @@ class Api:
         self.lock_wb_result = threading.RLock()
         self.lock_ozon_result = threading.RLock()
         load_dotenv()
+        activate_loggers()
 
     def start(self, name_of_sheet: str, who_is: str, folder: str):
         """
