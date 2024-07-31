@@ -75,53 +75,12 @@ class ApiOzon(Converter):
         else:
             self.start_work_with_list_result(name_of_sheet="analytics", bad=True)
 
-    def start_work_with_request(self, name_of_sheet: str, who_is: str):
-        requestOzon = RequestOzon(self.lock_ozon_request).start(name_of_sheet, who_is)
-        match requestOzon:
-            case 'Missing json file':
-                self.logger.warning("Не получен файл с Ozon")
-                self.result = 'ERROR: Не получен файл с Ozon'
-                return True
-            case 'Проблема с соединением':
-                self.logger.warning("Проблема с соединением - RequestOzon")
-                self.result = 'ERROR: Проблема с соединением'
-                return True
-        if type(requestOzon) == int and requestOzon != 200:
-            self.result = f'ERROR: {requestOzon[1]}'
-            return True
-        try:
-            json_response = requestOzon
-        except TypeError:
-            self.logger.warning(f"Нет доступа к файлу")
-            # print(f"Нет доступа к файлу ({self.name_of_sheet})")
-            return True
-        result = self.convert_to_list(json_response, name_of_sheet)
-        match result:
-            case 'download':
-                self.logger.info("Downloaded")
-                self.result = 'Зачем-то скачен файл'
-                return True
-            case 'is None':
-                self.logger.warning("File = None")
-                self.result = 'ERROR: File=None'
-                return True
-            case 'is empty':
-                self.logger.warning("File is empty")
-                self.result = 'ERROR: File is empty'
-                return True
-        self.values, self.dist, self.needed_keys = result
-        return False
-
     def choose_spreadsheetId(self, who_is: str):
         """
         Записывает в self.spreadsheetId Id Таблицы, с которой надо будет работать.
         :param who_is:
         :return:
         """
-        # with open('plugins/Ozon/data/spreadsheetIds_Ozon.txt', 'r') as txt:
-        #     data = txt.read().split('\n')
-        # data = dict(map(lambda x: x.split('='), data))
-        # self.spreadsheetId = data[who_is]
         self.spreadsheetId = os.getenv(f"Ozon-spreadsheetid-{who_is}")
 
     def connect_to_Google(self) -> bool:
@@ -135,20 +94,15 @@ class ApiOzon(Converter):
         credentials = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE,
                                                                             scopes=scopes)
         try:
-            # Авторизуемся в системе
-            # httpAuth = credentials.authorize(httplib2.Http())
-            # Выбираем работу с таблицами и 4 версию API
             service = build('sheets', 'v4', credentials=credentials)
         except httplib2.error.ServerNotFoundError:
-            self.logger.error(f"Google ({self.name_of_sheet}): ServerNotFound - connect_to_Google")
-            self.result = 'ERROR: Проблема с соединением'
-            return False
+            self.logger.warning(f"Google ({self.name_of_sheet}): ServerNotFound")
+            return self.connect_to_Google()
         except socket.gaierror:
-            self.logger.error(f"gaierror ({self.name_of_sheet}) - connect_to_Google")
-            self.result = 'ERROR: Проблема с соединением'
-            return False
+            self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
+            return self.connect_to_Google()
         finally:
-            self.logger.info(f"Connected to Google({self.name_of_sheet})")
+            self.logger.debug(f"Connected to Google({self.name_of_sheet})")
         self.service = service
         return True
 
@@ -163,15 +117,14 @@ class ApiOzon(Converter):
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
-            return 'error'
+            self.logger.warning('Проблема с соединением Google')
+            return self.choose_name_of_sheet(name_of_sheet)
         except httplib2.error.ServerNotFoundError:
-            self.result = 'ERROR: Проблема с соединением'
-            return 'error'
+            self.logger.warning('Проблема с соединением (httplib)')
+            return self.choose_name_of_sheet(name_of_sheet)
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
-            return 'error'
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
         for one_sheet in sheets:
@@ -199,6 +152,43 @@ class ApiOzon(Converter):
             return False
         return True
 
+    def start_work_with_request(self, name_of_sheet: str, who_is: str):
+        requestOzon = RequestOzon(self.lock_ozon_request).start(name_of_sheet, who_is)
+        match requestOzon:
+            case 'Missing json file':
+                self.logger.warning("Не получен файл с Ozon")
+                self.result = 'ERROR: Не получен файл с Ozon'
+                return True
+            case 'Проблема с соединением':
+                self.logger.warning("Проблема с соединением - RequestOzon")
+                self.result = 'ERROR: Проблема с соединением'
+                return True
+        if type(requestOzon[0]) == int and requestOzon[0] != 200:
+            self.result = f'ERROR: {requestOzon[1]}'
+            return True
+        try:
+            json_response = requestOzon
+        except TypeError:
+            self.logger.warning(f"Нет доступа к файлу")
+            # print(f"Нет доступа к файлу ({self.name_of_sheet})")
+            return True
+        result = self.convert_to_list(json_response, name_of_sheet)
+        match result:
+            case 'download':
+                self.logger.info(f"Downloaded {name_of_sheet}")
+                self.result = 'Зачем-то скачен файл'
+                return True
+            case 'is None':
+                self.logger.warning(f"File({self.name_of_sheet}) = None")
+                self.result = 'ERROR: File=None'
+                return True
+            case 'is empty':
+                self.logger.warning(f"File({self.name_of_sheet}) is empty")
+                self.result = 'ERROR: File is empty'
+                return True
+        self.values, self.dist, self.needed_keys = result
+        return False
+
     def private_create(self, name_of_sheet: str) -> bool:
         """
         Функция, создающая лист под названием name_of_sheet.
@@ -224,13 +214,12 @@ class ApiOzon(Converter):
                 }]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
-        self.logger.info(f"Created new sheet '{name_of_sheet}'")
+        self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
@@ -241,7 +230,6 @@ class ApiOzon(Converter):
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
-        # print(f"\nStart clearing sheet '{name_of_sheet}'...")
         if name_of_sheet != "Result!A:E":
             dist = len(self.values[0])
             if dist % 26 == 0:
@@ -259,14 +247,12 @@ class ApiOzon(Converter):
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
-        self.logger.info(f"Clearing complete ({name_of_sheet})")
-        # print(f"Clearing complete ({name_of_sheet})!")
+        self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
     def private_update(self, name_of_sheet: str) -> bool:
@@ -278,7 +264,6 @@ class ApiOzon(Converter):
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        # print(f"\nStart updating sheet {name_of_sheet}...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
@@ -289,16 +274,15 @@ class ApiOzon(Converter):
                      }
                 ]
             }).execute()
-        # except googleapiclient.errors.HttpError:
-        #     self.result = 'ERROR: Проблема с соединением'
-        #     return True
-        except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google')
             return True
-        self.logger.info(f"Updating complete ({name_of_sheet})")
-        # print(f"Updating complete ({name_of_sheet})!")
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return True
+        self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         with open('plugins/Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
+            self.logger.debug(f"sheet_ids:{print(txt.read().split('\n'))}")
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
@@ -349,9 +333,7 @@ class ApiOzon(Converter):
         :return:
         """
         self.lock_ozon_result.acquire()
-        if not self.create_result():
-            self.lock_ozon_result.release()
-            return
+        self.create_result()
         try:
             getted = self.service.spreadsheets().values().batchGet(
                 spreadsheetId=self.spreadsheetId,
@@ -360,16 +342,15 @@ class ApiOzon(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
-
         try:
             values = getted['valueRanges'][0]['values']
         except KeyError:
@@ -426,19 +407,18 @@ class ApiOzon(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             self.lock_ozon_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
             return
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             self.lock_ozon_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         self.lock_ozon_result.release()
 
-    def create_result(self) -> bool:
+    def create_result(self) -> None:
         """
         При отсутствии листа Result создаёт таковой по макету.
         :return:
@@ -462,35 +442,35 @@ class ApiOzon(Converter):
                         }]
                     }).execute()
                 except googleapiclient.errors.HttpError:
-                    self.result = 'ERROR: Проблема с соединением'
-                    return False
+                    self.logger.warning('Проблема с соединением Google')
+                    return self.create_result()
                 except TimeoutError:
-                    self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
-                    return False
-                values = list()
-                with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
-                    csv_file = csv.reader(file)
-                    for i in csv_file:
-                        if '' == i:
-                            continue
-                        else:
-                            values.append(i)
-                try:
-                    getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                        "valueInputOption": "USER_ENTERED",
-                        "data": [
-                            {"range": "Result!A:E",
-                             "majorDimension": "ROWS",
-                             "values": values
-                             }
-                        ]
-                    }).execute()
-                except googleapiclient.errors.HttpError:
-                    self.result = 'ERROR: Проблема с соединением'
-                    return False
-                except TimeoutError:
-                    self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
-                    return False
-            return True
+                    self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                    return self.create_result()
+                self.insert_design_result()
+
+    def insert_design_result(self) -> None:
+        values = list()
+        with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
+            csv_file = csv.reader(file)
+            for i in csv_file:
+                if '' == i:
+                    continue
+                else:
+                    values.append(i)
+        try:
+            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "valueInputOption": "USER_ENTERED",
+                "data": [
+                    {"range": "Result!A:E",
+                     "majorDimension": "ROWS",
+                     "values": values
+                     }
+                ]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google')
+            return self.insert_design_result()
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.insert_design_result()

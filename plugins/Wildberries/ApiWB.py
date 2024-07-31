@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import socket
 import threading
 import googleapiclient.errors
@@ -66,15 +67,14 @@ class ApiWB(Converter):
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
-            return 'error'
+            self.logger.warning('Проблема с соединением Google')
+            return self.choose_name_of_sheet(name_of_sheet)
         except httplib2.error.ServerNotFoundError:
-            self.result = 'ERROR: Проблема с соединением'
-            return 'error'
+            self.logger.warning('Проблема с соединением (httplib)')
+            return self.choose_name_of_sheet(name_of_sheet)
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
-            return 'error'
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
         for one_sheet in sheets:
@@ -94,10 +94,7 @@ class ApiWB(Converter):
         :param who_is:
         :return:
         """
-        with open('plugins/Wildberries/data/spreadsheetIds.txt', 'r') as txt:
-            data = txt.read().split('\n')
-        data = dict(map(lambda x: x.split('='), data))
-        self.spreadsheetId = data[who_is]
+        self.spreadsheetId = os.getenv(f"Ozon-spreadsheetid-{who_is}")
 
     def connect_to_Google(self) -> bool:
         """
@@ -110,22 +107,15 @@ class ApiWB(Converter):
         credentials = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE,
                                                                             scopes=scopes)
         try:
-            # Авторизуемся в системе
-            # httpAuth = credentials.authorize(httplib2.Http())
-            # Выбираем работу с таблицами и 4 версию API
             service = build('sheets', 'v4', credentials=credentials)
         except httplib2.error.ServerNotFoundError:
-            self.logger.error(f"Google ({self.name_of_sheet}): ServerNotFound")
-            # print(f"Google({self.name_of_sheet}): 'ServerNotFound'...\nHOW?!\n")
-            self.result = 'ERROR: Проблема с соединением'
-            return False
+            self.logger.warning(f"Google ({self.name_of_sheet}): ServerNotFound")
+            return self.connect_to_Google()
         except socket.gaierror:
-            self.logger.error(f"gaierror ({self.name_of_sheet})")
-            # print(f"The 'gaierror' has come!({self.name_of_sheet})\n")
-            self.result = 'ERROR: Проблема с соединением'
-            return False
+            self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
+            return self.connect_to_Google()
         finally:
-            self.logger.info(f"Connected to Google({self.name_of_sheet})")
+            self.logger.debug(f"Connected to Google({self.name_of_sheet})")
         self.service = service
         return True
 
@@ -192,18 +182,15 @@ class ApiWB(Converter):
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
             case 'download':
-                self.logger.warning("Downloaded")
-                # print(f"Downloaded {name_of_sheet}")
+                self.logger.info(f"Downloaded {name_of_sheet}")
                 self.result = 'Зачем-то скачен файл'
                 return True
             case 'is None':
-                self.logger.warning("File = None")
-                # print(f"File({self.name_of_sheet}) = None")
+                self.logger.warning(f"File({self.name_of_sheet}) = None")
                 self.result = 'ERROR: File=None'
                 return True
             case 'is empty':
-                self.logger.warning("File is empty")
-                # print(f"File({self.name_of_sheet}) is empty")
+                self.logger.warning(f"File({self.name_of_sheet}) is empty")
                 self.result = 'ERROR: File is empty'
                 return True
         self.values, self.dist, self.needed_keys = result
@@ -234,13 +221,12 @@ class ApiWB(Converter):
                 }]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
-        self.logger.info(f"Created new sheet '{name_of_sheet}'")
+        self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         return False
@@ -268,11 +254,10 @@ class ApiWB(Converter):
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
@@ -286,7 +271,6 @@ class ApiWB(Converter):
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        # print(f"\nStart updating sheet {self.name_of_sheet}...")
         try:
             getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
@@ -298,16 +282,14 @@ class ApiWB(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
-        self.logger.info(f"Updating complete ({self.name_of_sheet})")
-        # print(f"Updating complete ({self.name_of_sheet})!")
+        self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
-            self.logger.debug(print(txt.read().split('\n')))
+            self.logger.debug(f"sheet_ids:{print(txt.read().split('\n'))}")
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
@@ -339,11 +321,10 @@ class ApiWB(Converter):
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return False
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return False
         return True
 
@@ -359,9 +340,7 @@ class ApiWB(Converter):
         """
         self.lock_wb_result.acquire()
         # print('Work result')
-        if not self.create_result():
-            self.lock_wb_result.release()
-            return
+        self.create_result()
         # with open('plugins/Wildberries/data/info_about_Result.csv', 'r') as file:
         #     csv_file = csv.reader(file, lineterminator='\r')
         #     for i in csv_file:
@@ -374,15 +353,14 @@ class ApiWB(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         try:
             values = getted['valueRanges'][0]['values']
@@ -440,19 +418,18 @@ class ApiWB(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
+            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         self.lock_wb_result.release()
 
-    def create_result(self) -> bool:
+    def create_result(self) -> None:
         """
         При отсутствии листа Result создаёт таковой по макету.
         :return:
@@ -476,38 +453,38 @@ class ApiWB(Converter):
                         }]
                     }).execute()
                 except googleapiclient.errors.HttpError:
-                    self.result = 'ERROR: Проблема с соединением'
-                    return False
+                    self.logger.warning('Проблема с соединением Google')
+                    return self.create_result()
                 except TimeoutError:
-                    self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
-                    return False
-                values = list()
-                with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
-                    csv_file = csv.reader(file)
-                    for i in csv_file:
-                        if '' == i:
-                            continue
-                        else:
-                            values.append(i)
-                try:
-                    getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                        "valueInputOption": "USER_ENTERED",
-                        "data": [
-                            {"range": "Result!A:E",
-                             "majorDimension": "ROWS",
-                             "values": values
-                             }
-                        ]
-                    }).execute()
-                except googleapiclient.errors.HttpError:
-                    self.result = 'ERROR: Проблема с соединением'
-                    return False
-                except TimeoutError:
-                    self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-                    self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
-                    return False
-            return True
+                    self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                    return self.create_result()
+                self.insert_design_result()
+
+    def insert_design_result(self) -> None:
+        values = list()
+        with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
+            csv_file = csv.reader(file)
+            for i in csv_file:
+                if '' == i:
+                    continue
+                else:
+                    values.append(i)
+        try:
+            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "valueInputOption": "USER_ENTERED",
+                "data": [
+                    {"range": "Result!A:E",
+                     "majorDimension": "ROWS",
+                     "values": values
+                     }
+                ]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google')
+            return self.insert_design_result()
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.insert_design_result()
 
     def start_work_with_statements(self, name_of_sheet: str, who_is: str):
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
@@ -538,11 +515,10 @@ class ApiWB(Converter):
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.log(level=logging.CRITICAL, msg='Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
@@ -557,11 +533,10 @@ class ApiWB(Converter):
                     ]
                 }).execute()
         except googleapiclient.errors.HttpError:
-            self.result = 'ERROR: Проблема с соединением'
+            self.logger.warning('Проблема с соединением Google')
             return True
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
-            self.logger.critical('Попытка установить соединение была безуспешной (с Google)')
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
         return False
 

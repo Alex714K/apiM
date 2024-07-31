@@ -25,18 +25,10 @@ class RequestWildberries:
         # Ссылка
         try:
             url = os.getenv(f"Wildberries-url-{name_of_sheet}")
-            # url = self.parameters[f"url_{name_of_sheet}"]
         except KeyError:
-            # print("Wrong name of sheet")
             self.logger.critical("Wrong name of sheet!")
             sys.exit("Wrong name of sheet!")
         # Токен
-        # with open('plugins/Wildberries/data/tokens.txt') as txt:
-        #     tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        # authorization = tokens[who_is]
-        # headers = {
-        #     'Authorization': authorization
-        # }
         headers = {
             "Authorization": os.getenv(f"Wildberries-token-{who_is}")
         }
@@ -55,14 +47,10 @@ class RequestWildberries:
             else:
                 sys.exit('Man, you forget smth in Request_wildberries.py')
         except socket.gaierror:
-            self.logger.error(f"gaierror ({self.name_of_sheet})")
-            # print(f"The 'gaierror' has come ({self.name_of_sheet})!\n")
+            self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
             return 'Проблема с соединением'
         if not response:
-            self.logger.warning(f"Ошибка выполнения запроса:\nHttp статус: {response.status_code} ( {response.reason} )")
-            # print("Ошибка выполнения запроса:")
-            # print(url)
-            # print(f"Http статус: {response.status_code} ( {response.reason} )")
+            self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
             #     return json.load(data)
             return response.status_code, response.reason
@@ -71,17 +59,14 @@ class RequestWildberries:
                 # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
-                # print(f"Missing json file in {self.name_of_sheet}")
+                self.logger.error(f"Missing json file in {self.name_of_sheet}")
                 return 'Missing json file'
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
             # with open('data.json', 'w', encoding='UTF-8') as d:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            self.logger.info(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
-            # print("Успешно")
-            # print(url)
-            # print(f"Http статус: {response.status_code}")
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             return json_response, response.status_code
 
     @staticmethod
