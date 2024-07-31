@@ -1,4 +1,4 @@
-import os
+import datetime
 from plugins.Wildberries.ApiWB import ApiWB
 from plugins.Ozon.ApiOzon import ApiOzon
 from dotenv import load_dotenv
@@ -21,12 +21,14 @@ class Api:
         """
         match folder:
             case 'WB':
+                name = f"WB, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
                 wb_thread = threading.Thread(target=ApiWB(self.lock_wb_request, self.lock_wb_result).start,
                                              args=(name_of_sheet, who_is),
-                                             name=f"WB, {name_of_sheet}, {who_is}")
+                                             name=name)
                 wb_thread.start()
             case 'Ozon':
+                name = f"Ozon, {name_of_sheet}, {who_is}, {datetime.date.today().strftime("%Y-%m-%d %H:%M:%S")}"
                 ozon_thread = threading.Thread(target=ApiOzon(self.lock_ozon_request, self.lock_ozon_result).start,
                                                args=(name_of_sheet, who_is),
-                                               name=f"Ozon, {name_of_sheet}, {who_is}")
+                                               name=name)
                 ozon_thread.start()
