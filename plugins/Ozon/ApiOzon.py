@@ -31,26 +31,26 @@ class ApiOzon(Converter):
             return
         match name_of_sheet:
             case 'analytics':
-                self.analytics_start(who_is)
+                self.analytics_start()
             case _:
                 self.standart_update(name_of_sheet, who_is)
 
     def standart_start(self, name_of_sheet: str, who_is: str):
         self.name_of_sheet = name_of_sheet
-        self.choose_spreadsheetId(who_is)
         if not self.connect_to_Google():
             return True
         if self.start_work_with_request(name_of_sheet, who_is):
             return True
 
     def standart_update(self, name_of_sheet: str, who_is: str):
+        self.choose_spreadsheetId(who_is)
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
         if new_or_not:
-            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+            check = self.create_sheet(name_of_sheet=name_of_sheet)
         else:
-            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+            check = self.update_sheet(name_of_sheet=name_of_sheet)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         elif self.result is not None:
@@ -58,15 +58,16 @@ class ApiOzon(Converter):
         else:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
-    def analytics_start(self, who_is: str):
+    def analytics_start(self):
+        self.choose_spreadsheetId('analytics')
         name_of_sheet = datetime.date.today().strftime("%b")
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
         if new_or_not:
-            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+            check = self.create_sheet(name_of_sheet=name_of_sheet)
         else:
-            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+            check = self.update_sheet(name_of_sheet=name_of_sheet)
         if check:
             self.start_work_with_list_result(name_of_sheet="analytics")
         elif self.result is not None:
@@ -184,14 +185,14 @@ class ApiOzon(Converter):
         else:
             return True
 
-    def create_sheet(self, name_of_sheet: str, who_is: str):
+    def create_sheet(self, name_of_sheet: str):
         if self.private_create(name_of_sheet=name_of_sheet):
             return False
         if self.private_update(name_of_sheet=name_of_sheet):
             return False
         return True
 
-    def update_sheet(self, name_of_sheet: str, who_is: str):
+    def update_sheet(self, name_of_sheet: str):
         if self.private_clear(name_of_sheet=name_of_sheet):
             return False
         if self.private_update(name_of_sheet=name_of_sheet):
