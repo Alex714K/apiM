@@ -33,7 +33,7 @@ def activate_loggers():
             },
             "extraInfo": {
                 "handlers": ["fileHandler", "consoleHandler"],
-                "level": "INFO",
+                "level": "DEBUG",
             },
             "RequestWB": {
                 "handlers": ["fileHandler"],
