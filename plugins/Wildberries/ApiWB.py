@@ -307,6 +307,7 @@ class ApiWB(Converter):
         self.logger.info(f"Updating complete ({self.name_of_sheet})")
         # print(f"Updating complete ({self.name_of_sheet})!")
         with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+            self.logger.debug(print(txt.read().split('\n')))
             sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
             sheetId = sheets[name_of_sheet]
         self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
