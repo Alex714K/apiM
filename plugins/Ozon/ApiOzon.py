@@ -383,7 +383,8 @@ class ApiOzon(Converter):
         try:
             ind = (list(map(lambda x: x[0], values))).index(name_of_sheet)
         except ValueError:
-            values.append([name_of_sheet, '?', '?', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
+            values.append(
+                [name_of_sheet, '?', '?', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"])
         else:
             if bad:
                 if len(values[ind]) == 4:
