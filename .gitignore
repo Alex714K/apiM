@@ -4,3 +4,7 @@ data.*
 *.log
 test/
 work_with_statements.py
+main_cycle.spec
+main_cycle.exe
+dist
+build
