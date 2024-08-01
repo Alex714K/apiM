@@ -43,13 +43,13 @@ class ApiWB(Converter):
         if name_of_sheet == 'statements':
             self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is)
             return
-        new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
-        if new_or_not == 'error':
-            return
-        if new_or_not:
-            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
-        else:
-            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+        # new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        # if new_or_not == 'error':
+        #     return
+        # if new_or_not:
+        #     check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+        # else:
+        check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         elif self.result is not None:

@@ -62,13 +62,13 @@ class ApiOzon(Converter):
     def analytics_start(self):
         self.choose_spreadsheetId('analytics')
         name_of_sheet = datetime.date.today().strftime("%b")
-        new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
-        if new_or_not == 'error':
-            return
-        if new_or_not:
-            check = self.create_sheet(name_of_sheet=name_of_sheet)
-        else:
-            check = self.update_sheet(name_of_sheet=name_of_sheet)
+        # new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        # if new_or_not == 'error':
+        #     return
+        # if new_or_not:
+        #     check = self.create_sheet(name_of_sheet=name_of_sheet)
+        # else:
+        check = self.update_sheet(name_of_sheet=name_of_sheet)
         if check:
             self.start_work_with_list_result(name_of_sheet="analytics")
         elif self.result is not None:
