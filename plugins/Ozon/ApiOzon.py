@@ -2,6 +2,7 @@ import datetime
 import logging
 import socket
 import threading
+import time
 import googleapiclient.errors
 import httplib2
 from google.oauth2 import service_account
@@ -97,9 +98,11 @@ class ApiOzon(Converter):
             service = build('sheets', 'v4', credentials=credentials)
         except httplib2.error.ServerNotFoundError:
             self.logger.warning(f"Google ({self.name_of_sheet}): ServerNotFound")
+            time.sleep(2)
             return self.connect_to_Google()
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
+            time.sleep(2)
             return self.connect_to_Google()
         finally:
             self.logger.debug(f"Connected to Google({self.name_of_sheet})")
