@@ -7,7 +7,7 @@ import time
 import googleapiclient.errors
 import httplib2
 from google.oauth2 import service_account
-from googleapiclient.discovery import build
+import googleapiclient.discovery
 import csv
 from plugins.Wildberries.Converter_to_list_WB import Converter
 from plugins.Wildberries.Request_wildberries import RequestWildberries
@@ -15,10 +15,10 @@ from logging import getLogger
 
 
 class ApiWB(Converter):
-    def __init__(self, lock_wb_request: threading.RLock, lock_wb_result: threading.RLock):
+    def __init__(self, service, lock_wb_request: threading.RLock, lock_wb_result: threading.RLock):
         super().__init__()
         self.spreadsheetId = None
-        self.service = None
+        self.service = service
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
@@ -38,8 +38,8 @@ class ApiWB(Converter):
         if name_of_sheet == 'nm_report':
             return self.nm_report(who_is)
         self.choose_spreadsheetId(who_is=who_is)
-        if not self.connect_to_Google():
-            return
+        # if not self.connect_to_Google():
+        #     return
         if name_of_sheet == 'statements':
             self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is)
             return
@@ -68,13 +68,16 @@ class ApiWB(Converter):
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - choose_name_of_sheet')
+            time.sleep(5)
             return self.choose_name_of_sheet(name_of_sheet)
         except httplib2.error.ServerNotFoundError:
             self.logger.warning('Проблема с соединением (httplib)')
+            time.sleep(5)
             return self.choose_name_of_sheet(name_of_sheet)
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(5)
             return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -108,7 +111,7 @@ class ApiWB(Converter):
         credentials = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE,
                                                                             scopes=scopes)
         try:
-            service = build('sheets', 'v4', credentials=credentials)
+            service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
         except httplib2.error.ServerNotFoundError:
             self.logger.warning(f"Google ({self.name_of_sheet}): ServerNotFound")
             time.sleep(2)
@@ -224,7 +227,7 @@ class ApiWB(Converter):
                 }]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - private_create')
             return True
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
@@ -257,7 +260,7 @@ class ApiWB(Converter):
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - private_clear')
             return True
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
@@ -285,27 +288,27 @@ class ApiWB(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - private_update')
             return True
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
-        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
-            self.logger.debug(f"sheet_ids:{print(txt.read().split('\n'))}")
-            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-            sheetId = sheets[name_of_sheet]
-        self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
+        # self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return False
 
-    def change_formats(self, needed_keys: list | None, sheetId: str):
+    def change_formats(self, needed_keys: list | None, name_of_sheet: str):
         """
         При наличии столбцов, требующих изменения формата на число с двумя знаками посе запятой, функция изменяет
         формат конкретно этих столбцов.
         :param needed_keys: Список индексов столбцов
-        :param sheetId: Id листа, в котором работаем
+        :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
+        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+            self.logger.debug(f"sheet_ids:{txt.read().split('\n')}")
+            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+            sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
         data = {"requests": []}
@@ -324,7 +327,7 @@ class ApiWB(Converter):
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - change_formats')
             return False
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
@@ -356,7 +359,7 @@ class ApiWB(Converter):
                 dateTimeRenderOption='FORMATTED_STRING'
             ).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - start_result1')
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
@@ -421,7 +424,7 @@ class ApiWB(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - start_result2')
             self.lock_wb_result.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
@@ -456,7 +459,7 @@ class ApiWB(Converter):
                         }]
                     }).execute()
                 except googleapiclient.errors.HttpError:
-                    self.logger.warning('Проблема с соединением Google')
+                    self.logger.warning('Проблема с соединением Google - create_result')
                     return self.create_result()
                 except TimeoutError:
                     self.logger.warning('Проблема с соединением Google (TimeoutError)')
@@ -483,7 +486,7 @@ class ApiWB(Converter):
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - insert_result')
             return self.insert_design_result()
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
@@ -518,7 +521,7 @@ class ApiWB(Converter):
             getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
                                                                 ).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - priv_update_statements1')
             return True
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
@@ -536,7 +539,7 @@ class ApiWB(Converter):
                     ]
                 }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google')
+            self.logger.warning('Проблема с соединением Google - priv_update_statements2')
             return True
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')

@@ -15,10 +15,10 @@ import os
 
 
 class ApiOzon(Converter):
-    def __init__(self, lock_ozon_request: threading.RLock, lock_ozon_result: threading.RLock):
+    def __init__(self, service, lock_ozon_request: threading.RLock, lock_ozon_result: threading.RLock):
         super().__init__()
         self.spreadsheetId = None
-        self.service = None
+        self.service = service
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
@@ -38,8 +38,8 @@ class ApiOzon(Converter):
 
     def standart_start(self, name_of_sheet: str, who_is: str):
         self.name_of_sheet = name_of_sheet
-        if not self.connect_to_Google():
-            return True
+        # if not self.connect_to_Google():
+        #     return True
         if self.start_work_with_request(name_of_sheet, who_is):
             return True
 
@@ -284,21 +284,21 @@ class ApiOzon(Converter):
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
             return True
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
-        with open('plugins/Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
-            self.logger.debug(f"sheet_ids:{print(txt.read().split('\n'))}")
-            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-            sheetId = sheets[name_of_sheet]
-        self.change_formats(needed_keys=self.needed_keys, sheetId=sheetId)
+        # self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return False
 
-    def change_formats(self, needed_keys: list | None, sheetId: str):
+    def change_formats(self, needed_keys: list | None, name_of_sheet: str):
         """
         При наличии столбцов, требующих изменения формата на число с двумя знаками посе запятой, функция изменяет
         формат конкретно этих столбцов.
         :param needed_keys: Список индексов столбцов
-        :param sheetId: Id листа, в котором работаем
+        :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
+        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+            self.logger.debug(f"sheet_ids:{txt.read().split('\n')}")
+            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+            sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
         data = {"requests": []}
