@@ -19,6 +19,7 @@ class Api:
         self.lock_ozon_request = threading.RLock()
         self.lock_wb_result = threading.RLock()
         self.lock_ozon_result = threading.RLock()
+        self.lock_Google = threading.Lock()
         self.logger = logging.getLogger()
         self.service = None
         load_dotenv()
@@ -32,13 +33,23 @@ class Api:
         match folder:
             case 'WB':
                 name = f"WB, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
-                wb_thread = threading.Thread(target=ApiWB(self.service, self.lock_wb_request, self.lock_wb_result).start,
+                locks = {
+                    "lock_wb_request": self.lock_wb_request,
+                    "lock_wb_result": self.lock_wb_result,
+                    "lock_Google": self.lock_Google
+                }
+                wb_thread = threading.Thread(target=ApiWB(self.service, **locks).start,
                                              args=(name_of_sheet, who_is),
                                              name=name)
                 wb_thread.start()
             case 'Ozon':
                 name = f"Ozon, {name_of_sheet}, {who_is}, {datetime.date.today().strftime("%Y-%m-%d %H:%M:%S")}"
-                ozon_thread = threading.Thread(target=ApiOzon(self.service, self.lock_ozon_request, self.lock_ozon_result).start,
+                locks = {
+                    "lock_ozon_request": self.lock_ozon_request,
+                    "lock_ozon_result": self.lock_ozon_result,
+                    "lock_Google": self.lock_Google
+                }
+                ozon_thread = threading.Thread(target=ApiOzon(self.service, **locks).start,
                                                args=(name_of_sheet, who_is),
                                                name=name)
                 ozon_thread.start()

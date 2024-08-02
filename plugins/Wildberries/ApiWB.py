@@ -15,15 +15,16 @@ from logging import getLogger
 
 
 class ApiWB(Converter):
-    def __init__(self, service, lock_wb_request: threading.RLock, lock_wb_result: threading.RLock):
+    def __init__(self, service: googleapiclient.discovery.build, **kwargs):
         super().__init__()
         self.spreadsheetId = None
         self.service = service
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
-        self.lock_wb_request = lock_wb_request
-        self.lock_wb_result = lock_wb_result
+        self.lock_wb_request = kwargs["lock_wb_request"]
+        self.lock_wb_result = kwargs["lock_wb_result"]
+        self.lock_Google = kwargs["lock_Google"]
         self.logger = getLogger("ApiWB")
 
     def start(self, name_of_sheet: str, who_is: str):
@@ -43,13 +44,13 @@ class ApiWB(Converter):
         if name_of_sheet == 'statements':
             self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is)
             return
-        # new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
-        # if new_or_not == 'error':
-        #     return
-        # if new_or_not:
-        #     check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
-        # else:
-        check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+        new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        if new_or_not == 'error':
+            return
+        if new_or_not:
+            check = self.create_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
+        else:
+            check = self.update_sheet(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         elif self.result is not None:
@@ -65,20 +66,21 @@ class ApiWB(Converter):
         :param name_of_sheet: Название листа
         :return: Возващает bool | str ответ результата определения
         """
-        try:
-            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - choose_name_of_sheet')
-            time.sleep(5)
-            return self.choose_name_of_sheet(name_of_sheet)
-        except httplib2.error.ServerNotFoundError:
-            self.logger.warning('Проблема с соединением (httplib)')
-            time.sleep(5)
-            return self.choose_name_of_sheet(name_of_sheet)
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            time.sleep(5)
-            return self.choose_name_of_sheet(name_of_sheet)
+        with self.lock_Google:
+            try:
+                sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+            except googleapiclient.errors.HttpError as err:
+                self.logger.warning(f'Проблема с соединением Google - choose_name_of_sheet {err}')
+                time.sleep(5)
+                return self.choose_name_of_sheet(name_of_sheet)
+            except httplib2.error.ServerNotFoundError:
+                self.logger.warning('Проблема с соединением (httplib)')
+                time.sleep(5)
+                return self.choose_name_of_sheet(name_of_sheet)
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                time.sleep(5)
+                return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
         for one_sheet in sheets:
@@ -98,7 +100,7 @@ class ApiWB(Converter):
         :param who_is:
         :return:
         """
-        self.spreadsheetId = os.getenv(f"Ozon-spreadsheetid-{who_is}")
+        self.spreadsheetId = os.getenv(f"Wildberries-spreadsheetid-{who_is}")
 
     def connect_to_Google(self) -> bool:
         """
@@ -212,26 +214,27 @@ class ApiWB(Converter):
         """
         columnCount = len(self.values[0])  # кол-во столбцов
         name_of_sheet = name_of_sheet
-        try:
-            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                "requests": [{
-                    "addSheet": {
-                        "properties": {
-                            "title": name_of_sheet,
-                            "gridProperties": {
-                                "rowCount": self.dist,
-                                "columnCount": columnCount
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "requests": [{
+                        "addSheet": {
+                            "properties": {
+                                "title": name_of_sheet,
+                                "gridProperties": {
+                                    "rowCount": self.dist,
+                                    "columnCount": columnCount
+                                }
                             }
                         }
-                    }
-                }]
-            }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - private_create')
-            return True
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return True
+                    }]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - private_create')
+                return True
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return True
         self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
@@ -256,15 +259,16 @@ class ApiWB(Converter):
             r = f"{name_of_sheet}!A:{needed_letter}"
         else:
             r = name_of_sheet
-        try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
-                                                                ).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - private_clear')
-            return True
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return True
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
+                                                                    ).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - private_clear')
+                return True
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return True
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
@@ -277,22 +281,23 @@ class ApiWB(Converter):
         distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                "valueInputOption": valueInputOption,
-                "data": [
-                    {"range": distance,
-                     "majorDimension": majorDimension,
-                     "values": self.values
-                     }
-                ]
-            }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - private_update')
-            return True
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return True
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "valueInputOption": valueInputOption,
+                    "data": [
+                        {"range": distance,
+                         "majorDimension": majorDimension,
+                         "values": self.values
+                         }
+                    ]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - private_update')
+                return True
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return True
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         # self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return False
@@ -324,14 +329,15 @@ class ApiWB(Converter):
                     "fields": "userEnteredFormat(numberFormat)"
                 }
             })
-        try:
-            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - change_formats')
-            return False
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return False
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - change_formats')
+                return False
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return False
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
@@ -351,23 +357,24 @@ class ApiWB(Converter):
         #     csv_file = csv.reader(file, lineterminator='\r')
         #     for i in csv_file:
         #         ans.append(i)
-        try:
-            getted = self.service.spreadsheets().values().batchGet(
-                spreadsheetId=self.spreadsheetId,
-                ranges="Result!A:E",
-                valueRenderOption='FORMATTED_VALUE',
-                dateTimeRenderOption='FORMATTED_STRING'
-            ).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - start_result1')
-            self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-            return
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-            return
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().batchGet(
+                    spreadsheetId=self.spreadsheetId,
+                    ranges="Result!A:E",
+                    valueRenderOption='FORMATTED_VALUE',
+                    dateTimeRenderOption='FORMATTED_STRING'
+                ).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - start_result1')
+                self.lock_wb_result.release()
+                self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+                return
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                self.lock_wb_result.release()
+                self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+                return
         try:
             values = getted['valueRanges'][0]['values']
         except KeyError:
@@ -413,26 +420,27 @@ class ApiWB(Converter):
 
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                "valueInputOption": valueInputOption,
-                "data": [
-                    {"range": "Result!A:E",
-                     "majorDimension": majorDimension,
-                     "values": values
-                     }
-                ]
-            }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - start_result2')
-            self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-            return
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            self.lock_wb_result.release()
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-            return
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "valueInputOption": valueInputOption,
+                    "data": [
+                        {"range": "Result!A:E",
+                         "majorDimension": majorDimension,
+                         "values": values
+                         }
+                    ]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - start_result2')
+                self.lock_wb_result.release()
+                self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+                return
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                self.lock_wb_result.release()
+                self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+                return
         self.lock_wb_result.release()
 
     def create_result(self) -> None:
@@ -444,26 +452,27 @@ class ApiWB(Converter):
             try:
                 check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
             except KeyError:
-                try:
-                    getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                        "requests": [{
-                            "addSheet": {
-                                "properties": {
-                                    "title": "Result",
-                                    "gridProperties": {
-                                        "rowCount": 100,
-                                        "columnCount": 26
+                with self.lock_Google:
+                    try:
+                        getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                            "requests": [{
+                                "addSheet": {
+                                    "properties": {
+                                        "title": "Result",
+                                        "gridProperties": {
+                                            "rowCount": 100,
+                                            "columnCount": 26
+                                        }
                                     }
                                 }
-                            }
-                        }]
-                    }).execute()
-                except googleapiclient.errors.HttpError:
-                    self.logger.warning('Проблема с соединением Google - create_result')
-                    return self.create_result()
-                except TimeoutError:
-                    self.logger.warning('Проблема с соединением Google (TimeoutError)')
-                    return self.create_result()
+                            }]
+                        }).execute()
+                    except googleapiclient.errors.HttpError:
+                        self.logger.warning('Проблема с соединением Google - create_result')
+                        return self.create_result()
+                    except TimeoutError:
+                        self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                        return self.create_result()
                 self.insert_design_result()
 
     def insert_design_result(self) -> None:
@@ -475,22 +484,23 @@ class ApiWB(Converter):
                     continue
                 else:
                     values.append(i)
-        try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                "valueInputOption": "USER_ENTERED",
-                "data": [
-                    {"range": "Result!A:E",
-                     "majorDimension": "ROWS",
-                     "values": values
-                     }
-                ]
-            }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - insert_result')
-            return self.insert_design_result()
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return self.insert_design_result()
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "valueInputOption": "USER_ENTERED",
+                    "data": [
+                        {"range": "Result!A:E",
+                         "majorDimension": "ROWS",
+                         "values": values
+                         }
+                    ]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - insert_result')
+                return self.insert_design_result()
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return self.insert_design_result()
 
     def start_work_with_statements(self, name_of_sheet: str, who_is: str):
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
@@ -517,33 +527,35 @@ class ApiWB(Converter):
         # need = list()
         # for info in getted:
         #     need.append([info['properties']['title'], info['properties']['sheetId']])
-        try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
-                                                                ).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - priv_update_statements1')
-            return True
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return True
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+                                                                    ).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - priv_update_statements1')
+                return True
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return True
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
-        try:
-            getted = self.service.spreadsheets().values().batchUpdate(
-                spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
-                    "valueInputOption": 'USER_ENTERED',
-                    "data": [
-                        {"range": str(last_week),
-                         "majorDimension": 'ROWS',
-                         "values": self.values
-                         }
-                    ]
-                }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - priv_update_statements2')
-            return True
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            return True
+        with self.lock_Google:
+            try:
+                getted = self.service.spreadsheets().values().batchUpdate(
+                    spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
+                        "valueInputOption": 'USER_ENTERED',
+                        "data": [
+                            {"range": str(last_week),
+                             "majorDimension": 'ROWS',
+                             "values": self.values
+                             }
+                        ]
+                    }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - priv_update_statements2')
+                return True
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return True
         return False
 
     def nm_report(self, who_is: str):
