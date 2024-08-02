@@ -36,7 +36,7 @@ class RequestWildberries:
         try:
             # Если только через ссылку
             if name_of_sheet in ['stocks', 'orders_1mnth', 'orders_1week', 'orders_2days', 'orders_today',
-                                 'tariffs_boxes', 'tariffs_pallet', 'statements', 'prices', 'rk']:
+                                 'tariffs_boxes', 'tariffs_pallet', 'statements', 'prices', 'fixed_prices', 'rk']:
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
@@ -45,6 +45,7 @@ class RequestWildberries:
                 params = self.make_params()
                 response = requests.get(url, headers=headers, json=params)
             else:
+                self.logger.critical('Man, you forget smth in Request_wildberries.py')
                 sys.exit('Man, you forget smth in Request_wildberries.py')
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
