@@ -1,4 +1,5 @@
 import datetime
+import http.client
 import logging
 import os
 import socket
@@ -80,6 +81,9 @@ class ApiWB(Converter):
             return self.choose_name_of_sheet(name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -236,6 +240,9 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_create(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_create(name_of_sheet)
         self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
@@ -272,6 +279,9 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_clear(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_clear(name_of_sheet)
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
@@ -302,6 +312,9 @@ class ApiWB(Converter):
             return self.private_update(name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.private_update(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.private_update(name_of_sheet)
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
@@ -344,6 +357,9 @@ class ApiWB(Converter):
             return self.change_formats(needed_keys, name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.change_formats(needed_keys, name_of_sheet)
         return True
 
@@ -458,6 +474,10 @@ class ApiWB(Converter):
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             self.lock_wb_result.release()
             return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            self.lock_wb_result.release()
+            return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         self.lock_wb_result.release()
 
     def create_result(self) -> None:
@@ -492,6 +512,9 @@ class ApiWB(Converter):
                 except ssl.SSLError as err:
                     self.logger.warning(f'Ужасная ошибка ssl: {err}')
                     return self.create_result()
+                except http.client.ResponseNotReady as err:
+                    self.logger.warning(f'Проблема с http: {err}')
+                    return self.create_result()
         values = list()
         with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
             csv_file = csv.reader(file)
@@ -521,6 +544,9 @@ class ApiWB(Converter):
             return self.insert_design_result(values)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.insert_design_result(values)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.insert_design_result(values)
 
     def start_work_with_statements(self, name_of_sheet: str, who_is: str):
@@ -560,6 +586,9 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_update_statements(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_update_statements(name_of_sheet)
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
             getted = self.service.spreadsheets().values().batchUpdate(
@@ -580,6 +609,9 @@ class ApiWB(Converter):
             return self.private_update_statements(name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.private_update_statements(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.private_update_statements(name_of_sheet)
         return False
 

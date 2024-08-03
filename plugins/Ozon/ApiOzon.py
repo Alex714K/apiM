@@ -1,4 +1,5 @@
 import datetime
+import http.client
 import logging
 import socket
 import ssl
@@ -130,6 +131,9 @@ class ApiOzon(Converter):
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError) - choose_name_of_sheet')
             return self.choose_name_of_sheet(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
         for one_sheet in sheets:
@@ -228,6 +232,9 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_create(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_create(name_of_sheet)
         self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
@@ -264,6 +271,9 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_clear(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_clear(name_of_sheet)
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
@@ -294,6 +304,9 @@ class ApiOzon(Converter):
             return self.private_update(name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.private_update(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.private_update(name_of_sheet)
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
@@ -338,6 +351,9 @@ class ApiOzon(Converter):
             return self.change_formats(needed_keys, name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.change_formats(needed_keys, name_of_sheet)
         return True
 
@@ -445,6 +461,10 @@ class ApiOzon(Converter):
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             self.lock_ozon_result.release()
             return self.start_work_with_list_result(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            self.lock_ozon_result.release()
+            return self.start_work_with_list_result(name_of_sheet)
         self.lock_ozon_result.release()
 
     def create_result(self) -> None:
@@ -479,6 +499,9 @@ class ApiOzon(Converter):
                 except ssl.SSLError as err:
                     self.logger.warning(f'Ужасная ошибка ssl: {err}')
                     return self.create_result()
+                except http.client.ResponseNotReady as err:
+                    self.logger.warning(f'Проблема с http: {err}')
+                    return self.create_result()
         values = list()
         with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
             csv_file = csv.reader(file)
@@ -508,4 +531,7 @@ class ApiOzon(Converter):
             return self.insert_design_result(values)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.insert_design_result(values)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
             return self.insert_design_result(values)
