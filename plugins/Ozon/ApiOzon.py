@@ -131,6 +131,9 @@ class ApiOzon(Converter):
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError) - choose_name_of_sheet')
             return self.choose_name_of_sheet(name_of_sheet)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
             return self.choose_name_of_sheet(name_of_sheet)
