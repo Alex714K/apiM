@@ -41,10 +41,11 @@ class Api:
                     "LockWbFile_ChangeFormats": self.LockWbFile_ChangeFormats,
                     "lock_Google": self.lock_Google,
                 }
-                wb_thread = threading.Thread(target=ApiWB(self.service, **locks).start,
-                                             args=(name_of_sheet, who_is),
-                                             name=name)
-                wb_thread.start()
+                # wb_thread = threading.Thread(target=ApiWB(self.service, **locks).start,
+                #                              args=(name_of_sheet, who_is),
+                #                              name=name)
+                # wb_thread.start()
+                ApiWB(self.service, **locks).start(name_of_sheet, who_is)
             case 'Ozon':
                 name = f"Ozon, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
                 locks = {
@@ -53,10 +54,11 @@ class Api:
                     "LockOzonFile_ChangeFormats": self.LockOzonFile_ChangeFormats,
                     "lock_Google": self.lock_Google
                 }
-                ozon_thread = threading.Thread(target=ApiOzon(self.service, **locks).start,
-                                               args=(name_of_sheet, who_is),
-                                               name=name)
-                ozon_thread.start()
+                # ozon_thread = threading.Thread(target=ApiOzon(self.service, **locks).start,
+                #                                args=(name_of_sheet, who_is),
+                #                                name=name)
+                # ozon_thread.start()
+                ApiOzon(self.service, **locks).start(name_of_sheet, who_is)
 
     def connect_to_Google(self) -> bool:
         """
