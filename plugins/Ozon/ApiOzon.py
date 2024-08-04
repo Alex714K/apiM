@@ -372,7 +372,7 @@ class ApiOzon(Converter):
             self.logger.warning('Проблема с соединением Google - change_formats')
             return self.change_formats(needed_keys, name_of_sheet)
         except TimeoutError:
-            self.logger.critical('Попытка установить соединение была безуспешной (с Google) - change_formats')
+            self.logger.warning('Попытка установить соединение была безуспешной (с Google) - change_formats')
             return self.change_formats(needed_keys, name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
