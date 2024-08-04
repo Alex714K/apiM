@@ -363,7 +363,6 @@ class ApiWB(Converter):
         sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
-        print(needed_keys)
         data = {"requests": []}
         for i in needed_keys:
             data["requests"].append({
