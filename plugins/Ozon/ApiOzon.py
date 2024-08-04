@@ -368,8 +368,8 @@ class ApiOzon(Converter):
             })
         try:
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - change_formats')
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - change_formats {err}')
             return self.change_formats(needed_keys, name_of_sheet)
         except TimeoutError:
             self.logger.warning('Попытка установить соединение была безуспешной (с Google) - change_formats')
