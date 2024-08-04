@@ -1,10 +1,8 @@
 import datetime
 import http.client
-import logging
 import os
 import socket
 import ssl
-import threading
 import time
 import googleapiclient.errors
 import httplib2
@@ -24,8 +22,10 @@ class ApiWB(Converter):
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
-        self.lock_wb_request = kwargs["lock_wb_request"]
-        self.lock_wb_result = kwargs["lock_wb_result"]
+        self.who_is = None
+        self.LockWbRequest = kwargs["LockWbRequest"]
+        self.LockWbResult = kwargs["LockWbResult"]
+        self.LockWbFile_ChangeFormats = kwargs["LockWbFile_ChangeFormats"]
         self.lock_Google = kwargs["lock_Google"]
         self.logger = getLogger("ApiWB")
 
@@ -38,6 +38,7 @@ class ApiWB(Converter):
         """
         self.logger.info(f"Started: folder=WB, who_is={who_is}, name_of_sheet={name_of_sheet}")
         self.name_of_sheet = name_of_sheet
+        self.who_is = who_is
         if name_of_sheet == 'nm_report':
             return self.nm_report(who_is)
         self.choose_spreadsheetId(who_is=who_is)
@@ -82,8 +83,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.choose_name_of_sheet(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -91,8 +98,9 @@ class ApiWB(Converter):
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
             names_of_lists_and_codes.append([title, str(sheet_id)])
-        with open('plugins/Wildberries/data/sheets.txt', 'w', encoding="UTF-8") as txt:
-            txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
+        # with open('plugins/Wildberries/data/sheets.txt', 'w', encoding="UTF-8") as txt:
+        #     txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
+        os.environ[f"sheetIDs-{self.who_is}"] = ';'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes)))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
         else:
@@ -174,7 +182,7 @@ class ApiWB(Converter):
         :param who_is: Чей токен используется
         :return: Возвращает bool ответ результата запроса
         """
-        requestWB = RequestWildberries(self.lock_wb_request).start(name_of_sheet=name_of_sheet, who_is=who_is)
+        requestWB = RequestWildberries(self.LockWbRequest).start(name_of_sheet=name_of_sheet, who_is=who_is)
         match requestWB:
             case 'Missing json file':
                 self.result = 'ERROR: Не получен файл с WildBerries'
@@ -240,8 +248,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_create(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_create(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_create(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_create(name_of_sheet)
         self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
@@ -279,8 +293,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_clear(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_clear(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_clear(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_clear(name_of_sheet)
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
@@ -313,8 +333,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_update(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_update(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_update(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_update(name_of_sheet)
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
@@ -328,10 +354,13 @@ class ApiWB(Converter):
         :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
-        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
-            self.logger.debug(f"sheet_ids:{txt.read().split('\n')}")
-            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-            sheetId = sheets[name_of_sheet]
+        # with self.LockWbFile_ChangeFormats:
+        #     with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+        #         data = txt.read()
+        #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
+        #         sheetId = sheets[name_of_sheet]
+        sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
+        sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
         data = {"requests": []}
@@ -358,10 +387,15 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.change_formats(needed_keys, name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
             return self.change_formats(needed_keys, name_of_sheet)
-        return True
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            return self.change_formats(needed_keys, name_of_sheet)
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
         """
@@ -373,7 +407,7 @@ class ApiWB(Converter):
         :param bad: Успешно или нет
         :return:
         """
-        self.lock_wb_result.acquire()
+        self.LockWbResult.acquire()
         # print('Work result')
         self.create_result()
         # with open('plugins/Wildberries/data/info_about_Result.csv', 'r') as file:
@@ -389,12 +423,12 @@ class ApiWB(Converter):
         #     ).execute()
         # except googleapiclient.errors.HttpError:
         #     self.logger.warning('Проблема с соединением Google - start_result1')
-        #     self.lock_wb_result.release()
+        #     self.LockWbResult.release()
         #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         #     return
         # except TimeoutError:
         #     self.logger.warning('Проблема с соединением Google (TimeoutError)')
-        #     self.lock_wb_result.release()
+        #     self.LockWbResult.release()
         #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         #     return
         design_of_result = []
@@ -408,7 +442,7 @@ class ApiWB(Converter):
         # try:
         #     values = getted['valueRanges'][0]['values']
         # except KeyError:
-        #     self.lock_wb_result.release()
+        #     self.LockWbResult.release()
         #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         #     return
         # очистка от лишних пустых элементов списка (а они бывают)
@@ -462,23 +496,31 @@ class ApiWB(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - start_result2')
-            self.lock_wb_result.release()
+            self.LockWbResult.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            self.lock_wb_result.release()
+            self.LockWbResult.release()
             self.start_work_with_list_result(name_of_sheet=name_of_sheet)
             return
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
-            self.lock_wb_result.release()
+            self.LockWbResult.release()
+            return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            self.LockWbResult.release()
             return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
-            self.lock_wb_result.release()
+            self.LockWbResult.release()
             return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-        self.lock_wb_result.release()
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            self.LockWbResult.release()
+            return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
+        self.LockWbResult.release()
 
     def create_result(self) -> None:
         """
@@ -487,7 +529,8 @@ class ApiWB(Converter):
         """
         with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
             try:
-                check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
+                # check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
+                check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
             except KeyError:
                 try:
                     getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -512,8 +555,14 @@ class ApiWB(Converter):
                 except ssl.SSLError as err:
                     self.logger.warning(f'Ужасная ошибка ssl: {err}')
                     return self.create_result()
+                except OSError as err:
+                    self.logger.warning(f'Вероятно TimeOutError: {err}')
+                    return self.create_result()
                 except http.client.ResponseNotReady as err:
                     self.logger.warning(f'Проблема с http: {err}')
+                    return self.create_result()
+                except Exception as err:
+                    self.logger.error(f"Ошибка: {err}")
                     return self.create_result()
         values = list()
         with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
@@ -545,8 +594,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.insert_design_result(values)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.insert_design_result(values)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.insert_design_result(values)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.insert_design_result(values)
 
     def start_work_with_statements(self, name_of_sheet: str, who_is: str):
@@ -586,8 +641,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_update_statements(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_update_statements(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_update_statements(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_update_statements(name_of_sheet)
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
@@ -610,8 +671,14 @@ class ApiWB(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_update_statements(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_update_statements(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_update_statements(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_update_statements(name_of_sheet)
         return False
 

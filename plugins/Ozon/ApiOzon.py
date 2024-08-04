@@ -1,9 +1,7 @@
 import datetime
 import http.client
-import logging
 import socket
 import ssl
-import threading
 import time
 import googleapiclient.errors
 import httplib2
@@ -24,8 +22,9 @@ class ApiOzon(Converter):
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
-        self.lock_ozon_request = kwargs["lock_ozon_request"]
-        self.lock_ozon_result = kwargs["lock_ozon_result"]
+        self.LockOzonRequest = kwargs["LockOzonRequest"]
+        self.LockOzonResult = kwargs["LockOzonResult"]
+        self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
         self.lock_Google = kwargs["lock_Google"]
         self.logger = getLogger("ApiOzon")
 
@@ -134,8 +133,14 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.choose_name_of_sheet(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.choose_name_of_sheet(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.choose_name_of_sheet(name_of_sheet)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -165,7 +170,7 @@ class ApiOzon(Converter):
         return True
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
-        requestOzon = RequestOzon(self.lock_ozon_request).start(name_of_sheet, who_is)
+        requestOzon = RequestOzon(self.LockOzonRequest).start(name_of_sheet, who_is)
         match requestOzon:
             case 'Missing json file':
                 self.logger.warning("Не получен файл с Ozon - start_work_with_request")
@@ -235,8 +240,14 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_create(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_create(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_create(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_create(name_of_sheet)
         self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         # print(f"\nCreated new sheet '{name_of_sheet}'")
@@ -274,8 +285,14 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_clear(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_clear(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_clear(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_clear(name_of_sheet)
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
@@ -308,8 +325,14 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.private_update(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_update(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.private_update(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.private_update(name_of_sheet)
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
@@ -323,10 +346,11 @@ class ApiOzon(Converter):
         :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
-        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
-            self.logger.debug(f"sheet_ids:{txt.read().split('\n')}")
-            sheets = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-            sheetId = sheets[name_of_sheet]
+        with self.LockOzonFile_ChangeFormats:
+            with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+                data = txt.read()
+                sheets = dict(map(lambda x: x.split('='), data.split('\n')))
+                sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
         data = {"requests": []}
@@ -346,17 +370,21 @@ class ApiOzon(Converter):
             getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - change_formats')
-            self.result = 'ERROR: Проблема с соединением'
             return self.change_formats(needed_keys, name_of_sheet)
         except TimeoutError:
-            self.result = 'ERROR: Проблема с соединением (TimeoutError)'
             self.logger.critical('Попытка установить соединение была безуспешной (с Google) - change_formats')
             return self.change_formats(needed_keys, name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.change_formats(needed_keys, name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.change_formats(needed_keys, name_of_sheet)
         return True
 
@@ -370,7 +398,7 @@ class ApiOzon(Converter):
         :param bad: Успешно или нет
         :return:
         """
-        self.lock_ozon_result.acquire()
+        self.LockOzonResult.acquire()
         self.create_result()
         # try:
         #     getted = self.service.spreadsheets().values().batchGet(
@@ -381,12 +409,12 @@ class ApiOzon(Converter):
         #     ).execute()
         # except googleapiclient.errors.HttpError:
         #     self.logger.warning('Проблема с соединением Google - start_work_with_list_result')
-        #     self.lock_ozon_result.release()
+        #     self.LockOzonResult.release()
         #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         #     return
         # except TimeoutError:
         #     self.logger.warning('Проблема с соединением Google (TimeoutError) - start_work_with_list_result')
-        #     self.lock_ozon_result.release()
+        #     self.LockOzonResult.release()
         #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         #     return
         design_of_result = []
@@ -400,7 +428,7 @@ class ApiOzon(Converter):
         # try:
         #     values = getted['valueRanges'][0]['values']
         # except KeyError:
-        #     self.lock_ozon_result.release()
+        #     self.LockOzonResult.release()
         #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         #     return
         # очистка от лишних пустых элементов списка (а они бывают)
@@ -454,21 +482,29 @@ class ApiOzon(Converter):
             }).execute()
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - start_work_with_list_result')
-            self.lock_ozon_result.release()
+            self.LockOzonResult.release()
             return self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError) - start_work_with_list_result')
-            self.lock_ozon_result.release()
+            self.LockOzonResult.release()
             return self.start_work_with_list_result(name_of_sheet=name_of_sheet)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
-            self.lock_ozon_result.release()
+            self.LockOzonResult.release()
+            return self.start_work_with_list_result(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            self.LockOzonResult.release()
             return self.start_work_with_list_result(name_of_sheet)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
-            self.lock_ozon_result.release()
+            self.LockOzonResult.release()
             return self.start_work_with_list_result(name_of_sheet)
-        self.lock_ozon_result.release()
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            self.LockOzonResult.release()
+            return self.start_work_with_list_result(name_of_sheet )
+        self.LockOzonResult.release()
 
     def create_result(self) -> None:
         """
@@ -502,8 +538,14 @@ class ApiOzon(Converter):
                 except ssl.SSLError as err:
                     self.logger.warning(f'Ужасная ошибка ssl: {err}')
                     return self.create_result()
+                except OSError as err:
+                    self.logger.warning(f'Вероятно TimeOutError: {err}')
+                    return self.create_result()
                 except http.client.ResponseNotReady as err:
                     self.logger.warning(f'Проблема с http: {err}')
+                    return self.create_result()
+                except Exception as err:
+                    self.logger.error(f"Ошибка: {err}")
                     return self.create_result()
         values = list()
         with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
@@ -535,6 +577,12 @@ class ApiOzon(Converter):
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             return self.insert_design_result(values)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.insert_design_result(values)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            return self.insert_design_result(values)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
             return self.insert_design_result(values)

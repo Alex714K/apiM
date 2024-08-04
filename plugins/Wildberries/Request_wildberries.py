@@ -9,9 +9,9 @@ import os
 
 
 class RequestWildberries:
-    def __init__(self, lock_wb_request: RLock):
+    def __init__(self, LockWbRequest: RLock):
         self.name_of_sheet = None
-        self.lock_wb_request = lock_wb_request
+        self.LockWbRequest = LockWbRequest
         self.logger = getLogger("RequestWildberries")
 
     def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):

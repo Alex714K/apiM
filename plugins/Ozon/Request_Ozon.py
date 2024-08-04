@@ -10,8 +10,8 @@ from logging import getLogger
 
 
 class RequestOzon:
-    def __init__(self, lock_ozon_request: RLock):
-        self.lock_ozon_request = lock_ozon_request
+    def __init__(self, LockOzonRequest: RLock):
+        self.LockOzonRequest = LockOzonRequest
         self.logger = getLogger("RequestOzon")
 
     def start(self, name_of_sheet: str, who_is: str):
