@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # API.start('statements', 'planeta', 'WB')
     # API.start('nm_report', 'grand', 'WB')
     # Ozon
-    # API.start('analytics', 'analytics', 'Ozon')
+    # API.start('analytics', 'grand', 'Ozon')
     # API.start('stock_on_warehouses', 'grand', 'Ozon')
     # API.start('products', 'grand', 'Ozon')
     # API.start('prices', 'grand', 'Ozon')
