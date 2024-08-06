@@ -22,6 +22,7 @@ class ApiOzon(Converter):
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
+        self.who_is = None
         self.LockOzonRequest = kwargs["LockOzonRequest"]
         self.LockOzonResult = kwargs["LockOzonResult"]
         self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
@@ -40,6 +41,7 @@ class ApiOzon(Converter):
 
     def standart_start(self, name_of_sheet: str, who_is: str):
         self.name_of_sheet = name_of_sheet
+        self.who_is = who_is
         # if not self.connect_to_Google():
         #     return True
         if self.start_work_with_request(name_of_sheet, who_is):
@@ -148,8 +150,9 @@ class ApiOzon(Converter):
             title = one_sheet.get("properties", {}).get("title", "Sheet1")
             sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
             names_of_lists_and_codes.append([title, str(sheet_id)])
-        with open('plugins/Ozon/data/sheets_Ozon.txt', 'w', encoding="UTF-8") as txt:
-            txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
+        # with open('plugins/Ozon/data/sheets_Ozon.txt', 'w', encoding="UTF-8") as txt:
+        #     txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
+        os.environ[f"sheetIDs-{self.who_is}"] = ';'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes)))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
         else:
@@ -346,11 +349,13 @@ class ApiOzon(Converter):
         :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
-        with self.LockOzonFile_ChangeFormats:
-            with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
-                data = txt.read()
-                sheets = dict(map(lambda x: x.split('='), data.split('\n')))
-                sheetId = sheets[name_of_sheet]
+        # with self.LockOzonFile_ChangeFormats:
+        #     with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+        #         data = txt.read()
+        #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
+        #         sheetId = sheets[name_of_sheet]
+        sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
+        sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
         data = {"requests": []}
@@ -513,42 +518,41 @@ class ApiOzon(Converter):
         При отсутствии листа Result создаёт таковой по макету.
         :return:
         """
-        with open('plugins/Ozon/data/sheets_Ozon.txt', 'r', encoding="UTF-8") as txt:
+        try:
+            check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
+        except KeyError:
             try:
-                check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
-            except KeyError:
-                try:
-                    getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                        "requests": [{
-                            "addSheet": {
-                                "properties": {
-                                    "title": "Result",
-                                    "gridProperties": {
-                                        "rowCount": 100,
-                                        "columnCount": 26
-                                    }
+                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "requests": [{
+                        "addSheet": {
+                            "properties": {
+                                "title": "Result",
+                                "gridProperties": {
+                                    "rowCount": 100,
+                                    "columnCount": 26
                                 }
                             }
-                        }]
-                    }).execute()
-                except googleapiclient.errors.HttpError:
-                    self.logger.warning('Проблема с соединением Google - create_result')
-                    return self.create_result()
-                except TimeoutError:
-                    self.logger.warning('Проблема с соединением Google (TimeoutError) - create_result')
-                    return self.create_result()
-                except ssl.SSLError as err:
-                    self.logger.warning(f'Ужасная ошибка ssl: {err}')
-                    return self.create_result()
-                except OSError as err:
-                    self.logger.warning(f'Вероятно TimeOutError: {err}')
-                    return self.create_result()
-                except http.client.ResponseNotReady as err:
-                    self.logger.warning(f'Проблема с http: {err}')
-                    return self.create_result()
-                except Exception as err:
-                    self.logger.error(f"Ошибка: {err}")
-                    return self.create_result()
+                        }
+                    }]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - create_result')
+                return self.create_result()
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError) - create_result')
+                return self.create_result()
+            except ssl.SSLError as err:
+                self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                return self.create_result()
+            except OSError as err:
+                self.logger.warning(f'Вероятно TimeOutError: {err}')
+                return self.create_result()
+            except http.client.ResponseNotReady as err:
+                self.logger.warning(f'Проблема с http: {err}')
+                return self.create_result()
+            except Exception as err:
+                self.logger.error(f"Ошибка: {err}")
+                return self.create_result()
         values = list()
         with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
             csv_file = csv.reader(file)

@@ -529,43 +529,41 @@ class ApiWB(Converter):
         При отсутствии листа Result создаёт таковой по макету.
         :return:
         """
-        with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+        try:
+            check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
+        except KeyError:
             try:
-                # check = dict(map(lambda x: x.split('='), txt.read().split('\n')))['Result']
-                check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
-            except KeyError:
-                try:
-                    getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                        "requests": [{
-                            "addSheet": {
-                                "properties": {
-                                    "title": "Result",
-                                    "gridProperties": {
-                                        "rowCount": 100,
-                                        "columnCount": 26
-                                    }
+                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "requests": [{
+                        "addSheet": {
+                            "properties": {
+                                "title": "Result",
+                                "gridProperties": {
+                                    "rowCount": 100,
+                                    "columnCount": 26
                                 }
                             }
-                        }]
-                    }).execute()
-                except googleapiclient.errors.HttpError:
-                    self.logger.warning('Проблема с соединением Google - create_result')
-                    return self.create_result()
-                except TimeoutError:
-                    self.logger.warning('Проблема с соединением Google (TimeoutError)')
-                    return self.create_result()
-                except ssl.SSLError as err:
-                    self.logger.warning(f'Ужасная ошибка ssl: {err}')
-                    return self.create_result()
-                except OSError as err:
-                    self.logger.warning(f'Вероятно TimeOutError: {err}')
-                    return self.create_result()
-                except http.client.ResponseNotReady as err:
-                    self.logger.warning(f'Проблема с http: {err}')
-                    return self.create_result()
-                except Exception as err:
-                    self.logger.error(f"Ошибка: {err}")
-                    return self.create_result()
+                        }
+                    }]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - create_result')
+                return self.create_result()
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                return self.create_result()
+            except ssl.SSLError as err:
+                self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                return self.create_result()
+            except OSError as err:
+                self.logger.warning(f'Вероятно TimeOutError: {err}')
+                return self.create_result()
+            except http.client.ResponseNotReady as err:
+                self.logger.warning(f'Проблема с http: {err}')
+                return self.create_result()
+            except Exception as err:
+                self.logger.error(f"Ошибка: {err}")
+                return self.create_result()
         values = list()
         with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
             csv_file = csv.reader(file)
