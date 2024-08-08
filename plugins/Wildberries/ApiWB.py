@@ -41,12 +41,12 @@ class ApiWB(Converter):
         self.who_is = who_is
         if name_of_sheet == 'nm_report':
             return self.nm_report(who_is)
-        self.choose_spreadsheetId(who_is=who_is)
         # if not self.connect_to_Google():
         #     return
         if name_of_sheet == 'statements':
             self.start_work_with_statements(name_of_sheet=name_of_sheet, who_is=who_is)
             return
+        self.choose_spreadsheetId(who_is=who_is)
         new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         if new_or_not == 'error':
             return
@@ -67,7 +67,7 @@ class ApiWB(Converter):
 
         P.S. Не читать код, пожалеете =)
         :param name_of_sheet: Название листа
-        :return: Возващает bool | str ответ результата определения
+        :return: Возващает bool ответ результата определения
         """
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
@@ -410,29 +410,7 @@ class ApiWB(Converter):
         :return:
         """
         self.LockWbResult.acquire()
-        # print('Work result')
         self.create_result()
-        # with open('plugins/Wildberries/data/info_about_Result.csv', 'r') as file:
-        #     csv_file = csv.reader(file, lineterminator='\r')
-        #     for i in csv_file:
-        #         ans.append(i)
-        # try:
-        #     getted = self.service.spreadsheets().values().batchGet(
-        #         spreadsheetId=self.spreadsheetId,
-        #         ranges="Result!A:E",
-        #         valueRenderOption='FORMATTED_VALUE',
-        #         dateTimeRenderOption='FORMATTED_STRING'
-        #     ).execute()
-        # except googleapiclient.errors.HttpError:
-        #     self.logger.warning('Проблема с соединением Google - start_result1')
-        #     self.LockWbResult.release()
-        #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-        #     return
-        # except TimeoutError:
-        #     self.logger.warning('Проблема с соединением Google (TimeoutError)')
-        #     self.LockWbResult.release()
-        #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-        #     return
         design_of_result = []
         with open("plugins/Wildberries/data/info_about_Result.csv", encoding="UTF-8") as file:
             reader = csv.reader(file)
@@ -441,12 +419,6 @@ class ApiWB(Converter):
                     continue
                 else:
                     design_of_result.append(row)
-        # try:
-        #     values = getted['valueRanges'][0]['values']
-        # except KeyError:
-        #     self.LockWbResult.release()
-        #     self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-        #     return
         # очистка от лишних пустых элементов списка (а они бывают)
         for i in range(len(design_of_result)):
             if '' in design_of_result[i]:
@@ -530,7 +502,14 @@ class ApiWB(Converter):
         :return:
         """
         try:
-            check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
+            if self.name_of_sheet == 'statements':
+                check = dict(
+                    map(
+                        lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}-statements").split(';')
+                    )
+                )['Result']
+            else:
+                check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
         except KeyError:
             try:
                 getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -605,6 +584,12 @@ class ApiWB(Converter):
             return self.insert_design_result(values)
 
     def start_work_with_statements(self, name_of_sheet: str, who_is: str):
+        self.choose_spreadsheetId(who_is=f"{who_is}-statements")
+        # Кастыль, чтобы не переделывать весь код TODO Сделай нормально, блин
+        self.who_is, who_is = f"{self.who_is}-statements", self.who_is
+        self.choose_name_of_sheet(name_of_sheet)
+        self.who_is = who_is
+
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
         if check:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
@@ -629,11 +614,13 @@ class ApiWB(Converter):
         # need = list()
         # for info in getted:
         #     need.append([info['properties']['title'], info['properties']['sheetId']])
+        last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=name_of_sheet
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId,
+                                                                range=last_week
                                                                 ).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - priv_update_statements1')
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - priv_update_statements1 - {err}')
             return self.private_update_statements(name_of_sheet)
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
