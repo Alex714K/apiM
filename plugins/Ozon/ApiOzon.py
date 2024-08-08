@@ -66,7 +66,11 @@ class ApiOzon(Converter):
     def analytics_start(self):
         self.choose_spreadsheetId('analytics')
         name_of_sheet = datetime.date.today().strftime("%b")
+        # Кастыль, чтобы не переделывать весь код TODO Сделай нормально, блин
+        self.who_is, who_is = f"{self.who_is}-analytics", self.who_is
         self.choose_name_of_sheet(name_of_sheet)
+        self.who_is = who_is
+
         # new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
         # if new_or_not == 'error':
         #     return
@@ -520,7 +524,14 @@ class ApiOzon(Converter):
         :return:
         """
         try:
-            check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
+            if self.name_of_sheet == 'analytics':
+                check = dict(
+                    map(
+                        lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(';')
+                    )
+                )['Result']
+            else:
+                check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
         except KeyError:
             try:
                 getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
