@@ -126,7 +126,7 @@ class Converter:
 
     def stock_on_warehouses(self, file: list | dict):
         keys = ["sku", "warehouse_name", "item_code", "item_name", "promised_amount", "free_to_sell_amount",
-                "reserved_amount"]
+                "reserved_amount", "idc"]
         ans = numpy.array([keys])
         for row in file:
             values = list(row.values())
