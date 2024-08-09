@@ -64,7 +64,7 @@ class ApiOzon(Converter):
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
     def analytics_start(self):
-        self.choose_spreadsheetId('analytics')
+        self.choose_spreadsheetId(f"{self.who_is}-analytics")
         name_of_sheet = datetime.date.today().strftime("%b")
         # Кастыль, чтобы не переделывать весь код TODO Сделай нормально, блин
         self.who_is, who_is = f"{self.who_is}-analytics", self.who_is
@@ -359,7 +359,10 @@ class ApiOzon(Converter):
         #         data = txt.read()
         #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
         #         sheetId = sheets[name_of_sheet]
-        sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
+        if self.name_of_sheet == 'analytics':
+            sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(";")))
+        else:
+            sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
         sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return
