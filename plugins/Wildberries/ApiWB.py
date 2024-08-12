@@ -359,7 +359,10 @@ class ApiWB(Converter):
         #         data = txt.read()
         #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
         #         sheetId = sheets[name_of_sheet]
-        sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
+        if name_of_sheet == 'statements':
+            sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")))
+        else:
+            sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
         sheetId = sheets[name_of_sheet]
         if needed_keys == None:
             return

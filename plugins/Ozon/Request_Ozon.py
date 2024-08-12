@@ -333,6 +333,7 @@ class RequestOzon:
                     break
                 time.sleep(60)
                 params1["offset"] += 1000
+        time.sleep(60)
         while True:
             # Второй запрос
             try:
