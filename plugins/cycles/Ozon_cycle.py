@@ -18,7 +18,7 @@ def Ozon_cycle():
     schedule.every().day.at("02:45").do(API.start, 'orders_1week', 'grand', 'Ozon')
     schedule.every().day.at("02:50").do(API.start, 'orders_2days', 'grand', 'Ozon')
     # Вечер гранд
-    schedule.every().day.at("08:20").do(API.start, 'analytics', 'grand', 'Ozon')
+    schedule.every().day.at("08:00").do(API.start, 'analytics', 'grand', 'Ozon')
     schedule.every().day.at("08:25").do(API.start, 'stock_on_warehouses', 'grand', 'Ozon')
     schedule.every().day.at("08:30").do(API.start, 'products', 'grand', 'Ozon')
     schedule.every().day.at("08:35").do(API.start, 'orders_1mnth', 'grand', 'Ozon')
