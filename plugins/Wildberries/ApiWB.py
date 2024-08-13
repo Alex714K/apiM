@@ -72,10 +72,7 @@ class ApiWB(Converter, GoogleMainFunctions):
 
     def statements_update(self, who_is):
         self.choose_spreadsheetId(who_is=f"{who_is}-statements")
-        # Кастыль, чтобы не переделывать весь код TODO Сделай нормально, блин
-        self.who_is, who_is = f"{self.who_is}-statements", self.who_is
-        self.choose_name_of_sheet("statements", who_is)
-        self.who_is = who_is
+        self.choose_name_of_sheet("statements", f"{self.who_is}-statements")
 
         # if new_or_not:
         # if self.private_create(name_of_sheet):
