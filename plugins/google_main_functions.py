@@ -1,0 +1,267 @@
+import datetime
+import http.client
+import socket
+import ssl
+import sys
+import time
+import googleapiclient.errors
+import httplib2
+import csv
+import os
+
+
+class GoogleMainFunctions:
+    def __init__(self):
+        self.logger = None
+
+        self.spreadsheetId = None
+        self.service = None
+        self.values, self.dist, self.needed_keys = None, None, None
+        self.result = None
+        self.name_of_sheet = None
+        self.who_is = None
+
+    def choose_name_of_sheet(self, name_of_sheet, who_is) -> bool | str:
+        """
+        Определяет, нужен ли создать новый лист или нет.
+
+        P.S. Не читать код, пожалеете =)
+        :param name_of_sheet: Название листа
+        :param who_is: Чей токен используется
+        :return: Возващает bool ответ результата определения
+        """
+        try:
+            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - choose_name_of_sheet - {err}')
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        except httplib2.error.ServerNotFoundError:
+            self.logger.warning('Проблема с соединением (httplib)')
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            return self.choose_name_of_sheet(name_of_sheet, who_is)
+        names_of_lists_and_codes = list()
+        sheets = sheet_metadata.get('sheets', '')
+        for one_sheet in sheets:
+            title = one_sheet.get("properties", {}).get("title", "Sheet1")
+            sheet_id = one_sheet.get("properties", {}).get("sheetId", 0)
+            names_of_lists_and_codes.append([title, str(sheet_id)])
+        # with open('plugins/Wildberries/data/sheets.txt', 'w', encoding="UTF-8") as txt:
+        #     txt.write('\n'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes))))
+        os.environ[f"sheetIDs-{who_is}"] = ';'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes)))
+        if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
+            return False
+        else:
+            return True
+
+    def create_sheet(self, name_of_sheet: str):
+        if self.private_create(name_of_sheet=name_of_sheet):
+            return False
+        if self.private_update(name_of_sheet=name_of_sheet):
+            return False
+        return True
+
+    def update_sheet(self, name_of_sheet: str):
+        if self.private_clear(name_of_sheet=name_of_sheet):
+            return False
+        if self.private_update(name_of_sheet=name_of_sheet):
+            return False
+        return True
+
+    def private_create(self, name_of_sheet: str) -> bool:
+        """
+        Функция, создающая лист под названием name_of_sheet.
+
+        ВНИМАНИЕ!!! Не следует создавать лист при наличии листа с тем же названием. Не известны последствия
+        :param name_of_sheet: Название листа
+        :return: Возвращает bool ответ результата создания
+        """
+        columnCount = len(self.values[0])  # кол-во столбцов
+        try:
+            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "requests": [{
+                    "addSheet": {
+                        "properties": {
+                            "title": name_of_sheet,
+                            "gridProperties": {
+                                "rowCount": self.dist,
+                                "columnCount": columnCount
+                            }
+                        }
+                    }
+                }]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google - private_create')
+            return self.private_create(name_of_sheet)
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.private_create(name_of_sheet)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.private_create(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_create(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_create(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            return self.private_create(name_of_sheet)
+        self.logger.debug(f"Created new sheet '{name_of_sheet}'")
+        self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
+        return False
+
+    def private_clear(self, name_of_sheet: str) -> bool:
+        """
+        Функция, очищающая лист под название name_of_sheet
+        :param name_of_sheet: Название листа
+        :return: Возвращает bool ответ результата очистки
+        """
+        if name_of_sheet != "Result!A:E":
+            dist = len(self.values[0])
+            if dist % 26 == 0:
+                needed_letter = chr(ord('A') + 26 - 1)
+            else:
+                needed_letter = chr(ord('A') + dist % 26 - 1)
+            if dist > 26 and dist % 26 == 0:
+                needed_letter = f"{chr(ord("A") - 1 + (dist // 26 - 1))}{needed_letter}"
+            elif dist > 26:
+                needed_letter = f"{chr(ord("A") - 1 + (dist // 26))}{needed_letter}"
+            r = f"{name_of_sheet}!A:{needed_letter}"
+        else:
+            r = name_of_sheet
+        try:
+            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
+                                                                ).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google - private_clear')
+            return self.private_clear(name_of_sheet)
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.private_clear(name_of_sheet)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.private_clear(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_clear(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_clear(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            return self.private_clear(name_of_sheet)
+        self.logger.debug(f"Clearing complete ({name_of_sheet})")
+        return False
+
+    def private_update(self, name_of_sheet: str) -> bool:
+        """
+        Функция, обновляющий лист под название name_of_sheet.
+        :param name_of_sheet: Название листа
+        :return: Возвращает bool ответ результата обновления
+        """
+        distance = f"{name_of_sheet}"
+        valueInputOption = "USER_ENTERED"
+        majorDimension = "ROWS"  # список - строка
+        try:
+            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                "valueInputOption": valueInputOption,
+                "data": [
+                    {"range": distance,
+                     "majorDimension": majorDimension,
+                     "values": self.values
+                     }
+                ]
+            }).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google - private_update')
+            return self.private_update(name_of_sheet)
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.private_update(name_of_sheet)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.private_update(name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.private_update(name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.private_update(name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            return self.private_update(name_of_sheet)
+        self.logger.debug(f"Updating complete ({self.name_of_sheet})")
+        self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
+        return False
+
+    def change_formats(self, needed_keys: list | None, name_of_sheet: str):
+        """
+        При наличии столбцов, требующих изменения формата на число с двумя знаками посе запятой, функция изменяет
+        формат конкретно этих столбцов.
+        :param needed_keys: Список индексов столбцов
+        :param name_of_sheet: Название листа, в котором работаем
+        :return:
+        """
+        # with self.LockWbFile_ChangeFormats:
+        #     with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
+        #         data = txt.read()
+        #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
+        #         sheetId = sheets[name_of_sheet]
+        if name_of_sheet == 'statements':
+            sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")))
+        else:
+            sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
+        sheetId = sheets[name_of_sheet]
+        if needed_keys == None:
+            return
+        data = {"requests": []}
+        for i in needed_keys:
+            data["requests"].append({
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheetId,
+                        "startColumnIndex": i,
+                        "endColumnIndex": i + 1
+                    },
+                    "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "0.00"}}},
+                    "fields": "userEnteredFormat(numberFormat)"
+                }
+            })
+        if data["requests"] == []:
+            return
+        try:
+            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - change_formats - {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            return self.change_formats(needed_keys, name_of_sheet)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            return self.change_formats(needed_keys, name_of_sheet)

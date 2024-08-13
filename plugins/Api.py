@@ -10,7 +10,7 @@ from plugins.Wildberries.ApiWB import ApiWB
 from plugins.Ozon.ApiOzon import ApiOzon
 from dotenv import load_dotenv
 import threading
-from plugins.Logger.Logger import activate_loggers
+from plugins.logger.Logger import activate_loggers
 
 
 class Api:
@@ -45,7 +45,7 @@ class Api:
                 #                              args=(name_of_sheet, who_is),
                 #                              name=name)
                 # wb_thread.start()
-                ApiWB(self.service, **locks).start(name_of_sheet, who_is)
+                ApiWB(self.service, **locks).start(name_of_sheet, who_is, folder)
             case 'Ozon':
                 name = f"Ozon, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
                 locks = {
@@ -58,7 +58,7 @@ class Api:
                 #                                args=(name_of_sheet, who_is),
                 #                                name=name)
                 # ozon_thread.start()
-                ApiOzon(self.service, **locks).start(name_of_sheet, who_is)
+                ApiOzon(self.service, **locks).start(name_of_sheet, who_is, folder)
 
     def connect_to_Google(self) -> bool:
         """
