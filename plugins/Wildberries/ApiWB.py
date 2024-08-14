@@ -325,7 +325,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         self.choose_spreadsheetId(who_is=f"{who_is}-statements")
         # Кастыль, чтобы не переделывать весь код TODO Сделай нормально, блин
         self.who_is, who_is = f"{self.who_is}-statements", self.who_is
-        self.choose_name_of_sheet(name_of_sheet)
+        self.choose_name_of_sheet(name_of_sheet, who_is)
         self.who_is = who_is
 
         check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
