@@ -22,7 +22,7 @@ def activate_loggers():
             },
             "consoleHandler": {
                 "class": "logging.StreamHandler",
-                "formatter": "myFormatter",
+                "formatter": "consoleFormatter",
                 "level": "INFO"
             }
         },
@@ -55,6 +55,9 @@ def activate_loggers():
         "formatters": {
             "myFormatter": {
                 "format": "%(levelname)s -> %(asctime)s: %(name)s - %(message)s"
+            },
+            "consoleFormatter": {
+                "format": "%(asctime)s - %(message)s"
             }
         }
     }
