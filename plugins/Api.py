@@ -42,7 +42,7 @@ class Api:
                     "lock_Google": self.lock_Google,
                 }
                 # wb_thread = threading.Thread(target=ApiWB(self.service, **locks).start,
-                #                              args=(name_of_sheet, who_is),
+                #                              args=(name_of_sheet, who_is, folder,),
                 #                              name=name)
                 # wb_thread.start()
                 ApiWB(self.service, **locks).start(name_of_sheet, who_is, folder)
@@ -55,7 +55,7 @@ class Api:
                     "lock_Google": self.lock_Google
                 }
                 # ozon_thread = threading.Thread(target=ApiOzon(self.service, **locks).start,
-                #                                args=(name_of_sheet, who_is),
+                #                                args=(name_of_sheet, who_is, folder,),
                 #                                name=name)
                 # ozon_thread.start()
                 ApiOzon(self.service, **locks).start(name_of_sheet, who_is, folder)
