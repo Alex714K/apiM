@@ -1,11 +1,13 @@
-import schedule
-from plugins.cycles.WB_cycle import WB_cycle
-from plugins.cycles.Ozon_cycle import Ozon_cycle
+import threading
+import time
+from plugins.cycle_init_func import launch
 
 
 if __name__ == "__main__":
-    WB_cycle()
-    Ozon_cycle()
-
+    main_thrd = threading.Thread(target=launch)
+    main_thrd.start()
     while True:
-        schedule.run_pending()
+        time.sleep(2)
+        if not main_thrd.is_alive():
+            main_thrd = threading.Thread(target=launch)
+            main_thrd.start()
