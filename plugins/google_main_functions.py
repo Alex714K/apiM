@@ -244,7 +244,7 @@ class GoogleMainFunctions:
         #         data = txt.read()
         #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
         #         sheetId = sheets[name_of_sheet]
-        match name_of_sheet:
+        match self.name_of_sheet:
             case "statements":
                 sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")))
             case "analytics":
