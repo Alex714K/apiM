@@ -185,13 +185,6 @@ class RequestWildberries:
     def nm_report(self, who_is):
         url = 'https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads'
         iduu = str(uuid.uuid4())
-        # Токен
-        # with open('plugins/Wildberries/data/tokens.txt') as txt:
-        #     tokens = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        # authorization = tokens[who_is]
-        # headers = {
-        #     'Authorization': authorization
-        # }
         headers = {
             "Authorization": os.getenv(f"Wildberries-token-{who_is}")
         }
