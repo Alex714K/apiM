@@ -36,17 +36,18 @@ class RequestWildberries:
         try:
             # Если только через ссылку
             if name_of_sheet in ['stocks', 'orders_1mnth', 'orders_1week', 'orders_2days', 'orders_today',
-                                 'tariffs_boxes', 'tariffs_pallet', 'statements', 'prices', 'fixed_prices', 'rk']:
+                                 'tariffs_boxes', 'tariffs_pallet', 'statements', 'prices', 'fixed_prices', 'rk',
+                                 'stat_prodvigene']:
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
-            # Если через json и ссылк
+            # Если через json и ссылку
             elif name_of_sheet in []:
                 params = self.make_params()
                 response = requests.get(url, headers=headers, json=params)
             else:
-                self.logger.critical('Man, you forget smth in Request_wildberries.py')
-                sys.exit('Man, you forget smth in Request_wildberries.py')
+                self.logger.critical(f'Man, you forget {name_of_sheet} in Request_wildberries.py')
+                sys.exit(f'Man, you forget {name_of_sheet} in Request_wildberries.py')
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
             return 'Проблема с соединением'
@@ -178,6 +179,8 @@ class RequestWildberries:
                     'dateFrom': (datetime.date.today() - datetime.timedelta(days=first_day)).strftime("%Y-%m-%d"),
                     'dateTo': (datetime.date.today() - datetime.timedelta(days=last_day)).strftime("%Y-%m-%d")
                 }
+            case "stat_prodvigene":
+                params = {}
             case _:
                 params = {}
         return params
