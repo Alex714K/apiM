@@ -26,6 +26,9 @@ class Converter:
             return self.statements(file=file)
         elif name_of_sheet == 'storage_paid':
             return self.list_with_dict(file=file)
+        else:
+            print(file)
+            return sys.exit("I can't convert =(")
 
     def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
         keys = list()

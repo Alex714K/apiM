@@ -25,6 +25,9 @@ class Converter:
                 return self.prices(file=file)
         if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
             return self.orders(file)
+        else:
+            print(file)
+            return sys.exit("I can't convert =(")
 
     def orders(self, file: list | dict):
         keys = ["sku_id", "sku_name", "day", "ordered_units"]
