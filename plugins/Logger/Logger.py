@@ -10,7 +10,7 @@ def activate_loggers():
                 "class": "logging.FileHandler",
                 "formatter": "myFormatter",
                 "filename": "data/logs/logs.log",
-                "level": "INFO",
+                "level": "WARNING",
                 "encoding": "UTF-8"
             },
             "rootHandler": {
