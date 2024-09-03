@@ -1,4 +1,5 @@
 import sys
+import time
 from threading import RLock
 import uuid
 import requests
@@ -14,30 +15,38 @@ class RequestWildberries:
         self.LockWbRequest = LockWbRequest
         self.logger = getLogger("RequestWildberries")
 
-    def start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):
+    def start(self, name_of_sheet: str, who_is: str):
+        match name_of_sheet:
+            case "stocks_hard":
+                return self.stocks_hard(who_is)
+            case "nm_report":
+                return self.nm_report(who_is)
+            case _:
+                return self.simple_start(name_of_sheet, who_is)
+
+    def simple_start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):
         """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
         вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
         self.name_of_sheet = name_of_sheet
-        match name_of_sheet:
-            case 'nm_report':
-                return self.nm_report(who_is)
+
         # Ссылка
-        try:
-            url = os.getenv(f"Wildberries-url-{name_of_sheet}")
-        except KeyError:
-            self.logger.critical("Wrong name of sheet!")
-            sys.exit("Wrong name of sheet!")
+        url = os.getenv(f"Wildberries-url-{name_of_sheet}")
+        if url == None:
+            self.logger.critical(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
+            sys.exit(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
+
         # Токен
         headers = {
             "Authorization": os.getenv(f"Wildberries-token-{who_is}")
         }
+
         # Выполняем запрос
         try:
             # Если только через ссылку
-            if name_of_sheet in ['stocks', 'orders_1mnth', 'orders_1week', 'orders_2days', 'orders_today',
-                                 'tariffs_boxes', 'tariffs_pallet', 'statements', 'prices', 'fixed_prices', 'rk',
-                                 'stat_prodvigene']:
+            if name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today",
+                                 "tariffs_boxes", "tariffs_pallet", "statements", "prices", "fixed_prices", "rk",
+                                 "stat_prodvigene"]:
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
@@ -46,11 +55,12 @@ class RequestWildberries:
                 params = self.make_params()
                 response = requests.get(url, headers=headers, json=params)
             else:
-                self.logger.critical(f'Man, you forget {name_of_sheet} in Request_wildberries.py')
-                sys.exit(f'Man, you forget {name_of_sheet} in Request_wildberries.py')
+                self.logger.critical(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
+                sys.exit(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
-            return 'Проблема с соединением'
+            return "Проблема с соединением"
+
         if not response:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
             # with open('data.json') as data:
@@ -62,7 +72,62 @@ class RequestWildberries:
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {self.name_of_sheet}")
-                return 'Missing json file'
+                return "Missing json file"
+            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
+            return json_response, response.status_code
+
+    def stocks_hard(self, who_is: str):
+        self.name_of_sheet = "stocks_hard"
+        # Токен
+        headers = {
+            "Authorization": os.getenv(f"Wildberries-token-{who_is}")
+        }
+        params = {
+            "groupByBrand": "true",
+            "groupBySubject": "true",
+            "groupBySa": "true",
+            "groupByNm": "true",
+            "groupByBarcode": "true",
+            "groupBySize": "true"
+        }
+        url = "https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains"
+        url = self.make_request(url, params)
+        response = requests.get(url, headers=headers)
+        try:
+            task_id = response.json()["data"]["taskId"]
+        except KeyError:
+            self.logger.debug(f"stocks_hard - code:{response.status_code}, reason:{response.reason}")
+            time.sleep(60)
+            return self.stocks_hard(who_is)
+        url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/status"
+        while True:
+            response = requests.get(url, headers=headers)
+            json_response = response.json()
+            if json_response["data"]["status"] == "done":
+                break
+            else:
+                self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
+                time.sleep(3)
+        url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/download"
+        response = requests.get(url, headers=headers)
+
+        if not response:
+            self.logger.warning(f"stocks_hard - Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            return response.status_code, response.reason
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in {self.name_of_sheet}")
+                return "Missing json file"
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
             # with open('data.json', 'w', encoding='UTF-8') as d:
