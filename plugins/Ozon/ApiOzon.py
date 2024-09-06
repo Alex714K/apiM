@@ -71,7 +71,11 @@ class ApiOzon(Converter, GoogleMainFunctions):
 
     def analytics_update(self, who_is: str):
         self.choose_spreadsheetId(f"{self.who_is}-analytics")
-        name_of_sheet = datetime.date.today().strftime("%b")
+        today = datetime.date.today()
+        if today.day == 1:
+            name_of_sheet = datetime.date(today.year, today.month - 1, 31).strftime("%b")
+        else:
+            name_of_sheet = today.strftime("%b")
         self.choose_name_of_sheet(name_of_sheet, f"{self.who_is}-analytics")
 
         # new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
