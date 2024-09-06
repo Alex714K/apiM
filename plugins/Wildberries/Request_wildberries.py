@@ -97,7 +97,11 @@ class RequestWildberries:
         }
         url = "https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains"
         url = self.make_request(url, params)
-        response = requests.get(url, headers=headers)
+        try:
+            response = requests.get(url, headers=headers)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
+            return "Проблема с соединением"
         try:
             task_id = response.json()["data"]["taskId"]
         except KeyError:
@@ -106,13 +110,18 @@ class RequestWildberries:
             return self.stocks_hard(who_is)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/status"
         while True:
-            response = requests.get(url, headers=headers)
+            try:
+                response = requests.get(url, headers=headers)
+            except socket.gaierror:
+                self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
+                time.sleep(5)
+                continue
             json_response = response.json()
             if json_response["data"]["status"] == "done":
                 break
             else:
                 self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
-                time.sleep(3)
+                time.sleep(4)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/download"
         response = requests.get(url, headers=headers)
 
@@ -134,7 +143,20 @@ class RequestWildberries:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
-            return json_response, response.status_code
+            return {"json": json_response, "warehouses": self.get_warehouses(who_is)}, response.status_code
+
+    def get_warehouses(self, who_is: str):
+        url = "https://supplies-api.wildberries.ru/api/v1/warehouses"
+        # Токен
+        headers = {
+            "Authorization": os.getenv(f"Wildberries-token-{who_is}")
+        }
+        try:
+            response = requests.get(url, headers=headers)
+        except socket.gaierror:
+            time.sleep(10)
+            return self.get_warehouses(who_is)
+        return list(map(lambda x: x["name"].replace("(", "").replace(")", ""), response.json()))
 
     @staticmethod
     def make_request(url, kwargs: dict) -> str:

@@ -5,6 +5,7 @@ if __name__ == "__main__":
     API = Api()
     # Wildberries
     # API.start('stocks', 'planeta', 'WB')
+    # API.start('stocks_hard', 'planeta', 'WB')
     # API.start('orders_1mnth', 'planeta', 'WB')
     # API.start('orders_1week', 'planeta', 'WB')
     # API.start('orders_2days', 'planeta', 'WB')

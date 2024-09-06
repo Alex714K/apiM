@@ -2,7 +2,6 @@ import json
 import sys
 import numpy
 import datetime
-import logging
 
 
 class Converter:
@@ -26,6 +25,8 @@ class Converter:
             return self.statements(file=file)
         elif name_of_sheet == 'storage_paid':
             return self.list_with_dict(file=file)
+        elif name_of_sheet == 'stocks_hard':
+            return self.stocks_hard(file=file)
         else:
             print(file)
             return sys.exit("I can't convert =(")
@@ -113,6 +114,25 @@ class Converter:
             for key, value in row.items():
                 ans[i+1].append(value)
         ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
+
+    def stocks_hard(self, file):
+        keys = ["brand", "subjectName", "vendorCode", "nmId", "barcode", "techSize", "volume", "inWayToClient",
+                         "inWayFromClient", "quantityWarehousesFull"]
+        keys.extend(file["warehouses"])
+        ans = [keys]
+        for element in file["json"]:
+            ans.append(list(element.values())[:-1])
+            ans[-1].extend([""] * len(file["warehouses"]))
+            for warehouse in element["warehouses"]:
+                try:
+                    ans[-1][keys.index(warehouse["warehouseName"])] = warehouse["quantity"]
+                except ValueError:
+                    for key in keys:
+                        if warehouse["warehouseName"] in key:
+                            ans[-1][keys.index(key)] = warehouse["quantity"]
+
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
 
