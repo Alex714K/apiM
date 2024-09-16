@@ -19,6 +19,12 @@ def WB_cycle():
     schedule.every(10).minutes.do(API.start, 'prices', 'planeta', 'WB')
     schedule.every().day.at("23:15").do(API.start, 'fixed_prices', 'planeta', 'WB')
 
+    # Статистика приёмки
+    schedule.every(1).minutes.do(API.start, 'coefficients', 'grand', 'WB')
+    schedule.every(1).minutes.do(API.start, 'coefficients', 'terehov', 'WB')
+    schedule.every(1).minutes.do(API.start, 'coefficients', 'dnk', 'WB')
+    schedule.every(1).minutes.do(API.start, 'coefficients', 'planeta', 'WB')
+
     # Финансовые отчёты
     schedule.every().day.at("02:12").do(API.start, 'statements', 'planeta', 'WB')
     schedule.every().day.at("17:00").do(API.start, 'statements', 'planeta', 'WB')
