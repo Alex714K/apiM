@@ -15,6 +15,8 @@ class Converter:
                 return 'is empty'
         if name_of_sheet in ['orders_today', 'stocks', 'rk']:
             return self.list_with_dict(file=file)
+        elif name_of_sheet in "coefficients":
+            return self.list_with_dict_without_numpy(file=file)
         elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
             return self.orders_not_today(file=file)
         elif name_of_sheet in ['prices', 'fixed_prices']:
@@ -44,6 +46,16 @@ class Converter:
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
+
+    def list_with_dict_without_numpy(self, file: list) -> tuple[list, int, list | None]:
+        keys = list()
+        for key in file[0].keys():
+            keys.append(key)
+        ans = [keys]
+        for i, row in enumerate(file):
+            ans.append(list(row.values()))
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
 
     def orders_not_today(self, file: list) -> tuple[list, int, list | None]:
         keys = list()

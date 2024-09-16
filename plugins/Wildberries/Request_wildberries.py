@@ -46,7 +46,7 @@ class RequestWildberries:
             # Если только через ссылку
             if name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today",
                                  "tariffs_boxes", "tariffs_pallet", "statements", "prices", "fixed_prices", "rk",
-                                 "stat_prodvigene"]:
+                                 "coefficients", "stat_prodvigene"]:
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
@@ -267,6 +267,8 @@ class RequestWildberries:
                     'dateTo': (datetime.date.today() - datetime.timedelta(days=last_day)).strftime("%Y-%m-%d")
                 }
             case "stat_prodvigene":
+                params = {}
+            case "coefficients":
                 params = {}
             case _:
                 params = {}

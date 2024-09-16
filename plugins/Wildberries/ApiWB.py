@@ -1,5 +1,6 @@
 import datetime
 import http.client
+import json
 import os
 import socket
 import ssl
@@ -136,6 +137,8 @@ class ApiWB(Converter, GoogleMainFunctions):
                 self.result = 'ERROR: File is empty'
                 return False
         self.values, self.dist, self.needed_keys = result
+        with open("data.json", 'w', encoding='UTF-8') as file:
+            json.dump(self.values, file, ensure_ascii=False, indent=4)
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):

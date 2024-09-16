@@ -18,6 +18,7 @@ if __name__ == "__main__":
     # API.start('rk', 'planeta', 'WB')
     # API.start('statements', 'planeta', 'WB')
     # API.start('nm_report', 'grand', 'WB')
+    # API.start("coefficients", "planeta", "WB")
     # API.start('stat_prodvigene', 'planeta', 'WB')
     # Ozon
     # API.start('analytics', 'grand', 'Ozon')
