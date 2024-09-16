@@ -2,6 +2,7 @@ import datetime
 import http.client
 import socket
 import ssl
+import sys
 import threading
 import time
 import googleapiclient.errors
@@ -438,3 +439,66 @@ class GoogleMainFunctions:
             time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
             return self.insert_new_info(design)
+
+    def update_Results(self, who_is: str):
+        design = list()
+        match who_is:
+            case "WB":
+                with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
+                    csv_file = csv.reader(file)
+                    for row in csv_file:
+                        if row == "":
+                            continue
+                        else:
+                            design.append(row)
+                users = ["grand", "terehov", "dnk", "planeta"]
+            case "Ozon":
+                with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
+                    csv_file = csv.reader(file)
+                    for row in csv_file:
+                        if row == "":
+                            continue
+                        else:
+                            design.append(row)
+                users = ["grand", "terehov", "dnk"]
+            case _:
+                sys.exit("Wrong 'who_is' in update_Results")
+
+        valueInputOption = "USER_ENTERED"
+        majorDimension = "ROWS"  # список - строка`
+        for user in users:
+            spreadsheetId = os.getenv(user)
+            try:
+                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
+                    "valueInputOption": valueInputOption,
+                    "data": [
+                        {"range": f"Result!A:E",
+                         "majorDimension": majorDimension,
+                         "values": design
+                         }
+                    ]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                time.sleep(2)
+                self.logger.warning('Проблема с соединением Google - update_Results')
+                return self.update_Results()
+            except TimeoutError:
+                time.sleep(2)
+                self.logger.warning('Проблема с соединением Google (TimeoutError) - update_Results')
+                return self.update_Results()
+            except ssl.SSLError as err:
+                time.sleep(2)
+                self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                return self.update_Results()
+            except OSError as err:
+                time.sleep(2)
+                self.logger.warning(f'Вероятно TimeOutError: {err}')
+                return self.update_Results()
+            except http.client.ResponseNotReady as err:
+                time.sleep(2)
+                self.logger.warning(f'Проблема с http: {err}')
+                return self.update_Results()
+            except Exception as err:
+                time.sleep(2)
+                self.logger.error(f"Ошибка: {err}")
+                return self.update_Results()
