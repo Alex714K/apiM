@@ -16,16 +16,18 @@ class RequestOzon:
 
     def start(self, name_of_sheet: str, who_is: str):
         match name_of_sheet:
-            case 'analytics':
+            case "analytics":
                 return self.analytics(who_is)
-            case 'stock_on_warehouses':
+            case "stock_on_warehouses":
                 return self.stock_on_warehouses(name_of_sheet, who_is)
-            case 'products':
+            case "products":
                 return self.products(name_of_sheet, who_is)
-            case 'prices':
+            case "prices":
                 return self.prices(who_is)
-            case 'statistics':
+            case "statistics":
                 return self.statistics(who_is)
+            case "statistics_product":
+                return self.statistics_product(who_is)
         if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
             return self.orders(name_of_sheet, who_is)
 
@@ -366,8 +368,10 @@ class RequestOzon:
                     break
                 time.sleep(60)
                 params2["offset"] += 1000
-        parts["first"] = parts["first"].tolist()
-        parts["second"] = parts["second"].tolist()
+        parts = {
+            "first": parts["first"].tolist(),
+            "second": parts["second"].tolist()
+        }
         ids_of_second_part = list(map(lambda x: [x["dimensions"][0]["id"], x["dimensions"][1]["id"]], parts["second"]))
         for ind in range(len(parts["first"])):
             id_in_first_part = [parts["first"][ind]["dimensions"][0]["id"], parts["first"][ind]["dimensions"][1]["id"]]
@@ -383,7 +387,7 @@ class RequestOzon:
             #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             #     json.dump(parts["first"], d, ensure_ascii=False, indent=4)
             return parts["first"]
-        parts = None
+        parts.clear()
         return self.analytics(who_is=who_is)
 
     def prices(self, who_is: str):
@@ -430,3 +434,206 @@ class RequestOzon:
             else:
                 break
         return file
+
+    def statistics_product(self, who_is):
+        token = self.get_token(who_is)
+        headers = {
+            "Authorization": token,
+            "Content-Type": "application/json",
+        }
+        url = (f"https://performance.ozon.ru:443/api/client/statistics/campaign/product/json?"
+               f"dateFrom=2024-08-01&dateTo=2024-08-03")
+        try:
+            response = requests.get(url, headers=headers)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror with Google (statistics_product)")
+            return 'Проблема с соединением'
+        if not response:
+            self.logger.warning(f"statistics_product - Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            time.sleep(2)
+            return self.statistics_product(who_is)
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in statistics_product")
+                time.sleep(2)
+                return self.statistics_product(who_is)
+            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: statistics_product")
+            return json_response
+
+    def get_list_of_campaigns_id(self, who_is):
+        headers = {
+            "Authorization": self.get_token(who_is),
+            "Content-Type": "application/json",
+        }
+        try:
+            response = requests.get("https://performance.ozon.ru:443/api/client/campaign?advObjectType=SKU",
+                                    headers=headers)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror with Google (get_list_of_campaigns_id)")
+            return 'Проблема с соединением'
+        if not response:
+            self.logger.warning(f"get_list_of_campaigns_id - Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            time.sleep(2)
+            return self.get_list_of_campaigns_id(who_is)
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in get_list_of_campaigns_id")
+                time.sleep(2)
+                return self.get_list_of_campaigns_id(who_is)
+            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_list_of_campaigns_id")
+            return json_response
+
+    def get_report(self, who_is: str, UUID: str):
+        """
+        Получение отчёта о рекламных компаниях
+        """
+        headers = {
+            "Authorization": self.get_token(who_is),
+            "Content-Type": "application/json",
+        }
+        while True:
+            try:
+                response = requests.get(f"https://performance.ozon.ru:443/api/client/statistics/{UUID}",
+                                        headers=headers)
+            except socket.gaierror:
+                self.logger.warning(f"gaierror with Google (get_report)")
+                return 'Проблема с соединением'
+            if not response:
+                self.logger.warning(f"get_report - Http статус: {response.status_code} ( {response.reason} )")
+                # with open('data.json') as data:
+                #     return json.load(data)
+                time.sleep(2)
+                return self.get_report(who_is, UUID)
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    self.logger.error(f"Missing json file in get_report")
+                    time.sleep(2)
+                    return self.get_report(who_is, UUID)
+                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                # Записываем данные в файл (убирать комментарий при необходимости)
+                # with open('data.json', 'w', encoding='UTF-8') as d:
+                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
+            match json_response["state"]:
+                case "OK":
+                    break
+                case "ERROR":
+                    self.logger.warning(f"get_token, Error:{json_response['error']}")
+                    return self.get_report(who_is, UUID)
+
+        params = {"UUID": UUID}
+        try:
+            response = requests.get("https://performance.ozon.ru:443/api/client/statistics/report",
+                                    headers=headers,
+                                    json=params)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror with Google (get_report)")
+            time.sleep(2)
+            return self.get_report(who_is, UUID)
+        if not response:
+            self.logger.warning(f"get_report - Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            time.sleep(2)
+            return self.get_report(who_is, UUID)
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in get_report")
+                time.sleep(2)
+                return self.get_report(who_is, UUID)
+            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
+        return json_response
+
+    def get_token(self, who_is: str):
+        """
+        Получение токена
+        :return: f"{token_type} {token}"
+        """
+        try:
+            in_file_plus_secs = (
+                    datetime.datetime.strptime(
+                        os.getenv(f"Ozon-time_expire-{who_is}"), "%Y-%m-%d %H:%M:%S") + datetime.timedelta(minutes=2)
+            )
+        except TypeError as err:
+            print(err)
+        else:
+            if in_file_plus_secs <= datetime.datetime.today():
+                return os.getenv(f"Ozon-access_token-{who_is}")
+        mail = os.getenv(f"Ozon-mail-{who_is}")
+        secret = os.getenv(f"Ozon-secret-{who_is}")
+        host = "https://performance.ozon.ru"
+        endpoint = "/api/client/token"
+        url = host + endpoint
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+
+        params = {
+            "client_id": mail,
+            "client_secret": secret,
+            "grant_type": "client_credentials"
+        }
+        try:
+            response = requests.post(url, headers=headers, json=params)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror with Google (get_token)")
+            return self.get_token(who_is)
+        if not response:
+            self.logger.warning(f"get_token - Http статус: {response.status_code} ( {response.reason} )")
+            # with open('data.json') as data:
+            #     return json.load(data)
+            time.sleep(5)
+            return self.get_token(who_is)
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in get_token")
+                return self.get_token(who_is)
+            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            # Записываем данные в файл (убирать комментарий при необходимости)
+            # with open('data.json', 'w', encoding='UTF-8') as d:
+            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+            self.logger.debug(f"Http статус: {response.status_code}, func: get_token")
+        token = json_response["access_token"]
+        token_type = json_response["token_type"]
+        name = f"Ozon-time_expire-{who_is}"
+        expire_time = datetime.datetime.today() + datetime.timedelta(seconds=int(json_response["expires_in"]))
+        os.putenv(name, expire_time.strftime("%Y-%m-%d %H:%M:%S"))
+        os.putenv(f"Ozon-access_token-{who_is}", f"{token_type} {token}")
+        return f"{token_type} {token}"

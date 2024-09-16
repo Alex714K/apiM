@@ -11,23 +11,36 @@ class Converter:
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
             case None:
-                return 'is None'
+                return "is None"
             case []:
-                return 'is empty'
+                return "is empty"
         match name_of_sheet:
-            case 'analytics':
+            case "analytics":
                 return self.analytics(file=file)
-            case 'stock_on_warehouses':
+            case "stock_on_warehouses":
                 return self.stock_on_warehouses(file=file)
-            case 'products':
+            case "products":
                 return self.products(file=file)
-            case 'prices':
+            case "prices":
                 return self.prices(file=file)
+            case "statistics_product":
+                return self.statistics_product(file=file)
         if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
             return self.orders(file)
         else:
             print(file)
             return sys.exit("I can't convert =(")
+
+    def statistics_product(self, file: list | dict):
+        keys = list(file["rows"][0].keys())
+        ans = numpy.array([keys])
+        for element in file["rows"]:
+            values = list()
+            values.extend(list(element.values()))
+            values = numpy.array([values])
+            ans = numpy.concatenate((ans, values), axis=0)
+        needed_keys = self.check_keys(keys)
+        return ans.tolist(), ans.shape[0], needed_keys
 
     def orders(self, file: list | dict):
         keys = ["sku_id", "sku_name", "day", "ordered_units"]
@@ -212,3 +225,11 @@ class Converter:
             for key, value in row.items():
                 ans[i + 1].append(value)
         return ans, len(ans)
+
+    @staticmethod
+    def replace_from_dot_to_comma(file: list):
+        for row in file:
+            for column in range(len(row)):
+                row[column] = str(row[column]).replace(",", ".", 1)
+        return file
+

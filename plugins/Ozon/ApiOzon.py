@@ -136,6 +136,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
                 self.result = 'ERROR: File is empty'
                 return False
         self.values, self.dist, self.needed_keys = result
+        self.values = self.replace_from_dot_to_comma(self.values)
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
