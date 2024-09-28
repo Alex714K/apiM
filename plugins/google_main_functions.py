@@ -481,24 +481,32 @@ class GoogleMainFunctions:
             except googleapiclient.errors.HttpError:
                 time.sleep(2)
                 self.logger.warning('Проблема с соединением Google - update_Results')
-                return self.update_Results()
+                return self.update_Results(who_is)
             except TimeoutError:
                 time.sleep(2)
                 self.logger.warning('Проблема с соединением Google (TimeoutError) - update_Results')
-                return self.update_Results()
+                return self.update_Results(who_is)
             except ssl.SSLError as err:
                 time.sleep(2)
                 self.logger.warning(f'Ужасная ошибка ssl: {err}')
-                return self.update_Results()
+                return self.update_Results(who_is)
             except OSError as err:
                 time.sleep(2)
                 self.logger.warning(f'Вероятно TimeOutError: {err}')
-                return self.update_Results()
+                return self.update_Results(who_is)
             except http.client.ResponseNotReady as err:
                 time.sleep(2)
                 self.logger.warning(f'Проблема с http: {err}')
-                return self.update_Results()
+                return self.update_Results(who_is)
             except Exception as err:
                 time.sleep(2)
                 self.logger.error(f"Ошибка: {err}")
-                return self.update_Results()
+                return self.update_Results(who_is)
+
+    @staticmethod
+    def replace_from_dot_to_comma(file: list):
+        # for row in file:
+        #     for column in range(len(row)):
+        #         row[column] = str(row[column]).replace(",", ".", 1)
+        return list(map(lambda row: list(map(lambda x: x.replace(".", ",", 1), row)), file))
+        return file

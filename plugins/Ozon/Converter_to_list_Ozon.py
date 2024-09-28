@@ -225,11 +225,3 @@ class Converter:
             for key, value in row.items():
                 ans[i + 1].append(value)
         return ans, len(ans)
-
-    @staticmethod
-    def replace_from_dot_to_comma(file: list):
-        for row in file:
-            for column in range(len(row)):
-                row[column] = str(row[column]).replace(",", ".", 1)
-        return file
-
