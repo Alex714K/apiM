@@ -508,5 +508,4 @@ class GoogleMainFunctions:
         # for row in file:
         #     for column in range(len(row)):
         #         row[column] = str(row[column]).replace(",", ".", 1)
-        return list(map(lambda row: list(map(lambda x: x.replace(".", ",", 1), row)), file))
-        return file
+        return list(map(lambda row: list(map(lambda x: str(x).replace(".", ",", 1), row)), file))
