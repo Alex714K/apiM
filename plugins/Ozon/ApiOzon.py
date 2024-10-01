@@ -1,4 +1,5 @@
 import datetime
+import calendar
 import http.client
 import socket
 import ssl
@@ -74,10 +75,18 @@ class ApiOzon(Converter, GoogleMainFunctions):
     def analytics_update(self, who_is: str):
         self.choose_spreadsheetId(f"{self.who_is}-analytics")
         today = datetime.date.today()
-        if today.day == 1:
-            name_of_sheet = datetime.date(today.year, today.month - 1, 31).strftime("%b")
+        if today.day == 1 and today.month == 1:
+            name_of_sheet = datetime.date(today.year - 1,
+                                          12,
+                                          calendar.monthrange(today.year - 1, 12)[1]).strftime("%b")
+        elif today.day == 1:
+            name_of_sheet = datetime.date(today.year,
+                                          today.month - 1,
+                                          calendar.monthrange(today.year, today.month - 1)[1]).strftime("%b")
         else:
-            name_of_sheet = today.strftime("%b")
+            name_of_sheet = datetime.date(today.year,
+                                          today.month,
+                                          today.day).strftime("%b")
         self.choose_name_of_sheet(name_of_sheet, f"{self.who_is}-analytics")
 
         # new_or_not = self.choose_name_of_sheet(name_of_sheet=name_of_sheet)
