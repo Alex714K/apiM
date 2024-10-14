@@ -165,30 +165,6 @@ class ApiWB(Converter, GoogleMainFunctions):
         self.insert_new_info(design)
         self.LockWbResult.release()
 
-    def start_work_with_statements(self, name_of_sheet: str, who_is: str):
-        self.choose_spreadsheetId(who_is=f"{who_is}-statements")
-        # Кастыль, чтобы не переделывать весь код TODO Сделай нормально, блин
-        self.who_is, who_is = f"{self.who_is}-statements", self.who_is
-        self.choose_name_of_sheet(name_of_sheet, who_is)
-        self.who_is = who_is
-
-        check = self.start_work_with_request(name_of_sheet=name_of_sheet, who_is=who_is)
-        if check:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-            return
-        # if new_or_not:
-        # if self.private_create(name_of_sheet):
-        #     check = False
-        check1 = True
-        if self.private_update_statements():
-            check1 = False
-        if check1:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet)
-        elif self.result is not None:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-        else:
-            self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
-
     def private_update_statements(self):
         # getted = self.service.spreadsheets().
         # get(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE').execute()
