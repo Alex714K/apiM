@@ -8,3 +8,4 @@ main_cycle.spec
 main_cycle.exe
 dist
 build
+__pycache__
