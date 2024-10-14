@@ -1,10 +1,6 @@
 import datetime
 import calendar
-import http.client
-import socket
-import ssl
 import threading
-import time
 import googleapiclient.errors
 from googleapiclient.discovery import build
 import csv
@@ -45,7 +41,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
             return
         match name_of_sheet:
             case 'analytics':
-                self.analytics_update(who_is)
+                self.analytics_update()
             case _:
                 self.standart_update(name_of_sheet, who_is)
 
@@ -72,7 +68,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         else:
             self.start_work_with_list_result(name_of_sheet=name_of_sheet, bad=True)
 
-    def analytics_update(self, who_is: str):
+    def analytics_update(self):
         self.choose_spreadsheetId(f"{self.who_is}-analytics")
         today = datetime.date.today()
         if today.day == 1 and today.month == 1:
@@ -122,8 +118,8 @@ class ApiOzon(Converter, GoogleMainFunctions):
                 self.logger.warning("Проблема с соединением - RequestOzon - start_work_with_request")
                 self.result = 'ERROR: Проблема с соединением'
                 return False
-        if type(requestOzon) == tuple:
-            if type(requestOzon[0]) == int and requestOzon[0] != 200:
+        if requestOzon is tuple:
+            if requestOzon[0] is int and requestOzon[0] != 200:
                 self.result = f'ERROR: {requestOzon[1]}'
                 return False
         try:

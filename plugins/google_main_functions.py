@@ -1,6 +1,5 @@
 import datetime
 import http.client
-import socket
 import ssl
 import sys
 import threading
@@ -14,6 +13,8 @@ import os
 class GoogleMainFunctions:
     def __init__(self, **kwargs: threading.RLock):
         self.logger = None
+
+        self.wait_time = 3  # в секундах
 
         self.spreadsheetId = None
         self.service = None
@@ -38,24 +39,31 @@ class GoogleMainFunctions:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
         except googleapiclient.errors.HttpError as err:
             self.logger.warning(f'Проблема с соединением Google - choose_name_of_sheet - {err}')
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except httplib2.error.ServerNotFoundError:
             self.logger.warning('Проблема с соединением (httplib)')
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except OSError as err:
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except Exception as err:
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         names_of_lists_and_codes = list()
         sheets = sheet_metadata.get('sheets', '')
@@ -95,7 +103,7 @@ class GoogleMainFunctions:
         """
         columnCount = len(self.values[0])  # кол-во столбцов
         try:
-            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "requests": [{
                     "addSheet": {
                         "properties": {
@@ -109,28 +117,28 @@ class GoogleMainFunctions:
                 }]
             }).execute()
         except googleapiclient.errors.HttpError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google - private_create')
+            time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         self.logger.debug(f"Created new sheet '{name_of_sheet}'")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet, who_is=self.who_is)
@@ -156,31 +164,31 @@ class GoogleMainFunctions:
         else:
             r = name_of_sheet
         try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
-                                                                ).execute()
+            self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
+                                                       ).execute()
         except googleapiclient.errors.HttpError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google - private_clear')
+            time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
@@ -195,7 +203,7 @@ class GoogleMainFunctions:
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
         try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
                 "data": [
                     {"range": distance,
@@ -205,28 +213,28 @@ class GoogleMainFunctions:
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google - private_update')
+            time.sleep(self.wait_time)
             return self.private_update(name_of_sheet)
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.private_update(name_of_sheet)
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.private_update(name_of_sheet)
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.private_update(name_of_sheet)
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.private_update(name_of_sheet)
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.private_update(name_of_sheet)
         self.logger.debug(f"Updating complete ({self.name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
@@ -253,7 +261,7 @@ class GoogleMainFunctions:
             case _:
                 sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
         sheetId = sheets[name_of_sheet]
-        if needed_keys == None:
+        if needed_keys is None:
             return
         data = {"requests": []}
         for i in needed_keys:
@@ -268,33 +276,33 @@ class GoogleMainFunctions:
                     "fields": "userEnteredFormat(numberFormat)"
                 }
             })
-        if data["requests"] == []:
+        if not data["requests"]:
             return
         try:
-            getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
+            self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body=data).execute()
         except googleapiclient.errors.HttpError as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с соединением Google - change_formats - {err}')
+            time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
 
     def create_result(self, design):
@@ -303,25 +311,34 @@ class GoogleMainFunctions:
         :param design: Таблица, которую нужно вставить при создании
         :return:
         """
-        try:
-            match self.name_of_sheet:
-                case "statements":
-                    check = dict(
+        match self.name_of_sheet:
+            case "statements":
+                has_Result = "Result" in list(
+                    dict(
                         map(
-                            lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}-statements").split(';')
+                            lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")
                         )
-                    )['Result']
-                case "analytics":
-                    check = dict(
+                    ).keys()
+                )
+            case "analytics":
+                has_Result = "Result" in list(
+                    dict(
                         map(
-                            lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(';')
+                            lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(";")
                         )
-                    )['Result']
-                case _:
-                    check = dict(map(lambda x: x.split('='), os.getenv(f"sheetIDs-{self.who_is}").split(';')))['Result']
-        except KeyError:
+                    ).keys()
+                )
+            case _:
+                has_Result = "Result" in list(
+                    dict(
+                        map(
+                            lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")
+                        )
+                    ).keys()
+                )
+        if not has_Result:
             try:
-                getted = self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                     "requests": [{
                         "addSheet": {
                             "properties": {
@@ -335,34 +352,34 @@ class GoogleMainFunctions:
                     }]
                 }).execute()
             except googleapiclient.errors.HttpError:
-                time.sleep(2)
                 self.logger.warning('Проблема с соединением Google - create_result')
+                time.sleep(self.wait_time)
                 return self.create_result(design)
             except TimeoutError:
-                time.sleep(2)
                 self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                time.sleep(self.wait_time)
                 return self.create_result(design)
             except ssl.SSLError as err:
-                time.sleep(2)
                 self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                time.sleep(self.wait_time)
                 return self.create_result(design)
             except OSError as err:
-                time.sleep(2)
                 self.logger.warning(f'Вероятно TimeOutError: {err}')
+                time.sleep(self.wait_time)
                 return self.create_result(design)
             except http.client.ResponseNotReady as err:
-                time.sleep(2)
                 self.logger.warning(f'Проблема с http: {err}')
+                time.sleep(self.wait_time)
                 return self.create_result(design)
             except Exception as err:
-                time.sleep(2)
                 self.logger.error(f"Ошибка: {err}")
+                time.sleep(self.wait_time)
                 return self.create_result(design)
             self.insert_design_result(design)
 
     def insert_design_result(self, design: list) -> None:
         try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": "USER_ENTERED",
                 "data": [
                     {"range": "Result!A:E",
@@ -372,32 +389,32 @@ class GoogleMainFunctions:
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google - insert_result')
+            time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.insert_design_result(design)
-    
+
     def insert_new_info(self, design: list):
-        if self.result == None:
+        if self.result is None:
             values = [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"]
         else:
             values = [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"]
@@ -406,7 +423,7 @@ class GoogleMainFunctions:
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
         try:
-            getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+            self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                 "valueInputOption": valueInputOption,
                 "data": [
                     {"range": f"Result!D{row}:E{row}",
@@ -416,28 +433,28 @@ class GoogleMainFunctions:
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google - start_work_with_list_result')
+            time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError) - start_work_with_list_result')
+            time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.insert_new_info(design)
 
     def update_Results(self, who_is: str):
@@ -469,7 +486,7 @@ class GoogleMainFunctions:
         for user in users:
             spreadsheetId = os.getenv(user)
             try:
-                getted = self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
+                self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body={
                     "valueInputOption": valueInputOption,
                     "data": [
                         {"range": f"Result!A:E",
@@ -479,28 +496,28 @@ class GoogleMainFunctions:
                     ]
                 }).execute()
             except googleapiclient.errors.HttpError:
-                time.sleep(2)
                 self.logger.warning('Проблема с соединением Google - update_Results')
+                time.sleep(self.wait_time)
                 return self.update_Results(who_is)
             except TimeoutError:
-                time.sleep(2)
                 self.logger.warning('Проблема с соединением Google (TimeoutError) - update_Results')
+                time.sleep(self.wait_time)
                 return self.update_Results(who_is)
             except ssl.SSLError as err:
-                time.sleep(2)
                 self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                time.sleep(self.wait_time)
                 return self.update_Results(who_is)
             except OSError as err:
-                time.sleep(2)
                 self.logger.warning(f'Вероятно TimeOutError: {err}')
+                time.sleep(self.wait_time)
                 return self.update_Results(who_is)
             except http.client.ResponseNotReady as err:
-                time.sleep(2)
                 self.logger.warning(f'Проблема с http: {err}')
+                time.sleep(self.wait_time)
                 return self.update_Results(who_is)
             except Exception as err:
-                time.sleep(2)
                 self.logger.error(f"Ошибка: {err}")
+                time.sleep(self.wait_time)
                 return self.update_Results(who_is)
 
     @staticmethod

@@ -1,8 +1,6 @@
 import datetime
 import http.client
-import json
 import os
-import socket
 import ssl
 import threading
 import time
@@ -18,6 +16,7 @@ from plugins.google_main_functions import GoogleMainFunctions
 class ApiWB(Converter, GoogleMainFunctions):
     def __init__(self, service: googleapiclient.discovery.build, **kwargs: threading.RLock):
         super().__init__(**kwargs)
+        self.wait_time = 3  # в секундах
         self.spreadsheetId = None
         self.service = service
         self.values, self.dist, self.needed_keys = None, None, None
@@ -29,12 +28,11 @@ class ApiWB(Converter, GoogleMainFunctions):
         self.LockWbFile_ChangeFormats = kwargs["LockWbFile_ChangeFormats"]
         self.logger = getLogger("ApiWB")
 
-    def start(self, name_of_sheet: str, who_is: str, folder: str):
+    def start(self, name_of_sheet: str, who_is: str):
         """
         Запуск работы с запросом на сервера WildBerries.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :param folder: В какую папку идти
         :return:
         """
         self.logger.info(f"Started: folder=WB, who_is={who_is}, name_of_sheet={name_of_sheet}")
@@ -115,7 +113,7 @@ class ApiWB(Converter, GoogleMainFunctions):
             case 'Проблема с соединением':
                 self.result = 'ERROR: Проблема с соединением'
                 return False
-        if type(requestWB[0]) == int and requestWB[0] != 200:
+        if requestWB[0] is int and requestWB[0] != 200:
             self.result = f'ERROR: {requestWB[1]}'
             return False
         try:
@@ -200,36 +198,37 @@ class ApiWB(Converter, GoogleMainFunctions):
         #     need.append([info['properties']['title'], info['properties']['sheetId']])
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
-            getted = self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId,
-                                                                range=last_week
-                                                                ).execute()
+            self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId,
+                                                       range=last_week
+                                                       ).execute()
         except googleapiclient.errors.HttpError as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с соединением Google - priv_update_statements1 - {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
-            getted = self.service.spreadsheets().values().batchUpdate(
+            self.service.spreadsheets().values().batchUpdate(
                 spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
                     "valueInputOption": 'USER_ENTERED',
                     "data": [
@@ -240,28 +239,28 @@ class ApiWB(Converter, GoogleMainFunctions):
                     ]
                 }).execute()
         except googleapiclient.errors.HttpError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google - priv_update_statements2')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except TimeoutError:
-            time.sleep(2)
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except ssl.SSLError as err:
-            time.sleep(2)
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except OSError as err:
-            time.sleep(2)
             self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except http.client.ResponseNotReady as err:
-            time.sleep(2)
             self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         except Exception as err:
-            time.sleep(2)
             self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
             return self.private_update_statements()
         return False
 
