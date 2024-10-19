@@ -117,10 +117,16 @@ class RequestWildberries:
                 time.sleep(5)
                 continue
             json_response = response.json()
-            if json_response["data"]["status"] == "done":
-                break
-            else:
-                self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
+            num_of_tryes = 0
+            try:
+                if json_response["data"]["status"] == "done":
+                    break
+                else:
+                    self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
+                    time.sleep(4)
+            except KeyError:
+                if num_of_tryes > 3:
+                    return self.stocks_hard(who_is)
                 time.sleep(4)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/download"
         response = requests.get(url, headers=headers)
@@ -156,7 +162,7 @@ class RequestWildberries:
         except socket.gaierror:
             time.sleep(10)
             return self.get_warehouses(who_is)
-        return list(map(lambda x: x["name"].replace("(", "").replace(")", ""), response.json()))
+        return list(map(lambda x: str(x["name"]).replace("(", "").replace(")", ""), response.json()))
 
     @staticmethod
     def make_request(url, kwargs: dict) -> str:
