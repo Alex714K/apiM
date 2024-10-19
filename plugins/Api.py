@@ -45,7 +45,7 @@ class Api:
                 #                              args=(name_of_sheet, who_is, folder,),
                 #                              name=name)
                 # wb_thread.start()
-                ApiWB(self.service, **locks).start(name_of_sheet, who_is, folder)
+                ApiWB(self.service, **locks).start(name_of_sheet, who_is)
             case 'Ozon':
                 name = f"Ozon, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
                 locks = {
@@ -58,7 +58,7 @@ class Api:
                 #                                args=(name_of_sheet, who_is, folder,),
                 #                                name=name)
                 # ozon_thread.start()
-                ApiOzon(self.service, **locks).start(name_of_sheet, who_is, folder)
+                ApiOzon(self.service, **locks).start(name_of_sheet, who_is)
 
     def connect_to_Google(self) -> bool:
         """

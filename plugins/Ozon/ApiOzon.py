@@ -25,7 +25,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
         self.logger = getLogger("ApiOzon")
 
-    def start(self, name_of_sheet: str, who_is: str, folder: str):
+    def start(self, name_of_sheet: str, who_is: str):
         """
         Запуск работы с запросом на сервера Ozon.
         :param name_of_sheet: Название листа
@@ -36,7 +36,6 @@ class ApiOzon(Converter, GoogleMainFunctions):
         self.logger.info(f"Started: folder=Ozon, who_is={who_is}, name_of_sheet={name_of_sheet}")
         if name_of_sheet == "update_Results":
             self.update_Results(who_is)
-        self.folder = folder
         if not self.standart_start(name_of_sheet, who_is):
             return
         match name_of_sheet:
