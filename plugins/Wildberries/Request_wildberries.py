@@ -125,6 +125,7 @@ class RequestWildberries:
                     self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
                     time.sleep(4)
             except KeyError:
+                self.logger.error(f"stocks_hard - status:{json_response}")
                 if num_of_tryes > 3:
                     return self.stocks_hard(who_is)
                 time.sleep(4)
