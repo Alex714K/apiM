@@ -45,7 +45,7 @@ class Converter:
     def orders(self, file: list | dict):
         keys = ["sku_id", "sku_name", "day", "ordered_units"]
         ans = numpy.array([keys])
-        for row in file["result"]["data"]:
+        for row in file:
             values = list()
             dimensions = row["dimensions"]
             # добавляем dimensions
