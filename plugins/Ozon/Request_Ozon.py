@@ -33,7 +33,7 @@ class RequestOzon:
 
     def statistics(self, who_is):
         self.check_token()
-        # url = 'https://api-performance.ozon.ru:443/api/client/campaign'
+        # url = 'https://performance.ozon.ru:443/api/client/campaign'
         # response = requests.get(url=url, headers=headers)
         # json_response = response.json()
         # # print(json_response)
@@ -47,7 +47,7 @@ class RequestOzon:
             # print('lol')
             return data['token']
         else:
-            url = 'https://api-performance.ozon.ru/api/client/token'
+            url = 'https://performance.ozon.ru/api/client/token'
             headers = {
                 "Content-Type:": "application/json",
                 "Accept": "application/json"
@@ -453,7 +453,7 @@ class RequestOzon:
             "Authorization": token,
             "Content-Type": "application/json",
         }
-        url = (f"https://api-performance.ozon.ru:443/api/client/statistics/campaign/product/json?"
+        url = (f"https://performance.ozon.ru:443/api/client/statistics/campaign/product/json?"
                f"dateFrom=2024-08-01&dateTo=2024-08-03")
         try:
             response = requests.get(url, headers=headers)
@@ -488,7 +488,7 @@ class RequestOzon:
             "Content-Type": "application/json",
         }
         try:
-            response = requests.get("https://api-performance.ozon.ru:443/api/client/campaign?advObjectType=SKU",
+            response = requests.get("https://performance.ozon.ru:443/api/client/campaign?advObjectType=SKU",
                                     headers=headers)
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google (get_list_of_campaigns_id)")
@@ -525,7 +525,7 @@ class RequestOzon:
         }
         while True:
             try:
-                response = requests.get(f"https://api-performance.ozon.ru:443/api/client/statistics/{UUID}",
+                response = requests.get(f"https://performance.ozon.ru:443/api/client/statistics/{UUID}",
                                         headers=headers)
             except socket.gaierror:
                 self.logger.warning(f"gaierror with Google (get_report)")
@@ -559,7 +559,7 @@ class RequestOzon:
 
         params = {"UUID": UUID}
         try:
-            response = requests.get("https://api-performance.ozon.ru:443/api/client/statistics/report",
+            response = requests.get("https://performance.ozon.ru:443/api/client/statistics/report",
                                     headers=headers,
                                     json=params)
         except socket.gaierror:
@@ -605,7 +605,7 @@ class RequestOzon:
                 return os.getenv(f"Ozon-access_token-{who_is}")
         mail = os.getenv(f"Ozon-mail-{who_is}")
         secret = os.getenv(f"Ozon-secret-{who_is}")
-        host = "https://api-performance.ozon.ru"
+        host = "https://performance.ozon.ru"
         endpoint = "/api/client/token"
         url = host + endpoint
         headers = {
