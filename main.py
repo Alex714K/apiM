@@ -3,7 +3,7 @@ from plugins.Api import Api
 
 if __name__ == "__main__":
     API = Api()
-    # test
+    # Wildberries
     # API.start('stocks', 'planeta', 'WB')
     # API.start('stocks_hard', 'planeta', 'WB')
     # API.start('orders_1mnth', 'planeta', 'WB')
