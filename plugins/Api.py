@@ -83,4 +83,3 @@ class Api:
         finally:
             self.logger.debug(f"Connected to Google")
         self.service = service
-        return True
