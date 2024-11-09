@@ -9,3 +9,4 @@ main_cycle.exe
 dist
 build
 __pycache__
+.env
