@@ -599,7 +599,7 @@ class RequestOzon:
                         os.getenv(f"Ozon-time_expire-{who_is}"), "%Y-%m-%d %H:%M:%S") + datetime.timedelta(minutes=2)
             )
         except TypeError as err:
-            print(err)
+            self.logger.warning(err)
         else:
             if in_file_plus_secs <= datetime.datetime.today():
                 return os.getenv(f"Ozon-access_token-{who_is}")
