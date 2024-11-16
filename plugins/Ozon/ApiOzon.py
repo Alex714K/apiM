@@ -1,6 +1,8 @@
 import datetime
 import calendar
 import threading
+import time
+
 import googleapiclient.errors
 from googleapiclient.discovery import build
 import csv
@@ -111,12 +113,14 @@ class ApiOzon(Converter, GoogleMainFunctions):
         match requestOzon:
             case 'Missing json file':
                 self.logger.warning("Не получен файл с Ozon - start_work_with_request")
-                self.result = 'ERROR: Не получен файл с Ozon'
-                return False
+                time.sleep(self.wait_time)
+                # self.result = 'ERROR: Не получен файл с Ozon'
+                return self.start_work_with_request(name_of_sheet, who_is)
             case 'Проблема с соединением':
                 self.logger.warning("Проблема с соединением - RequestOzon - start_work_with_request")
-                self.result = 'ERROR: Проблема с соединением'
-                return False
+                time.sleep(self.wait_time)
+                # self.result = 'ERROR: Проблема с соединением'
+                return self.start_work_with_request(name_of_sheet, who_is)
         if requestOzon is tuple:
             if requestOzon[0] is int and requestOzon[0] != 200:
                 self.result = f'ERROR: {requestOzon[1]}'

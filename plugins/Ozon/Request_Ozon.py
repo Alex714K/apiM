@@ -223,7 +223,7 @@ class RequestOzon:
                 json_response1 = response1.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {name_of_sheet}")
-                return
+                return 'Missing json file'
             # # print(json.dumps(json_response1, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
             # with open('data.json', 'w', encoding='UTF-8') as d:
@@ -472,7 +472,7 @@ class RequestOzon:
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in statistics_product")
-                time.sleep(2)
+                time.sleep(5)
                 return self.statistics_product(who_is)
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
@@ -505,7 +505,7 @@ class RequestOzon:
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in get_list_of_campaigns_id")
-                time.sleep(2)
+                time.sleep(5)
                 return self.get_list_of_campaigns_id(who_is)
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
@@ -542,7 +542,7 @@ class RequestOzon:
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
                     self.logger.error(f"Missing json file in get_report")
-                    time.sleep(2)
+                    time.sleep(5)
                     return self.get_report(who_is, UUID)
                 # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 # Записываем данные в файл (убирать комментарий при необходимости)
@@ -578,7 +578,7 @@ class RequestOzon:
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in get_report")
-                time.sleep(2)
+                time.sleep(5)
                 return self.get_report(who_is, UUID)
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)
@@ -622,6 +622,7 @@ class RequestOzon:
             response = requests.post(url, headers=headers, json=params)
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google (get_token)")
+            time.sleep(5)
             return self.get_token(who_is)
         if not response:
             self.logger.warning(f"get_token - Http статус: {response.status_code} ( {response.reason} )")
@@ -635,6 +636,7 @@ class RequestOzon:
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in get_token")
+                time.sleep(5)
                 return self.get_token(who_is)
             # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             # Записываем данные в файл (убирать комментарий при необходимости)

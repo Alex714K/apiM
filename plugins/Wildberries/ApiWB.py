@@ -108,11 +108,13 @@ class ApiWB(Converter, GoogleMainFunctions):
         requestWB = RequestWildberries(self.LockWbRequest).start(name_of_sheet=name_of_sheet, who_is=who_is)
         match requestWB:
             case 'Missing json file':
-                self.result = 'ERROR: Не получен файл с WildBerries'
-                return False
+                # self.result = 'ERROR: Не получен файл с WildBerries'
+                time.sleep(self.wait_time)
+                return self.start_work_with_request(name_of_sheet, who_is)
             case 'Проблема с соединением':
-                self.result = 'ERROR: Проблема с соединением'
-                return False
+                # self.result = 'ERROR: Проблема с соединением'
+                time.sleep(self.wait_time)
+                return self.start_work_with_request(name_of_sheet, who_is)
         if requestWB[0] is int and requestWB[0] != 200:
             self.result = f'ERROR: {requestWB[1]}'
             return False
@@ -120,7 +122,6 @@ class ApiWB(Converter, GoogleMainFunctions):
             json_response, status_code = requestWB
         except TypeError:
             self.logger.warning(f"Нет доступа к файлу")
-            # print(f"Нет доступа к файлу ({self.name_of_sheet})")
             return False
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
@@ -183,7 +184,6 @@ class ApiWB(Converter, GoogleMainFunctions):
             return self.private_update_statements()
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            time.sleep(self.wait_time)
             time.sleep(self.wait_time)
             return self.private_update_statements()
         except ssl.SSLError as err:

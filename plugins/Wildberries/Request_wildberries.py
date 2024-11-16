@@ -32,7 +32,7 @@ class RequestWildberries:
 
         # Ссылка
         url = os.getenv(f"Wildberries-url-{name_of_sheet}")
-        if url == None:
+        if url is None:
             self.logger.critical(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
             sys.exit(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
 
