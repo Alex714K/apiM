@@ -324,9 +324,10 @@ class RequestOzon:
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"analytics - Http статус: {response.status_code} ( {response.reason} )")
+                time.sleep(10)
                 # with open('data.json') as data:
                 #     return json.load(data)
-                return response.status_code, response.reason
+                # return response.status_code, response.reason
             else:
                 try:
                     # Преобразуем ответ в json-объект
@@ -357,9 +358,10 @@ class RequestOzon:
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"analytics - Http статус: {response.status_code} ( {response.reason} )")
+                time.sleep(10)
                 # with open('data.json') as data:
                 #     return json.load(data)
-                return response.status_code, response.reason
+                # return response.status_code, response.reason
             else:
                 try:
                     # Преобразуем ответ в json-объект
