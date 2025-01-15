@@ -10,6 +10,7 @@ if __name__ == "__main__":
     # API.start('orders_1week', 'planeta', 'WB')
     # API.start('orders_2days', 'planeta', 'WB')
     # API.start('orders_today', 'planeta', 'WB')
+    # API.start('sales_today', 'planeta', 'WB')
     # API.start('tariffs_boxes', 'planeta', 'WB')
     # API.start('tariffs_pallet', 'planeta', 'WB')
     # API.start('prices', 'planeta', 'WB')

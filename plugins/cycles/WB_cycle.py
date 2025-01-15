@@ -26,14 +26,20 @@ def WB_cycle():
     schedule.every(1).minutes.do(API.start, 'coefficients', 'planeta', 'WB')
 
     # Финансовые отчёты
-    schedule.every().day.at("02:12").do(API.start, 'statements', 'planeta', 'WB')
-    schedule.every().day.at("17:00").do(API.start, 'statements', 'planeta', 'WB')
+    # schedule.every().day.at("02:12").do(API.start, 'statements', 'planeta', 'WB')
+    # schedule.every().day.at("17:00").do(API.start, 'statements', 'planeta', 'WB')
 
     # Заказы за сегодня
     schedule.every(30).minutes.do(API.start, 'orders_today', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'planeta', 'WB')
+
+    # Продаже за сегодня
+    schedule.every(30).minutes.do(API.start, 'sales_today', 'grand', 'WB')
+    schedule.every(30).minutes.do(API.start, 'sales_today', 'terehov', 'WB')
+    schedule.every(30).minutes.do(API.start, 'sales_today', 'dnk', 'WB')
+    schedule.every(30).minutes.do(API.start, 'sales_today', 'planeta', 'WB')
 
     # Остатки
     schedule.every(30).minutes.do(API.start, 'stocks', 'grand', 'WB')

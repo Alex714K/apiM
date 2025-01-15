@@ -29,12 +29,11 @@ class RequestWildberries:
         вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
         self.name_of_sheet = name_of_sheet
-
         # Ссылка
         url = os.getenv(f"Wildberries-url-{name_of_sheet}")
         if url is None:
-            self.logger.critical(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
-            sys.exit(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
+            self.logger.critical(f"Man, you forget {name_of_sheet}1 in Request_wildberries.py")
+            sys.exit(f"Man, you forget {name_of_sheet}1 in Request_wildberries.py")
 
         # Токен
         headers = {
@@ -44,9 +43,9 @@ class RequestWildberries:
         # Выполняем запрос
         try:
             # Если только через ссылку
-            if name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today",
+            if name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today", "sales_today"
                                  "tariffs_boxes", "tariffs_pallet", "statements", "prices", "fixed_prices", "rk",
-                                 "coefficients", "stat_prodvigene"]:
+                                 "coefficients", "stat_prodvigene"] or name_of_sheet == "sales_today":
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
@@ -55,8 +54,8 @@ class RequestWildberries:
                 params = self.make_params()
                 response = requests.get(url, headers=headers, json=params)
             else:
-                self.logger.critical(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
-                sys.exit(f"Man, you forget {name_of_sheet} in Request_wildberries.py")
+                self.logger.critical(f"Man, you forget {name_of_sheet}2 in Request_wildberries.py")
+                sys.exit(f"Man, you forget {name_of_sheet}2 in Request_wildberries.py")
         except socket.gaierror:
             self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
             return "Проблема с соединением"
@@ -243,6 +242,11 @@ class RequestWildberries:
             case 'stocks':
                 params = {'dateFrom': '2024-03-25'}
             case 'orders_today':
+                params = {
+                    'dateFrom': datetime.date.today().strftime("%Y-%m-%d"),
+                    'flag': 1
+                }
+            case 'sales_today':
                 params = {
                     'dateFrom': datetime.date.today().strftime("%Y-%m-%d"),
                     'flag': 1

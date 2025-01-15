@@ -13,7 +13,7 @@ class Converter:
                 return 'is None'
             case []:
                 return 'is empty'
-        if name_of_sheet in ['orders_today', 'stocks', 'rk']:
+        if name_of_sheet in ['orders_today', 'sales_today', 'stocks', 'rk']:
             return self.list_with_dict(file=file)
         elif name_of_sheet in "coefficients":
             return self.list_with_dict_without_numpy(file=file)
