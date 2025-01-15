@@ -203,6 +203,7 @@ class ApiWB(Converter, GoogleMainFunctions):
             time.sleep(self.wait_time)
             return self.private_update_statements()
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
+        time.sleep(5)
         try:
             self.service.spreadsheets().values().batchUpdate(
                 spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
@@ -214,8 +215,8 @@ class ApiWB(Converter, GoogleMainFunctions):
                          }
                     ]
                 }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - priv_update_statements2')
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - priv_update_statements2 ({err})')
             time.sleep(self.wait_time)
             return self.private_update_statements()
         except TimeoutError:
