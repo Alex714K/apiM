@@ -43,9 +43,9 @@ class RequestWildberries:
         # Выполняем запрос
         try:
             # Если только через ссылку
-            if name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today", "sales_today"
-                                 "tariffs_boxes", "tariffs_pallet", "statements", "prices", "fixed_prices", "rk",
-                                 "coefficients", "stat_prodvigene"] or name_of_sheet == "sales_today":
+            if (name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today"] or
+                    name_of_sheet in ["sales_today", "tariffs_boxes", "tariffs_pallet", "statements", "prices"] or
+                    name_of_sheet in ["fixed_prices", "rk", "coefficients", "stat_prodvigene"]):
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
