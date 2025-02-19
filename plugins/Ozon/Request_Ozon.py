@@ -1,5 +1,6 @@
 import datetime
 import os
+import pprint
 import socket
 from threading import RLock
 import time
@@ -409,13 +410,13 @@ class RequestOzon:
             "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
             "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
         }
-        url = "https://api-seller.ozon.ru/v4/product/info/prices"
+        url = "https://api-seller.ozon.ru/v5/product/info/prices"
         last_id = ""
         file = list()
         while True:
             params = {
                 "limit": 1000,
-                "last_id": last_id,
+                "cursor": last_id,
                 "filter": {"visibility": "ALL"}
             }
             try:
@@ -441,9 +442,9 @@ class RequestOzon:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
                 self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: prices")
-            file.extend(json_response["result"]["items"])
-            if len(json_response["result"]["items"]) == 1000:
-                last_id = json_response["result"]["last_id"]
+            file.extend(json_response["items"])
+            if len(json_response["items"]) == 1000:
+                last_id = json_response["cursor"]
                 # print(last_id)
             else:
                 break

@@ -61,63 +61,150 @@ class Converter:
         return ans.tolist(), ans.shape[0], needed_keys
 
     def prices(self, file: list | dict):
-        keys = ["acquiring", "product_id", "offer_id", "currency_code", "price", "old_price", "retail_price", "vat",
-                "min_ozon_price", "marketing_price", "marketing_seller_price", "auto_action_enabled",
-                "external_minimal_price", "external_minimal_price_currency", "external_price_index_value",
-                "ozon_minimal_price", "ozon_minimal_price_currency", "ozon_price_index_value", "price_index",
-                "self_marketplaces_minimal_price", "self_marketplaces_minimal_price_currency",
-                "self_marketplaces_price_index_value", "sales_percent", "sales_percent_fbo", "sales_percent_fbs",
-                "fbo_fulfillment_amount", "fbo_direct_flow_trans_min_amount", "fbo_direct_flow_trans_max_amount",
-                "fbo_deliv_to_customer_amount", "fbo_return_flow_amount", "fbo_return_flow_trans_min_amount",
-                "fbo_return_flow_trans_max_amount", "fbs_first_mile_min_amount", "fbs_first_mile_max_amount",
-                "fbs_direct_flow_trans_min_amount", "fbs_direct_flow_trans_max_amount", "fbs_deliv_to_customer_amount",
-                "fbs_return_flow_amount", "fbs_return_flow_trans_min_amount", "fbs_return_flow_trans_max_amount",
-                "volume_weight"]
+        # keys = ["acquiring", "product_id", "offer_id", "currency_code", "price", "old_price", "retail_price", "vat",
+        #         "min_ozon_price", "marketing_price", "marketing_seller_price", "auto_action_enabled",
+        #         "external_minimal_price", "external_minimal_price_currency", "external_price_index_value",
+        #         "ozon_minimal_price", "ozon_minimal_price_currency", "ozon_price_index_value", "price_index",
+        #         "self_marketplaces_minimal_price", "self_marketplaces_minimal_price_currency",
+        #         "self_marketplaces_price_index_value", "sales_percent", "sales_percent_fbo", "sales_percent_fbs",
+        #         "fbo_fulfillment_amount", "fbo_direct_flow_trans_min_amount", "fbo_direct_flow_trans_max_amount",
+        #         "fbo_deliv_to_customer_amount", "fbo_return_flow_amount", "fbo_return_flow_trans_min_amount",
+        #         "fbo_return_flow_trans_max_amount", "fbs_first_mile_min_amount", "fbs_first_mile_max_amount",
+        #         "fbs_direct_flow_trans_min_amount", "fbs_direct_flow_trans_max_amount", "fbs_deliv_to_customer_amount",
+        #         "fbs_return_flow_amount", "fbs_return_flow_trans_min_amount", "fbs_return_flow_trans_max_amount",
+        #         "volume_weight"]
+        keys: list[str] = [
+            "acquiring",
+            "fbo_deliv_to_customer_amount",
+            "fbo_direct_flow_trans_max_amount",
+            "fbo_direct_flow_trans_min_amount",
+            "fbo_return_flow_amount",
+            "fbs_deliv_to_customer_amount",
+            "fbs_direct_flow_trans_max_amount",
+            "fbs_direct_flow_trans_min_amount",
+            "fbs_first_mile_max_amount",
+            "fbs_first_mile_min_amount",
+            "fbs_return_flow_amount",
+            "sales_percent_fbo",
+            "sales_percent_fbs",
+            "marketing_actions-current_period_from",
+            "marketing_actions-current_period_to",
+            "marketing_actions-ozon_actions_exist",
+            "offer_id",
+            "auto_action_enabled",
+            "currency_code",
+            "marketing_price",
+            "marketing_seller_price",
+            "min_price",
+            "old_price",
+            "price",
+            "retail_price",
+            "vat",
+            "color_index",
+            "external_index_data",
+            "external_index_data",
+            "external_index_data",
+            "ozon_index_data",
+            "ozon_index_data",
+            "ozon_index_data",
+            "self_marketplaces_index_data",
+            "self_marketplaces_index_data",
+            "self_marketplaces_index_data",
+            "product_id",
+            "volume_weight"
+        ]
         ans = numpy.array([keys])
         for row in file:
-            "".replace(".", ",", 1)
+            # "".replace(".", ",", 1)
             values = list()
-            values.append(str(row["acquiring"]))
-            values.append(str(row["product_id"]))
-            values.append(str(row["offer_id"]))
-            values.append(str(row["price"]["currency_code"]))
-            values.append(str(row["price"]["price"]).replace(".", ",", 1))
-            values.append(str(row["price"]["old_price"]).replace(".", ",", 1))
-            values.append(str(row["price"]["retail_price"]).replace(".", ",", 1))
-            values.append(str(row["price"]["vat"]).replace(".", ",", 1))
-            values.append(str(row["price"]["min_ozon_price"]))
+
+            values.append(str(row["acquiring"]).replace(".", ",", 1))
+
+            values.append(str(row["commissions"]["fbo_deliv_to_customer_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbo_direct_flow_trans_max_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbo_direct_flow_trans_min_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbo_return_flow_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbs_deliv_to_customer_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbs_direct_flow_trans_max_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbs_direct_flow_trans_min_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbs_first_mile_max_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbs_first_mile_min_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["fbs_return_flow_amount"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["sales_percent_fbo"]).replace(".", ",", 1))
+            values.append(str(row["commissions"]["sales_percent_fbs"]).replace(".", ",", 1))
+
+            values.append(str(row["marketing_actions"]["current_period_from"]))
+            values.append(str(row["marketing_actions"]["current_period_to"]))
+            values.append(str(row["marketing_actions"]["ozon_actions_exist"]))
+
+            values.append(str(row["offer_id"]).replace(".", ",", 1))
+
+            values.append(str(row["price"]["auto_action_enabled"]).replace(".", ",", 1))
+            values.append(str(row["price"]["currency_code"]).replace(".", ",", 1))
             values.append(str(row["price"]["marketing_price"]).replace(".", ",", 1))
             values.append(str(row["price"]["marketing_seller_price"]).replace(".", ",", 1))
-            values.append(str(row["price"]["auto_action_enabled"]))
-            values.append(str(row["price_indexes"]["external_index_data"]["minimal_price"]).replace(".", ",", 1))
-            values.append(str(row["price_indexes"]["external_index_data"]["minimal_price_currency"]))
+            values.append(str(row["price"]["min_price"]).replace(".", ",", 1))
+            values.append(str(row["price"]["old_price"]).replace(".", ",", 1))
+            values.append(str(row["price"]["price"]).replace(".", ",", 1))
+            values.append(str(row["price"]["retail_price"]).replace(".", ",", 1))
+            values.append(str(row["price"]["vat"]).replace(".", ",", 1))
+
+            values.append(str(row["price_indexes"]["color_index"]).replace(".", ",", 1))
+            values.append(str(row["price_indexes"]["external_index_data"]["min_price"]).replace(".", ",", 1))
+            values.append(str(row["price_indexes"]["external_index_data"]["min_price_currency"]).replace(".", ",", 1))
             values.append(str(row["price_indexes"]["external_index_data"]["price_index_value"]).replace(".", ",", 1))
-            values.append(str(row["price_indexes"]["ozon_index_data"]["minimal_price"]).replace(".", ",", 1))
-            values.append(str(row["price_indexes"]["ozon_index_data"]["minimal_price_currency"]))
+            values.append(str(row["price_indexes"]["ozon_index_data"]["min_price"]).replace(".", ",", 1))
+            values.append(str(row["price_indexes"]["ozon_index_data"]["min_price_currency"]).replace(".", ",", 1))
             values.append(str(row["price_indexes"]["ozon_index_data"]["price_index_value"]).replace(".", ",", 1))
-            values.append(str(row["price_index"]).replace(".", ",", 1))
-            values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["minimal_price"]).replace(".", ",", 1))
-            values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["minimal_price_currency"]))
+            values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["min_price"]).replace(".", ",", 1))
+            values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["min_price_currency"]).replace(".", ",", 1))
             values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["price_index_value"]).replace(".", ",", 1))
-            values.append(str(row["commissions"]["sales_percent"]))
-            values.append(str(row["commissions"]["sales_percent_fbo"]))
-            values.append(str(row["commissions"]["sales_percent_fbs"]))
-            values.append(str(row["commissions"]["fbo_fulfillment_amount"]))
-            values.append(str(row["commissions"]["fbo_direct_flow_trans_min_amount"]))
-            values.append(str(row["commissions"]["fbo_direct_flow_trans_max_amount"]))
-            values.append(str(row["commissions"]["fbo_deliv_to_customer_amount"]).replace(".", ",", 1))
-            values.append(str(row["commissions"]["fbo_return_flow_amount"]))
-            values.append(str(row["commissions"]["fbo_return_flow_trans_min_amount"]))
-            values.append(str(row["commissions"]["fbo_return_flow_trans_max_amount"]))
-            values.append(str(row["commissions"]["fbs_first_mile_min_amount"]))
-            values.append(str(row["commissions"]["fbs_first_mile_max_amount"]))
-            values.append(str(row["commissions"]["fbs_direct_flow_trans_min_amount"]))
-            values.append(str(row["commissions"]["fbs_direct_flow_trans_max_amount"]))
-            values.append(str(row["commissions"]["fbs_deliv_to_customer_amount"]).replace(".", ",", 1))
-            values.append(str(row["commissions"]["fbs_return_flow_amount"]))
-            values.append(str(row["commissions"]["fbs_return_flow_trans_min_amount"]))
-            values.append(str(row["commissions"]["fbs_return_flow_trans_max_amount"]))
+
+            values.append(str(row["product_id"]).replace(".", ",", 1))
             values.append(str(row["volume_weight"]).replace(".", ",", 1))
+
+
+            # values.append(str(row["acquiring"]))
+            # values.append(str(row["product_id"]))
+            # values.append(str(row["offer_id"]))
+            # values.append(str(row["price"]["currency_code"]))
+            # values.append(str(row["price"]["price"]).replace(".", ",", 1))
+            # values.append(str(row["price"]["old_price"]).replace(".", ",", 1))
+            # values.append(str(row["price"]["retail_price"]).replace(".", ",", 1))
+            # values.append(str(row["price"]["vat"]).replace(".", ",", 1))
+            # values.append(str(row["price"]["min_price"]))
+            # values.append(str(row["price"]["marketing_price"]).replace(".", ",", 1))
+            # values.append(str(row["price"]["marketing_seller_price"]).replace(".", ",", 1))
+            # values.append(str(row["price"]["auto_action_enabled"]))
+            # values.append(str(row["price_indexes"]["external_index_data"]["min_price"]).replace(".", ",", 1))
+            # values.append(str(row["price_indexes"]["external_index_data"]["min_price_currency"]))
+            # values.append(str(row["price_indexes"]["external_index_data"]["price_index_value"]).replace(".", ",", 1))
+            # values.append(str(row["price_indexes"]["ozon_index_data"]["min_price"]).replace(".", ",", 1))
+            # values.append(str(row["price_indexes"]["ozon_index_data"]["min_price_currency"]))
+            # values.append(str(row["price_indexes"]["ozon_index_data"]["price_index_value"]).replace(".", ",", 1))
+            # values.append(str(row["price_index"]).replace(".", ",", 1))
+            # values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["min_price"]).replace(".", ",", 1))
+            # values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["min_price_currency"]))
+            # values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["price_index_value"]).replace(".", ",", 1))
+            # values.append(str(row["commissions"]["sales_percent"]))
+            # values.append(str(row["commissions"]["sales_percent_fbo"]))
+            # values.append(str(row["commissions"]["sales_percent_fbs"]))
+            # values.append(str(row["commissions"]["fbo_fulfillment_amount"]))
+            # values.append(str(row["commissions"]["fbo_direct_flow_trans_min_amount"]))
+            # values.append(str(row["commissions"]["fbo_direct_flow_trans_max_amount"]))
+            # values.append(str(row["commissions"]["fbo_deliv_to_customer_amount"]).replace(".", ",", 1))
+            # values.append(str(row["commissions"]["fbo_return_flow_amount"]))
+            # values.append(str(row["commissions"]["fbo_return_flow_trans_min_amount"]))
+            # values.append(str(row["commissions"]["fbo_return_flow_trans_max_amount"]))
+            # values.append(str(row["commissions"]["fbs_first_mile_min_amount"]))
+            # values.append(str(row["commissions"]["fbs_first_mile_max_amount"]))
+            # values.append(str(row["commissions"]["fbs_direct_flow_trans_min_amount"]))
+            # values.append(str(row["commissions"]["fbs_direct_flow_trans_max_amount"]))
+            # values.append(str(row["commissions"]["fbs_deliv_to_customer_amount"]).replace(".", ",", 1))
+            # values.append(str(row["commissions"]["fbs_return_flow_amount"]))
+            # values.append(str(row["commissions"]["fbs_return_flow_trans_min_amount"]))
+            # values.append(str(row["commissions"]["fbs_return_flow_trans_max_amount"]))
+            # values.append(str(row["volume_weight"]).replace(".", ",", 1))
             # используем numpy для быстроты программы
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
