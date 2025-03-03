@@ -31,6 +31,7 @@ class Api:
     def start(self, name_of_sheet: str, who_is: str, folder: str):
         """
         Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
+        :return: None
         """
         match folder:
             case 'WB':
