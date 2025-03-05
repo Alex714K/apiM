@@ -13,6 +13,8 @@ class Converter:
                 return 'is None'
             case []:
                 return 'is empty'
+        if type(file) is not list and type(file) is not dict:
+            sys.exit(file)
         if name_of_sheet in ['orders_today', 'sales_today', 'stocks', 'rk']:
             return self.list_with_dict(file=file)
         elif name_of_sheet in "coefficients":
