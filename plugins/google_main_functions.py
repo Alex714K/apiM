@@ -18,7 +18,9 @@ class GoogleMainFunctions:
 
         self.spreadsheetId = None
         self.service = None
-        self.values, self.dist, self.needed_keys = None, None, None
+        self.values = None
+        self.dist: int = 0
+        self.needed_keys = None
         self.result = None
         self.name_of_sheet = None
         self.who_is = None
@@ -151,27 +153,29 @@ class GoogleMainFunctions:
         :return: Возвращает bool ответ результата очистки
         """
         if name_of_sheet != "Result!A:E":
-            dist = len(self.values[0])
-            if dist % 26 == 0:
-                needed_letter = chr(ord('A') + 26 - 1)
-            else:
-                needed_letter = chr(ord('A') + dist % 26 - 1)
-            if dist > 26 and dist % 26 == 0:
-                needed_letter = f"{chr(ord("A") - 1 + (dist // 26 - 1))}{needed_letter}"
-            elif dist > 26:
-                needed_letter = f"{chr(ord("A") - 1 + (dist // 26))}{needed_letter}"
+            # dist = len(self.values[0])
+            # if dist % 26 == 0:
+            #     needed_letter = chr(ord('A') + 26 - 1)
+            # else:
+            #     needed_letter = chr(ord('A') + dist % 26 - 1)
+            # if dist > 26 and dist % 26 == 0:
+            #     needed_letter = f"{chr(ord("A") - 1 + (dist // 26 - 1))}{needed_letter}"
+            # elif dist > 26:
+            #     needed_letter = f"{chr(ord("A") - 1 + (dist // 26))}{needed_letter}"
+            needed_letter = self.create_last_letter_from_width()
             r = f"{name_of_sheet}!A:{needed_letter}"
         else:
             r = name_of_sheet
         try:
+            print(r)
             self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
                                                        ).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - private_clear')
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - private_clear - {err}')
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+        except TimeoutError as err:
+            self.logger.warninfg(f'Проблема с соединением Google ({err})')
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except ssl.SSLError as err:
@@ -193,50 +197,68 @@ class GoogleMainFunctions:
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
         return False
 
+    def create_last_letter_from_width(self) -> str:
+        dist = len(self.values[0])
+        print(self.values[1])
+        print(dist)
+        needed_letter = ""
+        A_ord = ord("A")
+        Z_ord = ord("Z")
+        while True:
+            print(needed_letter)
+            if dist < 26:
+                needed_letter += chr(A_ord + dist)
+                break
+            needed_letter += chr(A_ord + dist % 26)
+            dist //= 26
+
+        return needed_letter
+
     def private_update(self, name_of_sheet: str) -> bool:
         """
         Функция, обновляющий лист под название name_of_sheet.
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата обновления
         """
-        distance = f"{name_of_sheet}"
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
-        try:
-            self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
-                "valueInputOption": valueInputOption,
-                "data": [
-                    {"range": distance,
-                     "majorDimension": majorDimension,
-                     "values": self.values
-                     }
-                ]
-            }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - private_update')
-            time.sleep(self.wait_time)
-            return self.private_update(name_of_sheet)
-        except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
-            time.sleep(self.wait_time)
-            return self.private_update(name_of_sheet)
-        except ssl.SSLError as err:
-            self.logger.warning(f'Ужасная ошибка ssl: {err}')
-            time.sleep(self.wait_time)
-            return self.private_update(name_of_sheet)
-        except OSError as err:
-            self.logger.warning(f'Вероятно TimeOutError: {err}')
-            time.sleep(self.wait_time)
-            return self.private_update(name_of_sheet)
-        except http.client.ResponseNotReady as err:
-            self.logger.warning(f'Проблема с http: {err}')
-            time.sleep(self.wait_time)
-            return self.private_update(name_of_sheet)
-        except Exception as err:
-            self.logger.error(f"Ошибка: {err}")
-            time.sleep(self.wait_time)
-            return self.private_update(name_of_sheet)
-        self.logger.debug(f"Updating complete ({self.name_of_sheet})")
+        for i in range(1, self.dist + 1, 1000):
+            distance = f"{name_of_sheet}!{i}:{i+999}"
+            try:
+                self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
+                    "valueInputOption": valueInputOption,
+                    "data": [
+                        {"range": distance,
+                         "majorDimension": majorDimension,
+                         "values": self.values[i-1:i+1000-1]
+                         }
+                    ]
+                }).execute()
+            except googleapiclient.errors.HttpError as err:
+                self.logger.warning(f'Проблема с соединением Google - private_update - {err}')
+                time.sleep(self.wait_time)
+                return self.private_update(name_of_sheet)
+            except TimeoutError as err:
+                self.logger.warning(f'Проблема с соединением Google ({err})')
+                time.sleep(self.wait_time)
+                return self.private_update(name_of_sheet)
+            except ssl.SSLError as err:
+                self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                time.sleep(self.wait_time)
+                return self.private_update(name_of_sheet)
+            except OSError as err:
+                self.logger.warning(f'Вероятно TimeOutError: {err}')
+                time.sleep(self.wait_time)
+                return self.private_update(name_of_sheet)
+            except http.client.ResponseNotReady as err:
+                self.logger.warning(f'Проблема с http: {err}')
+                time.sleep(self.wait_time)
+                return self.private_update(name_of_sheet)
+            except Exception as err:
+                self.logger.error(f"Ошибка: {err}")
+                time.sleep(self.wait_time)
+                return self.private_update(name_of_sheet)
+        self.logger.debug(f"Updating complete ({name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return False
 
@@ -521,8 +543,11 @@ class GoogleMainFunctions:
                 return self.update_Results(who_is)
 
     @staticmethod
-    def replace_from_dot_to_comma(file: list):
+    def replace_from_dot_to_comma(file: list | dict):
         # for row in file:
         #     for column in range(len(row)):
         #         row[column] = str(row[column]).replace(",", ".", 1)
-        return list(map(lambda row: list(map(lambda x: str(x).replace(".", ",", 1), row)), file))
+        if type(file) is dict:
+            return file
+        else:
+            return list(map(lambda row: list(map(lambda x: str(x).replace(".", ",", 1), row)), file))
