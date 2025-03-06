@@ -1,9 +1,11 @@
 import datetime
 import calendar
+import json
 import threading
 import time
 
 import googleapiclient.errors
+import pandas
 from googleapiclient.discovery import build
 import csv
 from plugins.Ozon.Converter_to_list_Ozon import Converter
@@ -41,8 +43,10 @@ class ApiOzon(Converter, GoogleMainFunctions):
         if not self.standart_start(name_of_sheet, who_is):
             return
         match name_of_sheet:
-            case 'analytics':
+            case "analytics":
                 self.analytics_update()
+            case "sendings":
+                self.sendings_update(who_is)
             case _:
                 self.standart_update(name_of_sheet, who_is)
 
@@ -100,6 +104,49 @@ class ApiOzon(Converter, GoogleMainFunctions):
         else:
             self.start_work_with_list_result(name_of_sheet="analytics", bad=True)
 
+    def sendings_update(self, who_is: str):
+        self.choose_spreadsheetId(f"{who_is}-sendings")
+
+        data = self.values
+        # with open("data.json", "w", encoding="UTF-8") as file:
+        #     json.dump(data, file, ensure_ascii=False, indent=4)
+        #     print("dumped")
+        self.values = [data["keys"]]
+        self.values.extend(data["main"])
+        self.dist = len(self.values)
+
+        new_or_not = self.choose_name_of_sheet("main", who_is)
+        if new_or_not == 'error':
+            return
+        if new_or_not:
+            self.create_sheet(name_of_sheet="main")
+        else:
+            self.update_sheet(name_of_sheet="main")
+
+        self.values = [data["products_keys"]]
+        self.values.extend(data["products"])
+        self.dist = len(self.values)
+
+        new_or_not = self.choose_name_of_sheet("products", who_is)
+        if new_or_not == 'error':
+            return
+        if new_or_not:
+            self.create_sheet(name_of_sheet="products")
+        else:
+            self.update_sheet(name_of_sheet="products")
+
+        self.values = [data["financial_products_keys"]]
+        self.values.extend(data["financial_products"])
+        self.dist = len(self.values)
+
+        new_or_not = self.choose_name_of_sheet("financials", who_is)
+        if new_or_not == 'error':
+            return
+        if new_or_not:
+            self.create_sheet(name_of_sheet="financials")
+        else:
+            self.update_sheet(name_of_sheet="financials")
+
     def choose_spreadsheetId(self, who_is: str):
         """
         Записывает в self.spreadsheetId Id Таблицы, с которой надо будет работать.
@@ -110,17 +157,18 @@ class ApiOzon(Converter, GoogleMainFunctions):
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
         requestOzon = RequestOzon(self.LockOzonRequest).start(name_of_sheet, who_is)
-        match requestOzon:
-            case 'Missing json file':
-                self.logger.warning("Не получен файл с Ozon - start_work_with_request")
-                time.sleep(self.wait_time)
-                # self.result = 'ERROR: Не получен файл с Ozon'
-                return self.start_work_with_request(name_of_sheet, who_is)
-            case 'Проблема с соединением':
-                self.logger.warning("Проблема с соединением - RequestOzon - start_work_with_request")
-                time.sleep(self.wait_time)
-                # self.result = 'ERROR: Проблема с соединением'
-                return self.start_work_with_request(name_of_sheet, who_is)
+        if type(requestOzon) is not pandas.DataFrame:
+            match requestOzon:
+                case 'Missing json file':
+                    self.logger.warning("Не получен файл с Ozon - start_work_with_request")
+                    time.sleep(self.wait_time)
+                    # self.result = 'ERROR: Не получен файл с Ozon'
+                    return self.start_work_with_request(name_of_sheet, who_is)
+                case 'Проблема с соединением':
+                    self.logger.warning("Проблема с соединением - RequestOzon - start_work_with_request")
+                    time.sleep(self.wait_time)
+                    # self.result = 'ERROR: Проблема с соединением'
+                    return self.start_work_with_request(name_of_sheet, who_is)
         if requestOzon is tuple:
             if requestOzon[0] is int and requestOzon[0] != 200:
                 self.result = f'ERROR: {requestOzon[1]}'

@@ -1,6 +1,6 @@
+import pandas
 import datetime
 import os
-import pprint
 import socket
 from threading import RLock
 import time
@@ -29,6 +29,10 @@ class RequestOzon:
                 return self.statistics(who_is)
             case "statistics_product":
                 return self.statistics_product(who_is)
+            case "orders_alt":
+                return self.orders_alt(who_is)
+            case "sendings":
+                return self.sendings(who_is)
         if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
             return self.orders(name_of_sheet, who_is)
 
@@ -45,7 +49,6 @@ class RequestOzon:
         time_in_file = datetime.datetime.strptime(data['time'], "%Y-%m-%d %H:%M:%S")
         time_now = datetime.datetime.today() + datetime.timedelta(seconds=1)
         if time_in_file > time_now:
-            # print('lol')
             return data['token']
         else:
             url = 'https://performance.ozon.ru/api/client/token'
@@ -59,6 +62,116 @@ class RequestOzon:
                 "grant_type": "client_credentials"
             }
             response = requests.post(url=url, headers=headers)
+
+    def sendings(self, who_is: str):
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
+        url = "https://api-seller.ozon.ru/v2/posting/fbo/list"
+        params = {
+            "filter": {
+                "since": (datetime.datetime.today() - datetime.timedelta(days=30)).isoformat()[:-4] + "Z",
+                "to": (datetime.datetime.today() - datetime.timedelta(days=1)).isoformat()[:-4] + "Z"
+            },
+            "with": {
+                "analytics_data": True,
+                "financial_data": True
+            },
+            "limit": 1000,
+            "offset": 0
+        }
+
+        data = list()
+        while True:
+            try:
+                response = requests.post(url=url, headers=headers, json=params)
+            except socket.gaierror:
+                self.logger.warning(f"gaierror in request (sendings)")
+                return 'Проблема с соединением'
+            if not response:
+                self.logger.warning(f"sendings - Http статус: {response.status_code} ( {response.reason} )")
+                return response.status_code, response.reason
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    self.logger.error(f"Missing json file in sendings")
+                    return 'Missing json file'
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
+                data.extend(json_response["result"])
+            if len(json_response["result"]) == 1000:
+                params["offset"] += 1000
+                time.sleep(5)
+            else:
+                break
+
+        return data
+
+    def orders_alt(self, who_is: str):
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
+        url = "https://api-seller.ozon.ru/v1/report/postings/create"
+
+        params = {
+            "filter": {
+                "processed_at_from": (datetime.datetime.today() - datetime.timedelta(days=30)).isoformat()[:-4] + "Z",
+                "processed_at_to": (datetime.datetime.today() - datetime.timedelta(days=1)).isoformat()[:-4] + "Z",
+                "delivery_schema": ["fbo"]
+            },
+            "language": "RU"}
+        try:
+            response = requests.post(url=url, headers=headers, json=params)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror in request (orders_alt_1)")
+            return 'Проблема с соединением'
+        if not response:
+            self.logger.warning(f"orders_alt_1 - Http статус: {response.status_code} ( {response.reason} )")
+            return response.status_code, response.reason
+        else:
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in orders_alt_1")
+                return 'Missing json file'
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_1")
+            code = json_response["result"]["code"]
+
+        url = "https://api-seller.ozon.ru/v1/report/info"
+        params = {"code": code}
+        while True:
+            try:
+                response = requests.post(url=url, headers=headers, json=params)
+            except socket.gaierror:
+                self.logger.warning(f"gaierror in request (orders_alt_2)")
+                return 'Проблема с соединением'
+
+            if not response:
+                self.logger.warning(f"orders_alt_2 - Http статус: {response.status_code} ( {response.reason} )")
+                return response.status_code, response.reason
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    self.logger.error(f"Missing json file in orders_alt_2")
+                    return 'Missing json file'
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_2")
+
+            if json_response["result"]["status"] == "success":
+                url = json_response["result"]["file"]
+                break
+            elif json_response["result"]["status"] == "failed":
+                return 400, "failed"
+            else:
+                time.sleep(5)
+
+        csv_data = pandas.read_csv(url, sep=";")
+        return csv_data
 
     def orders(self, name_of_sheet: str, who_is: str):
         headers = {
@@ -93,7 +206,7 @@ class RequestOzon:
             try:
                 response = requests.post(url=url, headers=headers, json=params)
             except socket.gaierror:
-                self.logger.warning(f"gaierror with Google ({name_of_sheet})")
+                self.logger.warning(f"gaierror in request ({name_of_sheet})")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
@@ -136,7 +249,6 @@ class RequestOzon:
             response = requests.post(url=url, headers=headers, json=params)
         except socket.gaierror:
             self.logger.error(f"gaierror {name_of_sheet}")
-            # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
@@ -166,7 +278,6 @@ class RequestOzon:
             response = requests.post(url=url, headers=headers, json=params)
         except socket.gaierror:
             self.logger.error(f"gaierror {name_of_sheet}")
-            # print(f"The 'gaierror' has come ({name_of_sheet})!\n")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
@@ -211,7 +322,7 @@ class RequestOzon:
         try:
             response1 = requests.post(url, headers=headers, json=params1)
         except socket.gaierror:
-            self.logger.warning(f"gaierror with Google ({name_of_sheet})")
+            self.logger.warning(f"gaierror in request ({name_of_sheet})")
             return 'Проблема с соединением'
         if not response1:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response1.status_code} ( {response1.reason} )")
@@ -238,7 +349,7 @@ class RequestOzon:
         try:
             response2 = requests.post(url, headers=headers, json=params2)
         except socket.gaierror:
-            self.logger.warning(f"gaierror with Google ({name_of_sheet})")
+            self.logger.warning(f"gaierror in request ({name_of_sheet})")
             return 'Проблема с соединением'
         if not response2:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response2.status_code} ( {response2.reason} )")
@@ -321,7 +432,7 @@ class RequestOzon:
             try:
                 response = requests.post(url, headers=headers, json=params1)
             except socket.gaierror:
-                self.logger.warning(f"gaierror with Google (analytics)")
+                self.logger.warning(f"gaierror in request (analytics)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"analytics - Http статус: {response.status_code} ( {response.reason} )")
@@ -355,7 +466,7 @@ class RequestOzon:
             try:
                 response = requests.post(url, headers=headers, json=params2)
             except socket.gaierror:
-                self.logger.warning(f"gaierror with Google (analytics)")
+                self.logger.warning(f"gaierror in request (analytics)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"analytics - Http статус: {response.status_code} ( {response.reason} )")
@@ -422,7 +533,7 @@ class RequestOzon:
             try:
                 response = requests.post(url=url, headers=headers, json=params)
             except socket.gaierror:
-                self.logger.warning(f"gaierror with Google (prices)")
+                self.logger.warning(f"gaierror in request (prices)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"prices - Http статус: {response.status_code} ( {response.reason} )")
@@ -445,7 +556,6 @@ class RequestOzon:
             file.extend(json_response["items"])
             if len(json_response["items"]) == 1000:
                 last_id = json_response["cursor"]
-                # print(last_id)
             else:
                 break
         return file
@@ -461,7 +571,7 @@ class RequestOzon:
         try:
             response = requests.get(url, headers=headers)
         except socket.gaierror:
-            self.logger.warning(f"gaierror with Google (statistics_product)")
+            self.logger.warning(f"gaierror in request (statistics_product)")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"statistics_product - Http статус: {response.status_code} ( {response.reason} )")
@@ -494,7 +604,7 @@ class RequestOzon:
             response = requests.get("https://performance.ozon.ru:443/api/client/campaign?advObjectType=SKU",
                                     headers=headers)
         except socket.gaierror:
-            self.logger.warning(f"gaierror with Google (get_list_of_campaigns_id)")
+            self.logger.warning(f"gaierror in request (get_list_of_campaigns_id)")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"get_list_of_campaigns_id - Http статус: {response.status_code} ( {response.reason} )")
@@ -531,7 +641,7 @@ class RequestOzon:
                 response = requests.get(f"https://performance.ozon.ru:443/api/client/statistics/{UUID}",
                                         headers=headers)
             except socket.gaierror:
-                self.logger.warning(f"gaierror with Google (get_report)")
+                self.logger.warning(f"gaierror in request (get_report)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"get_report - Http статус: {response.status_code} ( {response.reason} )")
@@ -566,7 +676,7 @@ class RequestOzon:
                                     headers=headers,
                                     json=params)
         except socket.gaierror:
-            self.logger.warning(f"gaierror with Google (get_report)")
+            self.logger.warning(f"gaierror in request (get_report)")
             time.sleep(2)
             return self.get_report(who_is, UUID)
         if not response:
@@ -624,7 +734,7 @@ class RequestOzon:
         try:
             response = requests.post(url, headers=headers, json=params)
         except socket.gaierror:
-            self.logger.warning(f"gaierror with Google (get_token)")
+            self.logger.warning(f"gaierror in request (get_token)")
             time.sleep(5)
             return self.get_token(who_is)
         if not response:

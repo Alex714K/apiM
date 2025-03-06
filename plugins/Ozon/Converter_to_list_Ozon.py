@@ -1,13 +1,14 @@
 import json
+import math
 import sys
 import numpy
-import datetime
-import logging
+import pandas
 
 
 class Converter:
     def convert_to_list(self,
-                        file: list | dict, name_of_sheet: str) -> (tuple[list, int, list | None] | str):
+                        file: list | dict | pandas.DataFrame, name_of_sheet: str) -> \
+            (tuple[list | dict, int, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
             case None:
@@ -25,6 +26,10 @@ class Converter:
                 return self.prices(file=file)
             case "statistics_product":
                 return self.statistics_product(file=file)
+            case "orders_alt":
+                return self.orders_alt(file=file)
+            case "sendings":
+                return self.sendings(file=file)
         if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
             return self.orders(file)
         else:
@@ -41,6 +46,19 @@ class Converter:
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
+
+    def orders_alt(self, file: pandas.DataFrame):
+        ans = [list(file.keys())]
+        ans.extend(file.to_numpy().tolist())
+
+        needed_keys = self.check_keys(list(file.keys()))
+
+        for row in ans:
+            for i_element in range(len(row)):
+                if type(row[i_element]) is not str and math.isnan(row[i_element]):
+                    row[i_element] = ""
+
+        return ans, len(ans), needed_keys
 
     def orders(self, file: list | dict):
         keys = ["sku_id", "sku_name", "day", "ordered_units"]
@@ -254,20 +272,92 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
-    def get_values_from_dict(self, object_with_or_without_dict: str | int | list):
-        if type(object_with_or_without_dict) == list:
-            ans = list()
-            print(object_with_or_without_dict)
-            for value in object_with_or_without_dict:
-                if type(value) == dict:
-                    ans.extend(self.get_values_from_dict(list(value.values())))
-                elif type(value) == list:
+    def sendings(self, file: list[dict]) -> tuple[dict, int, list]:
+        ans = {
+            "main": list(),
+            "keys": list(),
+            "products": list(),
+            "products_keys": list(),
+            "financial_products": list(),
+            "financial_products_keys": list()
+        }
+        for key in file[0]:
+            match key:
+                case "products":
+                    ans["products_keys"].extend(list(file[0]["products"][0].keys()))
+
+                case "financial_data":
+                    ans["financial_products_keys"].extend(list(file[0]["financial_data"]["products"][0].keys()))
+                    ans["financial_products_keys"].pop(ans["financial_products_keys"].index("item_services"))
+
+                    # ans["financial_products_keys"][0].extend(list(
+                    #     file[0]["financial_data"]["products"][0]["item_services"].keys()
+                    # ))
+
+                case "additional_data":
                     pass
+
+                case "analytics_data":
+                    ans["keys"].extend(list(
+                        file[0]["analytics_data"].keys()
+                    ))
+                case _:
+                    ans["keys"].append(key)
+
+        for value in file:
+            ans["main"].append(list())
+
+            for key in value.keys():
+                match key:
+                    case "products":
+                        for product in value[key]:
+                            data = self.get_items_from_dict(product, "product")
+                            # print(data[1])
+                            ans["products"].append(data[1])
+                            continue
+                    case "financial_data":
+                        product: int | str | list | dict | None = None
+                        for product in value[key]["products"]:
+                            data = self.get_items_from_dict(product, "financial")
+                            ans["financial_products"].append(data[1])
+                            continue
+                    case "analytics_data":
+                        data = self.get_items_from_dict(value["analytics_data"])
+                        ans["main"][-1].extend(data[1])
+                        continue
+                    case "additional_data":
+                        # print(value[key])
+                        pass
+                    case _:
+                        ans["main"][-1].append(value[key])
+                        continue
+
+        return ans, 0, list()
+
+    @staticmethod
+    def get_items_from_dict(file: dict, plus_key: str = "") -> tuple[list, list]:
+        """
+        Конвевртирует огромные json из кучи вложенных словарей и списков в красивый список
+        :return: tuple(keys, values)
+        """
+        #  tuple(keys, values)
+        keys = list()
+        values = list()
+        for key, value in file.items():
+            keys.append(f"{plus_key}_{key}")
+
+            if key == "actions" or key == "digital_codes":
+                if value == list():
+                    values.append("")
                 else:
-                    ans.append(value)
-            return ans
-        else:
-            return [object_with_or_without_dict]
+                    values.append(";".join(value))
+            elif type(value) is dict:
+                continue
+            else:
+                values.append(value)
+
+        return keys, values
+
 
     @staticmethod
     def check_keys(keys: list) -> list | None:
