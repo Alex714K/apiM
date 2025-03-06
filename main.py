@@ -29,5 +29,7 @@ if __name__ == "__main__":
     # API.start('orders_1mnth', 'grand', 'Ozon')
     # API.start('orders_1week', 'grand', 'Ozon')
     # API.start('orders_2days', 'grand', 'Ozon')
+    # API.start('orders_alt', 'grand', 'Ozon')
+    # API.start('sendings', 'grand', 'Ozon')
     # API.start('statistics', 'grand', 'Ozon')
     # API.start('statistics_product', 'grand', 'Ozon')
