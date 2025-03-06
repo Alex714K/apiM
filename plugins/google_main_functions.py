@@ -4,6 +4,8 @@ import ssl
 import sys
 import threading
 import time
+from typing import overload
+
 import googleapiclient.errors
 import httplib2
 import csv
@@ -28,7 +30,7 @@ class GoogleMainFunctions:
         self.lock_Google = kwargs["lock_Google"]
         self.seconds_of_lock_Google = 1.5
 
-    def choose_name_of_sheet(self, name_of_sheet, who_is) -> bool | str:
+    def choose_name_of_sheet(self, name_of_sheet, who_is) -> bool:
         """
         Определяет, нужен ли создать новый лист или нет.
 
@@ -78,8 +80,7 @@ class GoogleMainFunctions:
         os.environ[f"sheetIDs-{who_is}"] = ';'.join(list(map(lambda x: '='.join(x), names_of_lists_and_codes)))
         if name_of_sheet in list(map(lambda x: x[0], names_of_lists_and_codes)):
             return False
-        else:
-            return True
+        return True
 
     def create_sheet(self, name_of_sheet: str):
         if self.private_create(name_of_sheet=name_of_sheet):
@@ -200,9 +201,8 @@ class GoogleMainFunctions:
         dist = len(self.values[0])
         needed_letter = ""
         A_ord = ord("A")
-        Z_ord = ord("Z")
+        # Z_ord = ord("Z")
         while True:
-            print(needed_letter)
             if dist < 26:
                 needed_letter += chr(A_ord + dist)
                 break
@@ -217,10 +217,16 @@ class GoogleMainFunctions:
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата обновления
         """
+        sheet_id = self.get_all_sheet_ids()[name_of_sheet]
+        difference_distance = len(self.values) - self.get_row_count_in_sheet(sheet_id)
+        if difference_distance > 0:
+            self.append_new_rows(sheet_id, difference_distance)
+        self.logger.info(f"Rows of sheet '{name_of_sheet}' is increased.")
+
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
         for i in range(1, self.dist + 1, 1000):
-            distance = f"{name_of_sheet}!{i}:{i+999}"
+            distance = f"{name_of_sheet}!{i}:{i+1000}"
             try:
                 self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheetId, body={
                     "valueInputOption": valueInputOption,
@@ -259,6 +265,26 @@ class GoogleMainFunctions:
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return False
 
+    def append_new_rows(self,sheet_id: int, num_rows: int):
+        requests = [{
+            "appendDimension": {
+                "sheetId": sheet_id,
+                "dimension": "ROWS",
+                "length": num_rows
+            }
+        }]
+
+        body = {
+            'requests': requests
+        }
+
+        response = self.service.spreadsheets().batchUpdate(
+            spreadsheetId=self.spreadsheetId,
+            body=body
+        ).execute()
+
+        return response
+
     def change_formats(self, needed_keys: list | None, name_of_sheet: str):
         """
         При наличии столбцов, требующих изменения формата на число с двумя знаками посе запятой, функция изменяет
@@ -267,19 +293,15 @@ class GoogleMainFunctions:
         :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
-        # with self.LockWbFile_ChangeFormats:
-        #     with open('plugins/Wildberries/data/sheets.txt', 'r', encoding="UTF-8") as txt:
-        #         data = txt.read()
-        #         sheets = dict(map(lambda x: x.split('='), data.split('\n')))
-        #         sheetId = sheets[name_of_sheet]
-        match self.name_of_sheet:
-            case "statements":
-                sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")))
-            case "analytics":
-                sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(";")))
-            case _:
-                sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
-        sheetId = sheets[name_of_sheet]
+        # match self.name_of_sheet:
+        #     case "statements":
+        #         sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")))
+        #     case "analytics":
+        #         sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(";")))
+        #     case _:
+        #         sheets = dict(map(lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")))
+        # sheetId = sheets[name_of_sheet]
+        sheetId = self.get_all_sheet_ids()[name_of_sheet]
         if needed_keys is None:
             return
         data = {"requests": []}
@@ -330,31 +352,32 @@ class GoogleMainFunctions:
         :param design: Таблица, которую нужно вставить при создании
         :return:
         """
-        match self.name_of_sheet:
-            case "statements":
-                has_Result = "Result" in list(
-                    dict(
-                        map(
-                            lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")
-                        )
-                    ).keys()
-                )
-            case "analytics":
-                has_Result = "Result" in list(
-                    dict(
-                        map(
-                            lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(";")
-                        )
-                    ).keys()
-                )
-            case _:
-                has_Result = "Result" in list(
-                    dict(
-                        map(
-                            lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")
-                        )
-                    ).keys()
-                )
+        # match self.name_of_sheet:
+        #     case "statements":
+        #         has_Result = "Result" in list(
+        #             dict(
+        #                 map(
+        #                     lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-statements").split(";")
+        #                 )
+        #             ).keys()
+        #         )
+        #     case "analytics":
+        #         has_Result = "Result" in list(
+        #             dict(
+        #                 map(
+        #                     lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}-analytics").split(";")
+        #                 )
+        #             ).keys()
+        #         )
+        #     case _:
+        #         has_Result = "Result" in list(
+        #             dict(
+        #                 map(
+        #                     lambda x: x.split("="), os.getenv(f"sheetIDs-{self.who_is}").split(";")
+        #                 )
+        #             ).keys()
+        #         )
+        has_Result = "Result" in self.get_all_sheet_ids().keys()
         if not has_Result:
             try:
                 self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheetId, body={
@@ -538,6 +561,28 @@ class GoogleMainFunctions:
                 self.logger.error(f"Ошибка: {err}")
                 time.sleep(self.wait_time)
                 return self.update_Results(who_is)
+
+    def get_row_count_in_sheet(self, sheetId: int | str) -> int:
+        row_count = 0
+        sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        sheets = sheet_metadata.get("sheets", "")
+        if type(sheetId) is int:
+            for sheet in sheets:
+                if sheetId == sheet["properties"]["sheetId"]:
+                    row_count = int(sheet["properties"]["gridProperties"]["rowCount"])
+        else:
+            for sheet in sheets:
+                if sheetId == sheet["properties"]["title"]:
+                    row_count = int(sheet["properties"]["gridProperties"]["rowCount"])
+        return row_count
+
+    def get_all_sheet_ids(self) -> dict:
+        ans = dict()
+        sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        sheets = sheet_metadata.get("sheets", "")
+        for sheet in sheets:
+            ans[sheet["properties"]["title"]] = sheet["properties"]["sheetId"]
+        return ans
 
     @staticmethod
     def replace_from_dot_to_comma(file: list | dict):
