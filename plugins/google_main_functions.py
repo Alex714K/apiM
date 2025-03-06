@@ -167,7 +167,6 @@ class GoogleMainFunctions:
         else:
             r = name_of_sheet
         try:
-            print(r)
             self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId, range=r
                                                        ).execute()
         except googleapiclient.errors.HttpError as err:
@@ -199,8 +198,6 @@ class GoogleMainFunctions:
 
     def create_last_letter_from_width(self) -> str:
         dist = len(self.values[0])
-        print(self.values[1])
-        print(dist)
         needed_letter = ""
         A_ord = ord("A")
         Z_ord = ord("Z")
