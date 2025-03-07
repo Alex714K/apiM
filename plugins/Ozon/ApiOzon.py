@@ -179,7 +179,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
             self.logger.warning(f"Нет доступа к файлу - start_work_with_request")
             # print(f"Нет доступа к файлу ({self.name_of_sheet})")
             return False
-        result = self.convert_to_list(json_response, name_of_sheet)
+        result = self.convert_to_list(json_response, name_of_sheet, who_is)
         match result:
             case 'download':
                 self.logger.info(f"Downloaded {name_of_sheet} - start_work_with_request")

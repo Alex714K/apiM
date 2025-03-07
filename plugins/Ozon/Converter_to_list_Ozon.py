@@ -3,11 +3,12 @@ import math
 import sys
 import numpy
 import pandas
+from plugins.Ozon.Request_Ozon import RequestOzon
 
 
 class Converter:
     def convert_to_list(self,
-                        file: list | dict | pandas.DataFrame, name_of_sheet: str) -> \
+                        file: list | dict | pandas.DataFrame, name_of_sheet: str, who_is: str) -> \
             (tuple[list | dict, int, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
@@ -29,7 +30,7 @@ class Converter:
             case "orders_alt":
                 return self.orders_alt(file=file)
             case "sendings":
-                return self.sendings(file=file)
+                return self.sendings(file=file, who_is=who_is)
         if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
             return self.orders(file)
         else:
@@ -272,7 +273,7 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
-    def sendings(self, file: list[dict]) -> tuple[dict, int, list]:
+    def sendings(self, file: list[dict], who_is: str) -> tuple[dict, int, list]:
         ans = {
             "main": list(),
             "keys": list(),
@@ -290,6 +291,9 @@ class Converter:
                     ans["financial_products_keys"].extend(list(file[0]["financial_data"]["products"][0].keys()))
                     ans["financial_products_keys"].pop(ans["financial_products_keys"].index("item_services"))
 
+                    ans["keys"].append("cluster_from")
+                    ans["keys"].append("cluster_to")
+
                     # ans["financial_products_keys"][0].extend(list(
                     #     file[0]["financial_data"]["products"][0]["item_services"].keys()
                     # ))
@@ -297,10 +301,10 @@ class Converter:
                 case "additional_data":
                     pass
 
-                case "analytics_data":
-                    ans["keys"].extend(list(
-                        file[0]["analytics_data"].keys()
-                    ))
+                # case "analytics_data":
+                #     ans["keys"].extend(list(
+                #         file[0]["analytics_data"].keys()
+                #     ))
                 case _:
                     ans["keys"].append(key)
 
@@ -321,10 +325,18 @@ class Converter:
                             data = self.get_items_from_dict(product, "financial")
                             ans["financial_products"].append(data[1])
                             continue
-                    case "analytics_data":
-                        data = self.get_items_from_dict(value["analytics_data"])
-                        ans["main"][-1].extend(data[1])
-                        continue
+
+                        if len(value[key]["cluster_from"]) == 0 or len(value[key]["cluster_to"]) == 0:
+                            data = RequestOzon.get_additional_sendings(who_is, value["posting_number"])
+                            ans["main"][-1].append(data[0])
+                            ans["main"][-1].append(data[1])
+                        else:
+                            ans["main"][-1].append(value[key]["cluster_from"])
+                            ans["main"][-1].append(value[key]["cluster_to"])
+                    # case "analytics_data":
+                    #     data = self.get_items_from_dict(value["analytics_data"])
+                    #     ans["main"][-1].extend(data[1])
+                    #     continue
                     case "additional_data":
                         # print(value[key])
                         pass

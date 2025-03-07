@@ -71,11 +71,11 @@ class RequestOzon:
         url = "https://api-seller.ozon.ru/v2/posting/fbo/list"
         params = {
             "filter": {
-                "since": (datetime.datetime.today() - datetime.timedelta(days=30)).isoformat()[:-4] + "Z",
-                "to": (datetime.datetime.today() - datetime.timedelta(days=1)).isoformat()[:-4] + "Z"
+                "since": (datetime.datetime.today() - datetime.timedelta(days=5)).isoformat()[:-4] + "Z",
+                "to": (datetime.datetime.today()).isoformat()[:-4] + "Z"
             },
             "with": {
-                "analytics_data": True,
+                "analytics_data": False,
                 "financial_data": True
             },
             "limit": 1000,
@@ -83,31 +83,70 @@ class RequestOzon:
         }
 
         data = list()
+        for i in range(6):
+            params["filter"]["since"] = (datetime.datetime.today() - datetime.timedelta(days=i*5+5)).isoformat()[:-4] + "Z"
+            params["filter"]["to"] = (datetime.datetime.today() - datetime.timedelta(days=i*5)).isoformat()[:-4] + "Z"
+            while True:
+                try:
+                    response = requests.post(url=url, headers=headers, json=params)
+                except socket.gaierror:
+                    self.logger.warning(f"gaierror in request (sendings)")
+                    return 'Проблема с соединением'
+                if not response:
+                    self.logger.warning(f"sendings - Http статус: {response.status_code} ( {response.reason} )")
+                    return response.status_code, response.reason
+                else:
+                    try:
+                        # Преобразуем ответ в json-объект
+                        json_response = response.json()
+                    except requests.exceptions.JSONDecodeError:
+                        self.logger.error(f"Missing json file in sendings")
+                        return 'Missing json file'
+                    self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
+                    data.extend(json_response["result"])
+                if len(json_response["result"]) == 1000:
+                    params["offset"] += 1000
+                    time.sleep(5)
+                else:
+                    break
+
+        return data
+
+    @staticmethod
+    def get_additional_sendings(who_is: str, posting_number: str) -> tuple[str, str] | str:
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
+        url = "https://api-seller.ozon.ru/v2/posting/fbo/get"
+        params = {
+            "posting_number": posting_number,
+            "with": {
+                "analytics_data": False,
+                "financial_data": True
+            }
+        }
         while True:
             try:
                 response = requests.post(url=url, headers=headers, json=params)
             except socket.gaierror:
-                self.logger.warning(f"gaierror in request (sendings)")
+                # self.logger.warning(f"gaierror in request (sendings)")
                 return 'Проблема с соединением'
             if not response:
-                self.logger.warning(f"sendings - Http статус: {response.status_code} ( {response.reason} )")
+                # self.logger.warning(f"sendings - Http статус: {response.status_code} ( {response.reason} )")
                 return response.status_code, response.reason
             else:
                 try:
                     # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
-                    self.logger.error(f"Missing json file in sendings")
+                    # self.logger.error(f"Missing json file in sendings")
                     return 'Missing json file'
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
-                data.extend(json_response["result"])
-            if len(json_response["result"]) == 1000:
-                params["offset"] += 1000
-                time.sleep(5)
-            else:
-                break
-
-        return data
+                # self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
+                if (len(json_response["result"]["financial_data"]["cluster_from"]) > 0 and
+                        len(json_response["result"]["financial_data"]["cluster_to"]) > 0):
+                    return (json_response["result"]["financial_data"]["cluster_from"],
+                            json_response["result"]["financial_data"]["cluster_to"])
 
     def orders_alt(self, who_is: str):
         headers = {
