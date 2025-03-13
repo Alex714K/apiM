@@ -16,7 +16,7 @@ class GoogleMainFunctions:
     def __init__(self, **kwargs: threading.RLock):
         self.logger = None
 
-        self.wait_time = 3  # в секундах
+        self.wait_time = 5  # в секундах
 
         self.spreadsheetId = None
         self.service = None
@@ -564,7 +564,33 @@ class GoogleMainFunctions:
 
     def get_row_count_in_sheet(self, sheetId: int | str) -> int:
         row_count = 0
-        sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        try:
+            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google - get_row_count_in_sheet')
+            time.sleep(self.wait_time)
+            return self.get_row_count_in_sheet()
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError) - get_row_count_in_sheet')
+            time.sleep(self.wait_time)
+            return self.get_row_count_in_sheet()
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
+            return self.get_row_count_in_sheet()
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
+            return self.get_row_count_in_sheet()
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
+            return self.get_row_count_in_sheet()
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
+            return self.get_row_count_in_sheet()
+
         sheets = sheet_metadata.get("sheets", "")
         if type(sheetId) is int:
             for sheet in sheets:
@@ -578,7 +604,33 @@ class GoogleMainFunctions:
 
     def get_all_sheet_ids(self) -> dict:
         ans = dict()
-        sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        try:
+            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheetId).execute()
+        except googleapiclient.errors.HttpError:
+            self.logger.warning('Проблема с соединением Google - get_all_sheet_ids')
+            time.sleep(self.wait_time)
+            return self.get_all_sheet_ids()
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError) - get_all_sheet_ids')
+            time.sleep(self.wait_time)
+            return self.get_all_sheet_ids()
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
+            return self.get_all_sheet_ids()
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
+            return self.get_all_sheet_ids()
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
+            return self.get_all_sheet_ids()
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
+            return self.get_all_sheet_ids()
+
         sheets = sheet_metadata.get("sheets", "")
         for sheet in sheets:
             ans[sheet["properties"]["title"]] = sheet["properties"]["sheetId"]
