@@ -132,20 +132,40 @@ class Converter:
         return ans, len(ans), needed_keys
 
     def stocks_hard(self, file):
-        keys = ["brand", "subjectName", "vendorCode", "nmId", "barcode", "techSize", "volume", "inWayToClient",
-                         "inWayFromClient", "quantityWarehousesFull"]
+        keys = ["brand", "subjectName", "vendorCode", "nmId", "barcode", "techSize", "volume", "В пути до получателей",
+                         "В пути возвраты на склад WB", "Всего находится на складах"]
         keys.extend(file["warehouses"])
         ans = [keys]
         for element in file["json"]:
-            ans.append(list(element.values())[:-1])
-            ans[-1].extend([""] * len(file["warehouses"]))
-            for warehouse in element["warehouses"]:
-                try:
-                    ans[-1][keys.index(warehouse["warehouseName"])] = warehouse["quantity"]
-                except ValueError:
-                    for key in keys:
-                        if warehouse["warehouseName"] in key:
-                            ans[-1][keys.index(key)] = warehouse["quantity"]
+            ans.append(list())
+            for key, value in element.items():
+                if key != "warehouses":
+                    ans[-1].append(value)
+                else:
+                    ans[-1].append("0")
+                    ans[-1].append("0")
+                    ans[-1].append("0")
+                    ans[-1].extend([""] * len(file["warehouses"]))
+                    for warehouse in value:
+                        if warehouse["warehouseName"] == "В пути до получателей":
+                            ans[-1][7] = warehouse["quantity"]
+                        elif warehouse["warehouseName"] == "В пути возвраты на склад WB":
+                            ans[-1][8] = warehouse["quantity"]
+                        elif warehouse["warehouseName"] == "Всего находится на складах":
+                            ans[-1][9] = warehouse["quantity"]
+                        else:
+                            try:
+                                index = keys.index(warehouse["warehouseName"])
+                            except ValueError:
+                                for name in keys:
+                                    if warehouse["warehouseName"] in name:
+                                        ans[-1][keys.index(name)] = warehouse["quantity"]
+                                        break
+                                else:
+                                    keys.append(warehouse["warehouseName"])
+                                    ans[-1].append(warehouse["quantity"])
+                            else:
+                                ans[-1][index] = warehouse["quantity"]
 
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
