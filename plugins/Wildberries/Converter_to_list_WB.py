@@ -165,7 +165,10 @@ class Converter:
                                     keys.append(warehouse["warehouseName"])
                                     ans[-1].append(warehouse["quantity"])
                             else:
-                                ans[-1][index] = warehouse["quantity"]
+                                try:
+                                    ans[-1][index] = warehouse["quantity"]
+                                except IndexError:
+                                    ans[-1].append(warehouse["quantity"])
 
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
