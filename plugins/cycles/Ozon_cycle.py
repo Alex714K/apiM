@@ -10,10 +10,12 @@ def Ozon_cycle():
     schedule.every(10).minutes.do(API.start, 'prices', 'grand', 'Ozon')
     schedule.every(10).minutes.do(API.start, 'prices', 'terehov', 'Ozon')
     schedule.every(10).minutes.do(API.start, 'prices', 'dnk', 'Ozon')
+    schedule.every(10).minutes.do(API.start, 'prices', '2ruz', 'Ozon')
     # Остатки
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'grand', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'terehov', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'dnk', 'Ozon')
+    schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', '2ruz', 'Ozon')
     # Sendings
     schedule.every(30).minutes.do(API.start, 'sendings', 'grand', 'Ozon')
     # Утро гранд
