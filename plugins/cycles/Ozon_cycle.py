@@ -52,5 +52,17 @@ def Ozon_cycle():
     schedule.every().day.at("09:35").do(API.start, 'orders_1mnth', 'dnk', 'Ozon')
     schedule.every().day.at("09:40").do(API.start, 'orders_1week', 'dnk', 'Ozon')
     schedule.every().day.at("09:45").do(API.start, 'orders_2days', 'dnk', 'Ozon')
+    # Утро 2ruz
+    # schedule.every().day.at("03:55").do(API.start, 'analytics', 'dnk', 'Ozon')
+    schedule.every().day.at("04:00").do(API.start, 'products', '2ruz', 'Ozon')
+    schedule.every().day.at("04:05").do(API.start, 'orders_1mnth', '2ruz', 'Ozon')
+    schedule.every().day.at("04:10").do(API.start, 'orders_1week', '2ruz', 'Ozon')
+    schedule.every().day.at("04:15").do(API.start, 'orders_2days', '2ruz', 'Ozon')
+    # Вечер 2ruz
+    # schedule.every().day.at("09:50").do(API.start, 'analytics', 'dnk', 'Ozon')
+    schedule.every().day.at("09:55").do(API.start, 'products', '2ruz', 'Ozon')
+    schedule.every().day.at("10:00").do(API.start, 'orders_1mnth', '2ruz', 'Ozon')
+    schedule.every().day.at("10:05").do(API.start, 'orders_1week', '2ruz', 'Ozon')
+    schedule.every().day.at("10:10").do(API.start, 'orders_2days', '2ruz', 'Ozon')
 
     logging.getLogger("extraInfo").info("Ozon scheduled")
