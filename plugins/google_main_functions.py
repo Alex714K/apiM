@@ -175,7 +175,7 @@ class GoogleMainFunctions:
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except TimeoutError as err:
-            self.logger.warninfg(f'Проблема с соединением Google ({err})')
+            self.logger.warning(f'Проблема с соединением Google ({err})')
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except ssl.SSLError as err:
