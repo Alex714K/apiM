@@ -19,11 +19,15 @@ def WB_cycle():
     schedule.every(10).minutes.do(API.start, 'prices', 'planeta', 'WB')
     schedule.every().day.at("23:15").do(API.start, 'fixed_prices', 'planeta', 'WB')
 
+    schedule.every(10).minutes.do(API.start, 'prices', '2ruz', 'WB')
+    schedule.every().day.at("23:15").do(API.start, 'fixed_prices', '2ruz', 'WB')
+
     # Статистика приёмки
     schedule.every(30).minutes.do(API.start, 'coefficients', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'planeta', 'WB')
+    schedule.every(30).minutes.do(API.start, 'coefficients', '2ruz', 'WB')
 
     # Финансовые отчёты
     # schedule.every().day.at("02:12").do(API.start, 'statements', 'planeta', 'WB')
@@ -34,24 +38,41 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'orders_today', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'planeta', 'WB')
+    schedule.every(30).minutes.do(API.start, 'orders_today', '2ruz', 'WB')
 
     # Продаже за сегодня
     schedule.every(30).minutes.do(API.start, 'sales_today', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'planeta', 'WB')
+    schedule.every(30).minutes.do(API.start, 'sales_today', '2ruz', 'WB')
 
     # Остатки
     schedule.every(30).minutes.do(API.start, 'stocks', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks', 'planeta', 'WB')
+    schedule.every(30).minutes.do(API.start, 'stocks', '2ruz', 'WB')
 
     # Остатки новые
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'planeta', 'WB')
+    schedule.every(30).minutes.do(API.start, 'stocks_hard', '2ruz', 'WB')
+    # Утро 2ruz
+    schedule.every().day.at("23:45").do(API.start, 'orders_1mnth', '2ruz', 'WB')
+    schedule.every().day.at("23:50").do(API.start, 'orders_1week', '2ruz', 'WB')
+    schedule.every().day.at("23:55").do(API.start, 'orders_2days', '2ruz', 'WB')
+    schedule.every().day.at("00:00").do(API.start, 'tariffs_boxes', '2ruz', 'WB')
+    schedule.every().day.at("00:05").do(API.start, 'tariffs_pallet', '2ruz', 'WB')
+
+    # День 2ruz
+    schedule.every().day.at("05:45").do(API.start, 'orders_1mnth', '2ruz', 'WB')
+    schedule.every().day.at("05:50").do(API.start, 'orders_1week', '2ruz', 'WB')
+    schedule.every().day.at("05:55").do(API.start, 'orders_2days', '2ruz', 'WB')
+    schedule.every().day.at("06:00").do(API.start, 'tariffs_boxes', '2ruz', 'WB')
+    schedule.every().day.at("06:05").do(API.start, 'tariffs_pallet', '2ruz', 'WB')
 
     # Утро гранд
     schedule.every().day.at("00:10").do(API.start, 'orders_1mnth', 'grand', 'WB')
