@@ -47,6 +47,13 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'sales_today', 'planeta', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', '2ruz', 'WB')
 
+    # Продаже за месяц
+    schedule.every().hour.do(API.start, 'sales_today', 'grand', 'WB')
+    schedule.every().hour.do(API.start, 'sales_today', 'terehov', 'WB')
+    schedule.every().hour.do(API.start, 'sales_today', 'dnk', 'WB')
+    schedule.every().hour.do(API.start, 'sales_today', 'planeta', 'WB')
+    schedule.every().hour.do(API.start, 'sales_today', '2ruz', 'WB')
+
     # Остатки
     schedule.every(30).minutes.do(API.start, 'stocks', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'stocks', 'terehov', 'WB')
