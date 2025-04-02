@@ -21,6 +21,8 @@ class Converter:
             return self.list_with_dict_without_numpy(file=file)
         elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
             return self.orders_not_today(file=file)
+        elif name_of_sheet in ['sales_1mnth']:
+            return self.sales_not_today(file=file)
         elif name_of_sheet in ['prices', 'fixed_prices']:
             return self.prices(file=file)
         elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
@@ -75,6 +77,25 @@ class Converter:
             if datetime.datetime.now().strftime('%Y-%m-%d') == str(ans[i][1])[:10]:
                 need_to_delete.append(i)
         ans = numpy.delete(ans, need_to_delete, axis=0)
+        needed_keys = self.check_keys(keys)
+        return ans.tolist(), ans.shape[0], needed_keys
+
+    def sales_not_today(self, file: dict) -> tuple[list, int, list | None]:
+        keys = list()
+        for key in file[0].keys():
+            keys.append(key)
+        ans = numpy.array([keys])
+        for i, row in enumerate(file):
+            values = list()
+            flag = False
+            for key, value in row.items():
+                if key == "lastChangeDate" and datetime.date(int(value[0:3]), int(value[5:7]), int(value[8:10])) == datetime.date.today():
+                    flag = True
+                values.append(value)
+            if flag:
+                continue
+            values = numpy.array([values])
+            ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 

@@ -44,8 +44,8 @@ class RequestWildberries:
         try:
             # Если только через ссылку
             if (name_of_sheet in ["stocks", "orders_1mnth", "orders_1week", "orders_2days", "orders_today"] or
-                    name_of_sheet in ["sales_today", "tariffs_boxes", "tariffs_pallet", "statements", "prices"] or
-                    name_of_sheet in ["fixed_prices", "rk", "coefficients", "stat_prodvigene"]):
+                    name_of_sheet in ["sales_today", "sales_1mnth", "tariffs_boxes", "tariffs_pallet", "statements"] or
+                    name_of_sheet in ["prices", "fixed_prices", "rk", "coefficients", "stat_prodvigene"]):
                 params = self.make_params()
                 url_for_reqst = self.make_request(url, params)
                 response = requests.get(url_for_reqst, headers=headers)
@@ -251,6 +251,10 @@ class RequestWildberries:
                     'dateFrom': datetime.date.today().strftime("%Y-%m-%d"),
                     'flag': 1
                 }
+            case 'sales_1mnth':
+                params = {
+                    'dateFrom': (datetime.date.today() - datetime.timedelta(days=31)).strftime("%Y-%m-%d"),
+                }
             case 'orders_2days':
                 params = {'dateFrom': (datetime.date.today() - datetime.timedelta(days=2)).strftime("%Y-%m-%d")}
             case 'orders_1week':
@@ -315,4 +319,5 @@ class RequestWildberries:
         if flag:
             return None, None
         response = requests.get(url, headers=headers)
-        return list(map(lambda x: x.split(';'), response.content.decode("utf-8")))
+        # return list(map(lambda x: x.split(';'), response.content.decode("utf-8"))), response.status_code
+        return response.content.decode("utf-8"), response.status_code
