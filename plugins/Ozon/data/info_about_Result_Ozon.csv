@@ -6,5 +6,6 @@ prices,Цены,10 минут,
 orders_1mnth,Заказы за месяц,2 раза в день
 orders_1week,Заказы за неделю,2 раза в день
 orders_2days,Заказы за два дня,2 раза в день
+orders_alt,Альтернативные заказы,?
 statistics,Статистика,?
 statistics_product,?,1 раз в день,
