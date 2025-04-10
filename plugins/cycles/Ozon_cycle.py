@@ -7,24 +7,29 @@ from plugins.Api import Api
 def Ozon_cycle():
     API = Api()
     # grand
-    schedule.every(10).minutes.do(API.start, 'prices', 'grand', 'Ozon')
+    schedule.every(15).minutes.do(API.start, 'prices', 'grand', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'grand', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'sendings', 'grand', 'Ozon')
 
     # terehov
-    schedule.every(10).minutes.do(API.start, 'prices', 'terehov', 'Ozon')
+    schedule.every(15).minutes.do(API.start, 'prices', 'terehov', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'terehov', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'sendings', 'terehov', 'Ozon')
 
     # dnk
-    schedule.every(10).minutes.do(API.start, 'prices', 'dnk', 'Ozon')
+    schedule.every(15).minutes.do(API.start, 'prices', 'dnk', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'dnk', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'sendings', 'dnk', 'Ozon')
 
     # 2ruz
-    schedule.every(10).minutes.do(API.start, 'prices', '2ruz', 'Ozon')
+    schedule.every(15).minutes.do(API.start, 'prices', '2ruz', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', '2ruz', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'sendings', '2ruz', 'Ozon')
+
+    # peco
+    schedule.every(15).minutes.do(API.start, 'prices', 'peco', 'Ozon')
+    schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'peco', 'Ozon')
+    schedule.every(30).minutes.do(API.start, 'sendings', 'peco', 'Ozon')
 
     # grand
     schedule.every().day.at('06:40').do(API.start, 'orders_alt', 'grand', 'Ozon')
@@ -54,5 +59,12 @@ def Ozon_cycle():
     schedule.every().day.at('08:10').do(API.start, 'orders_1mnth', '2ruz', 'Ozon')
     schedule.every().day.at('08:15').do(API.start, 'orders_1week', '2ruz', 'Ozon')
     schedule.every().day.at('08:20').do(API.start, 'orders_2days', '2ruz', 'Ozon')
+
+    # peco
+    schedule.every().day.at('08:25').do(API.start, 'orders_alt', 'peco', 'Ozon')
+    schedule.every().day.at('08:30').do(API.start, 'products', 'peco', 'Ozon')
+    schedule.every().day.at('08:35').do(API.start, 'orders_1mnth', 'peco', 'Ozon')
+    schedule.every().day.at('08:40').do(API.start, 'orders_1week', 'peco', 'Ozon')
+    schedule.every().day.at('08:45').do(API.start, 'orders_2days', 'peco', 'Ozon')
 
     logging.getLogger("extraInfo").info("Ozon scheduled")

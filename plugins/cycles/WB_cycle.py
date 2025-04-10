@@ -11,7 +11,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'grand', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', 'grand', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'grand', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'grand', 'WB')
 
     # terehov
@@ -19,7 +19,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'terehov', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', 'terehov', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'terehov', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'terehov', 'WB')
 
     # dnk
@@ -27,7 +27,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'dnk', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', 'dnk', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'dnk', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'dnk', 'WB')
 
     # planeta
@@ -35,7 +35,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'planeta', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'planeta', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'planeta', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', 'planeta', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'planeta', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'planeta', 'WB')
 
     # 2ruz
@@ -43,7 +43,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', '2ruz', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', '2ruz', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', '2ruz', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', '2ruz', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', '2ruz', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', '2ruz', 'WB')
 
     # peco
@@ -51,7 +51,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'peco', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'peco', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'peco', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', 'peco', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'peco', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'peco', 'WB')
 
     # rus_house
@@ -59,7 +59,7 @@ def WB_cycle():
     schedule.every(30).minutes.do(API.start, 'stocks_hard', 'rus_house', 'WB')
     schedule.every(30).minutes.do(API.start, 'orders_today', 'rus_house', 'WB')
     schedule.every(30).minutes.do(API.start, 'sales_today', 'rus_house', 'WB')
-    schedule.every(10).minutes.do(API.start, 'prices', 'rus_house', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'rus_house', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'rus_house', 'WB')
 
     # fixed_prices
