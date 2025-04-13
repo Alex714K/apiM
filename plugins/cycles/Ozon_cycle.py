@@ -14,22 +14,18 @@ def Ozon_cycle():
     # terehov
     schedule.every(15).minutes.do(API.start, 'prices', 'terehov', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'terehov', 'Ozon')
-    schedule.every(30).minutes.do(API.start, 'sendings', 'terehov', 'Ozon')
 
     # dnk
     schedule.every(15).minutes.do(API.start, 'prices', 'dnk', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'dnk', 'Ozon')
-    schedule.every(30).minutes.do(API.start, 'sendings', 'dnk', 'Ozon')
 
     # 2ruz
     schedule.every(15).minutes.do(API.start, 'prices', '2ruz', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', '2ruz', 'Ozon')
-    schedule.every(30).minutes.do(API.start, 'sendings', '2ruz', 'Ozon')
 
     # peco
     schedule.every(15).minutes.do(API.start, 'prices', 'peco', 'Ozon')
     schedule.every(30).minutes.do(API.start, 'stock_on_warehouses', 'peco', 'Ozon')
-    schedule.every(30).minutes.do(API.start, 'sendings', 'peco', 'Ozon')
 
     # grand
     schedule.every().day.at('06:40').do(API.start, 'orders_alt', 'grand', 'Ozon')
