@@ -62,6 +62,14 @@ def WB_cycle():
     schedule.every(15).minutes.do(API.start, 'prices', 'rus_house', 'WB')
     schedule.every(30).minutes.do(API.start, 'coefficients', 'rus_house', 'WB')
 
+    # sisin
+    schedule.every(30).minutes.do(API.start, 'stocks', 'sisin', 'WB')
+    schedule.every(30).minutes.do(API.start, 'stocks_hard', 'sisin', 'WB')
+    schedule.every(30).minutes.do(API.start, 'orders_today', 'sisin', 'WB')
+    schedule.every(30).minutes.do(API.start, 'sales_today', 'sisin', 'WB')
+    schedule.every(15).minutes.do(API.start, 'prices', 'sisin', 'WB')
+    schedule.every(30).minutes.do(API.start, 'coefficients', 'sisin', 'WB')
+
     # fixed_prices
     schedule.every().hour.at('23:00').do(API.start, 'fixed_prices', 'grand', 'WB')
     schedule.every().hour.at('23:05').do(API.start, 'fixed_prices', 'terehov', 'WB')
@@ -70,6 +78,7 @@ def WB_cycle():
     schedule.every().hour.at('23:20').do(API.start, 'fixed_prices', '2ruz', 'WB')
     schedule.every().hour.at('23:25').do(API.start, 'fixed_prices', 'peco', 'WB')
     schedule.every().hour.at('23:30').do(API.start, 'fixed_prices', 'rus_house', 'WB')
+    schedule.every().hour.at('23:35').do(API.start, 'fixed_prices', 'sisin', 'WB')
 
     # grand
     schedule.every().day.at('03:10').do(API.start, 'orders_1mnth', 'grand', 'WB')
@@ -126,6 +135,14 @@ def WB_cycle():
     schedule.every().day.at('06:25').do(API.start, 'sales_1mnth', 'rus_house', 'WB')
     schedule.every().day.at('06:30').do(API.start, 'tariffs_boxes', 'rus_house', 'WB')
     schedule.every().day.at('06:35').do(API.start, 'tariffs_pallet', 'rus_house', 'WB')
+
+    # sisin
+    schedule.every().day.at('06:40').do(API.start, 'orders_1mnth', 'sisin', 'WB')
+    schedule.every().day.at('06:45').do(API.start, 'orders_1week', 'sisin', 'WB')
+    schedule.every().day.at('06:50').do(API.start, 'orders_2days', 'sisin', 'WB')
+    schedule.every().day.at('06:55').do(API.start, 'sales_1mnth', 'sisin', 'WB')
+    schedule.every().day.at('07:00').do(API.start, 'tariffs_boxes', 'sisin', 'WB')
+    schedule.every().day.at('07:05').do(API.start, 'tariffs_pallet', 'sisin', 'WB')
 
     # Платное хранение
     # schedule.every().day.at('00:00').do(API.start, 'storage_paid', 'planeta', 'WB')
