@@ -4,7 +4,6 @@ import ssl
 import sys
 import threading
 import time
-from typing import overload
 
 import googleapiclient.errors
 import httplib2
