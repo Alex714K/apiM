@@ -108,12 +108,15 @@ class RequestWildberries:
             time.sleep(60)
             return self.stocks_hard(who_is)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/status"
+
+        count = 0
+
         while True:
             try:
                 response = requests.get(url, headers=headers)
             except socket.gaierror:
                 self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
-                time.sleep(5)
+                time.sleep(10)
                 continue
             json_response = response.json()
             num_of_tryes = 0
@@ -122,7 +125,9 @@ class RequestWildberries:
                     break
                 else:
                     self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
-                    time.sleep(4)
+                    if count < 4:
+                        count += 1
+                    time.sleep(5 * count)
             except KeyError:
                 self.logger.error(f"stocks_hard - status:{json_response}")
                 if num_of_tryes > 3:
