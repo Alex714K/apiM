@@ -15,7 +15,7 @@ class GoogleMainFunctions:
     def __init__(self, **kwargs: threading.RLock):
         self.logger = None
 
-        self.wait_time = 5  # в секундах
+        self.wait_time = 7  # в секундах
 
         self.spreadsheetId = None
         self.service = None
