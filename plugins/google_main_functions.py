@@ -569,27 +569,27 @@ class GoogleMainFunctions:
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - get_row_count_in_sheet')
             time.sleep(self.wait_time)
-            return self.get_row_count_in_sheet()
+            return self.get_row_count_in_sheet(sheetId)
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError) - get_row_count_in_sheet')
             time.sleep(self.wait_time)
-            return self.get_row_count_in_sheet()
+            return self.get_row_count_in_sheet(sheetId)
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             time.sleep(self.wait_time)
-            return self.get_row_count_in_sheet()
+            return self.get_row_count_in_sheet(sheetId)
         except OSError as err:
             self.logger.warning(f'Вероятно TimeOutError: {err}')
             time.sleep(self.wait_time)
-            return self.get_row_count_in_sheet()
+            return self.get_row_count_in_sheet(sheetId)
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
             time.sleep(self.wait_time)
-            return self.get_row_count_in_sheet()
+            return self.get_row_count_in_sheet(sheetId)
         except Exception as err:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
-            return self.get_row_count_in_sheet()
+            return self.get_row_count_in_sheet(sheetId)
 
         sheets = sheet_metadata.get("sheets", "")
         if type(sheetId) is int:
