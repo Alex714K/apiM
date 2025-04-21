@@ -1,5 +1,7 @@
+import csv
 import json
 import math
+import pprint
 import sys
 import numpy
 import pandas
@@ -241,9 +243,9 @@ class Converter:
         needed_keys = self.check_keys(keys)
         return ans.tolist(), ans.shape[0], needed_keys
 
-    def products(self, file: list | dict):
-        # ans = arr_ans.tolist()
-        ans = file
+    def products(self, file: str):
+        file = file.replace("\ufeff", "").replace("\"", "").replace("\'", "")
+        ans = list(map(lambda x: x.split(";"), file.split("\n")))[:-1]
         needed_keys = self.check_keys(ans)
         return ans, len(ans), needed_keys
 

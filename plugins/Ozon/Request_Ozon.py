@@ -313,32 +313,38 @@ class RequestOzon:
         params = {
             "code": code_of_report
         }
-        try:
-            response = requests.post(url=url, headers=headers, json=params)
-        except socket.gaierror:
-            self.logger.error(f"gaierror {name_of_sheet}")
-            return 'Проблема с соединением'
-        if not response:
-            self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
-            return response.status_code, response.reason
-        else:
+
+        while True:
             try:
-                # Преобразуем ответ в json-объект
-                json_response = response.json()
-            except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in {name_of_sheet}")
-                return 'Missing json file'
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+                response = requests.post(url=url, headers=headers, json=params)
+            except socket.gaierror:
+                self.logger.error(f"gaierror {name_of_sheet}")
+                return 'Проблема с соединением'
+            if not response:
+                self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
+                # with open('data.json') as data:
+                #     return json.load(data)
+                time.sleep(10)
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    self.logger.error(f"Missing json file in {name_of_sheet}")
+                    return 'Missing json file'
+                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                # Записываем данные в файл (убирать комментарий при необходимости)
+                # with open('data.json', 'w', encoding='UTF-8') as d:
+                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+            if json_response["result"]["status"] == "success":
+                break
+            else:
+                time.sleep(5)
         url = json_response["result"]["file"]
         response = requests.get(url)
-        file = list(map(lambda x: x[1:-1].split("\";\""), response.content.decode("utf-8-sig").split('\n')))
+        file = response.content.decode()
         return file
 
     def stock_on_warehouses(self, name_of_sheet: str, who_is: str):
