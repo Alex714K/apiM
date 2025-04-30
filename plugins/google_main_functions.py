@@ -220,7 +220,7 @@ class GoogleMainFunctions:
         difference_distance = len(self.values) - self.get_row_count_in_sheet(sheet_id)
         if difference_distance > 0:
             self.append_new_rows(sheet_id, difference_distance)
-        self.logger.info(f"Rows of sheet '{name_of_sheet}' is increased.")
+            self.logger.info(f"Rows of sheet '{name_of_sheet}' is increased.")
 
         valueInputOption = "USER_ENTERED"
         majorDimension = "ROWS"  # список - строка
