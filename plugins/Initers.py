@@ -9,7 +9,6 @@ class Initer:
     """
     def __init__(self):
         self.parameters = None
-        # self.logger = Logger.get_logger("Apister")
         current_date = datetime.datetime.now()
         logging.basicConfig(level=logging.DEBUG, filename=f"data/logs/{current_date.strftime('%Y-%m')}.log",
                             filemode="w", format="%(asctime)s %(levelname)s %(message)s", encoding="UTF-8")
