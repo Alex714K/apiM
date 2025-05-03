@@ -637,9 +637,6 @@ class GoogleMainFunctions:
 
     @staticmethod
     def replace_from_dot_to_comma(file: list | dict):
-        # for row in file:
-        #     for column in range(len(row)):
-        #         row[column] = str(row[column]).replace(",", ".", 1)
         if type(file) is dict:
             return file
         else:
