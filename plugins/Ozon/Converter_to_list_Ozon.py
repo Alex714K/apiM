@@ -10,7 +10,7 @@ from plugins.Ozon.Request_Ozon import RequestOzon
 
 class Converter:
     def convert_to_list(self,
-                        file: list | dict | pandas.DataFrame, name_of_sheet: str, who_is: str) -> \
+                        file: list | dict | pandas.DataFrame | str, name_of_sheet: str, who_is: str) -> \
             (tuple[list | dict, int, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
@@ -23,6 +23,8 @@ class Converter:
                 return self.analytics(file=file)
             case "stock_on_warehouses":
                 return self.stock_on_warehouses(file=file)
+            case "stocks_FBS":
+                return self.stocks_fbs(file=file)
             case "products":
                 return self.products(file=file)
             case "prices":
@@ -175,8 +177,10 @@ class Converter:
                 values.extend([None, None, None])
             else:
                 values.append(str(row["price_indexes"]["external_index_data"]["min_price"]).replace(".", ",", 1))
-                values.append(str(row["price_indexes"]["external_index_data"]["min_price_currency"]).replace(".", ",", 1))
-                values.append(str(row["price_indexes"]["external_index_data"]["price_index_value"]).replace(".", ",", 1))
+                values.append(
+                    str(row["price_indexes"]["external_index_data"]["min_price_currency"]).replace(".", ",", 1))
+                values.append(
+                    str(row["price_indexes"]["external_index_data"]["price_index_value"]).replace(".", ",", 1))
 
             if row["price_indexes"]["ozon_index_data"] is None:
                 values.extend([None, None, None])
@@ -188,13 +192,15 @@ class Converter:
             if row["price_indexes"]["self_marketplaces_index_data"] is None:
                 values.extend([None, None, None])
             else:
-                values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["min_price"]).replace(".", ",", 1))
-                values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["min_price_currency"]).replace(".", ",", 1))
-                values.append(str(row["price_indexes"]["self_marketplaces_index_data"]["price_index_value"]).replace(".", ",", 1))
+                values.append(
+                    str(row["price_indexes"]["self_marketplaces_index_data"]["min_price"]).replace(".", ",", 1))
+                values.append(
+                    str(row["price_indexes"]["self_marketplaces_index_data"]["min_price_currency"]).replace(".", ",",1))
+                values.append(
+                    str(row["price_indexes"]["self_marketplaces_index_data"]["price_index_value"]).replace(".", ",", 1))
 
             values.append(str(row["product_id"]).replace(".", ",", 1))
             values.append(str(row["volume_weight"]).replace(".", ",", 1))
-
 
             # values.append(str(row["acquiring"]))
             # values.append(str(row["product_id"]))
@@ -359,6 +365,34 @@ class Converter:
 
         return ans, 0, list()
 
+    def stocks_fbs(self, file: list[dict[str, str | int | list[dict[str, str | int]]]]):
+        result: list[list] = list()
+        keys = [
+            "offer_id",
+            "product_id",
+            "Сейчас на складе",
+            "Зарезервировано",
+            "Тип упаковки",
+            "sku",
+            "Тип склада"
+        ]
+        result.append(keys)
+        for product in file:
+            for stock in product["stocks"]:
+                result.append([
+                    product["offer_id"],
+                    product["product_id"],
+                    stock["present"],
+                    stock["reserved"],
+                    stock["shipment_type"],
+                    stock["sku"],
+                    stock["type"]
+                ])
+
+        needed_keys = self.check_keys(keys)
+
+        return result, len(result), needed_keys
+
     @staticmethod
     def get_items_from_dict(file: dict, plus_key: str = "") -> tuple[list, list]:
         """
@@ -382,7 +416,6 @@ class Converter:
                 values.append(value)
 
         return keys, values
-
 
     @staticmethod
     def check_keys(keys: list) -> list | None:

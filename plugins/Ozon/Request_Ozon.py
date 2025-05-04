@@ -21,6 +21,8 @@ class RequestOzon:
                 return self.analytics(who_is)
             case "stock_on_warehouses":
                 return self.stock_on_warehouses(name_of_sheet, who_is)
+            case "stocks_FBS":
+                return self.stocks_fbs(name_of_sheet, who_is)
             case "products":
                 return self.products(name_of_sheet, who_is)
             case "prices":
@@ -809,3 +811,53 @@ class RequestOzon:
         os.putenv(name, expire_time.strftime("%Y-%m-%d %H:%M:%S"))
         os.putenv(f"Ozon-access_token-{who_is}", f"{token_type} {token}")
         return f"{token_type} {token}"
+
+    def stocks_fbs(self, name_of_sheet, who_is):
+        headers = {
+            "Client-Id": os.getenv(f"Ozon-Client_Id-{who_is}"),
+            "Api-Key": os.getenv(f"Ozon-Api_Key-{who_is}")
+        }
+        url = "https://api-seller.ozon.ru/v4/product/info/stocks"
+        params = {
+            "cursor": "",
+            "filter": {},
+            "limit": 1000
+        }
+
+        result = list()
+        flag = False
+        while not flag:
+            try:
+                response = requests.post(url, headers=headers, json=params)
+            except socket.gaierror:
+                self.logger.warning(f"gaierror in request ({name_of_sheet})")
+                return 'Проблема с соединением'
+            if not response:
+                self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
+                # with open('data.json') as data:
+                #     return json.load(data)
+                time.sleep(2)
+                return self.stocks_fbs(name_of_sheet, who_is)
+            else:
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    self.logger.error("Missing json file in get_report")
+                    time.sleep(5)
+                    return self.stocks_fbs(name_of_sheet, who_is)
+                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                # Записываем данные в файл (убирать комментарий при необходимости)
+                # with open('data.json', 'w', encoding='UTF-8') as d:
+                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
+                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+
+                result.extend(json_response["items"])
+
+                if json_response["total"] < 1000:
+                    flag = True
+
+                params["cursor"] = json_response["cursor"]
+
+        return result
