@@ -17,7 +17,6 @@ class ApiWB(Converter, GoogleMainFunctions):
     def __init__(self, service: googleapiclient.discovery.build, **kwargs: threading.RLock):
         super().__init__(**kwargs)
         self.wait_time = 3  # в секундах
-        self.spreadsheetId = None
         self.service = service
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
@@ -95,7 +94,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         :param who_is:
         :return:
         """
-        self.spreadsheetId = os.getenv(f"Wildberries-spreadsheetid-{who_is}")
+        self.spreadsheet_id = os.getenv(f"Wildberries-spreadsheetid-{who_is}")
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str) -> bool:
         """
@@ -171,7 +170,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         #     need.append([info['properties']['title'], info['properties']['sheetId']])
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
-            self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheetId,
+            self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id,
                                                        range=last_week
                                                        ).execute()
         except googleapiclient.errors.HttpError as err:

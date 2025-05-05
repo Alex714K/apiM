@@ -16,17 +16,17 @@ class Converter:
         if type(file) is not list and type(file) is not dict:
             sys.exit(str(file))
         match name_of_sheet:
-            case 'orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid':
+            case n if n in ['orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid']:
                 return self.list_with_dict(file=file)
             case "coefficients":
                 return self.list_with_dict_without_numpy(file=file)
-            case 'orders_1mnth', 'orders_1week', 'orders_2days':
+            case n if n in ['orders_1mnth', 'orders_1week', 'orders_2days']:
                 return self.orders_not_today(file=file)
             case 'sales_1mnth':
                 return self.sales_not_today(file=file)
-            case 'prices', 'fixed_prices':
+            case n if n in ['prices', 'fixed_prices']:
                 return self.prices(file=file)
-            case 'tariffs_boxes', 'tariffs_pallet':
+            case n if n in ['tariffs_boxes', 'tariffs_pallet']:
                 return self.tariffs(file=file)
             case 'statements':
                 return self.statements(file=file)
@@ -34,6 +34,7 @@ class Converter:
                 return self.stocks_hard(file=file)
             case _:
                 print(file)
+                print(name_of_sheet)
                 return sys.exit("I can't convert =(")
 
     def list_with_dict(self, file: list) -> tuple[list, int, list | None]:

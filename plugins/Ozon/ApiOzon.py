@@ -147,7 +147,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         :param who_is:
         :return:
         """
-        self.spreadsheetId = os.getenv(f"Ozon-spreadsheetid-{who_is}")
+        self.spreadsheet_id = os.getenv(f"Ozon-spreadsheetid-{who_is}")
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
         request_ozon = RequestOzon(self.LockOzonRequest).start(name_of_sheet, who_is)
