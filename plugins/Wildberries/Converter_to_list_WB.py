@@ -34,7 +34,6 @@ class Converter:
                 return self.stocks_hard(file=file)
             case _:
                 print(file)
-                print(name_of_sheet)
                 return sys.exit("I can't convert =(")
 
     def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
