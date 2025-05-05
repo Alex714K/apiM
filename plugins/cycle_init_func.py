@@ -1,12 +1,12 @@
 import time
 from multiprocessing import Process
 import schedule
-from plugins.cycles.WB_cycle import WB_cycle
-from plugins.cycles.Ozon_cycle import Ozon_cycle
+from plugins.cycles.WB_cycle import wb_cycle
+from plugins.cycles.Ozon_cycle import ozon_cycle
 
 
 def launch():
-    processes = [Process(target=WB_cycle), Process(target=Ozon_cycle)]
+    processes = [Process(target=wb_cycle), Process(target=ozon_cycle)]
 
     for process in processes:
         process.start()

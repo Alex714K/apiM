@@ -3,7 +3,7 @@ import logging.config
 
 
 def activate_loggers():
-    dictLogConfig = {
+    dict_log_config = {
         "version": 1,
         "handlers": {
             "fileHandler": {
@@ -61,4 +61,4 @@ def activate_loggers():
             }
         }
     }
-    logging.config.dictConfig(dictLogConfig)
+    logging.config.dictConfig(dict_log_config)

@@ -37,7 +37,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         """
         self.logger.info(f"Started: folder=WB, who_is={who_is}, name_of_sheet={name_of_sheet}")
         if name_of_sheet == "update_Results":
-            self.update_Results(who_is)
+            self.update_results(who_is)
         if not self.standart_start(name_of_sheet, who_is):
             return
         match name_of_sheet:
@@ -103,25 +103,23 @@ class ApiWB(Converter, GoogleMainFunctions):
         названия name_of_sheet.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :return: Возвращает bool ответ результата запроса
+        :return: Возвращается bool ответ результата запроса
         """
-        requestWB = RequestWildberries(self.LockWbRequest).start(name_of_sheet=name_of_sheet, who_is=who_is)
-        match requestWB:
+        request_wb = RequestWildberries(self.LockWbRequest).start(name_of_sheet=name_of_sheet, who_is=who_is)
+        match request_wb:
             case 'Missing json file':
-                # self.result = 'ERROR: Не получен файл с WildBerries'
                 time.sleep(self.wait_time)
                 return self.start_work_with_request(name_of_sheet, who_is)
             case 'Проблема с соединением':
-                # self.result = 'ERROR: Проблема с соединением'
                 time.sleep(self.wait_time)
                 return self.start_work_with_request(name_of_sheet, who_is)
-        if requestWB[0] is int and requestWB[0] != 200:
-            self.result = f'ERROR: {requestWB[1]}'
+        if request_wb[0] is int and request_wb[0] != 200:
+            self.result = f'ERROR: {request_wb[1]}'
             return False
         try:
-            json_response, status_code = requestWB
+            json_response, _ = request_wb
         except TypeError:
-            self.logger.warning(f"Нет доступа к файлу")
+            self.logger.warning("Нет доступа к файлу")
             return False
         result = self.convert_to_list(json_response, name_of_sheet)
         match result:
@@ -139,8 +137,6 @@ class ApiWB(Converter, GoogleMainFunctions):
                 return False
         self.values, self.dist, self.needed_keys = result
         self.values = self.replace_from_dot_to_comma(self.values)
-        # with open("data.json", 'w', encoding='UTF-8') as file:
-        #     json.dump(self.values, file, ensure_ascii=False, indent=4)
         return True
 
     def start_work_with_list_result(self, name_of_sheet: str, bad: bool = False):
@@ -242,4 +238,5 @@ class ApiWB(Converter, GoogleMainFunctions):
         return False
 
     def nm_report_update(self, who_is: str):
+        # В разработке
         pass

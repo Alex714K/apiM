@@ -3,7 +3,7 @@ import schedule
 from plugins.Api import Api
 
 
-def WB_cycle():
+def wb_cycle():
     API = Api()
     my_scheduler = schedule.Scheduler()
     # grand

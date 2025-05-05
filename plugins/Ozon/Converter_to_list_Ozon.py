@@ -1,7 +1,5 @@
-import csv
 import json
 import math
-import pprint
 import sys
 import numpy
 import pandas
@@ -84,18 +82,6 @@ class Converter:
         return ans.tolist(), ans.shape[0], needed_keys
 
     def prices(self, file: list | dict):
-        # keys = ["acquiring", "product_id", "offer_id", "currency_code", "price", "old_price", "retail_price", "vat",
-        #         "min_ozon_price", "marketing_price", "marketing_seller_price", "auto_action_enabled",
-        #         "external_minimal_price", "external_minimal_price_currency", "external_price_index_value",
-        #         "ozon_minimal_price", "ozon_minimal_price_currency", "ozon_price_index_value", "price_index",
-        #         "self_marketplaces_minimal_price", "self_marketplaces_minimal_price_currency",
-        #         "self_marketplaces_price_index_value", "sales_percent", "sales_percent_fbo", "sales_percent_fbs",
-        #         "fbo_fulfillment_amount", "fbo_direct_flow_trans_min_amount", "fbo_direct_flow_trans_max_amount",
-        #         "fbo_deliv_to_customer_amount", "fbo_return_flow_amount", "fbo_return_flow_trans_min_amount",
-        #         "fbo_return_flow_trans_max_amount", "fbs_first_mile_min_amount", "fbs_first_mile_max_amount",
-        #         "fbs_direct_flow_trans_min_amount", "fbs_direct_flow_trans_max_amount", "fbs_deliv_to_customer_amount",
-        #         "fbs_return_flow_amount", "fbs_return_flow_trans_min_amount", "fbs_return_flow_trans_max_amount",
-        #         "volume_weight"]
         keys: list[str] = [
             "acquiring",
             "fbo_deliv_to_customer_amount",
@@ -301,31 +287,10 @@ class Converter:
             "financial_products": list(),
             "financial_products_keys": list()
         }
-        for key in file[0]:
-            match key:
-                case "products":
-                    ans["products_keys"].extend(list(file[0]["products"][0].keys()))
-
-                case "financial_data":
-                    ans["financial_products_keys"].extend(list(file[0]["financial_data"]["products"][0].keys()))
-                    ans["financial_products_keys"].pop(ans["financial_products_keys"].index("item_services"))
-
-                    ans["keys"].append("cluster_from")
-                    ans["keys"].append("cluster_to")
-
-                    # ans["financial_products_keys"][0].extend(list(
-                    #     file[0]["financial_data"]["products"][0]["item_services"].keys()
-                    # ))
-
-                case "additional_data":
-                    pass
-
-                # case "analytics_data":
-                #     ans["keys"].extend(list(
-                #         file[0]["analytics_data"].keys()
-                #     ))
-                case _:
-                    ans["keys"].append(key)
+        data = self.sendings_keys(file[0])
+        ans["keys"].extend(data["keys"])
+        ans["products_keys"].extend(data["products_keys"])
+        ans["financial_products_keys"].extend(data["financial_products_keys"])
 
         for value in file:
             ans["main"].append(list())
@@ -333,37 +298,84 @@ class Converter:
             for key in value.keys():
                 match key:
                     case "products":
-                        for product in value[key]:
-                            data = self.get_items_from_dict(product, "product")
-                            # print(data[1])
-                            ans["products"].append(data[1])
-                            continue
+                        ans["products"].extend(self.sendings_product(key, value))
                     case "financial_data":
-                        product: int | str | list | dict | None = None
-                        for product in value[key]["products"]:
-                            data = self.get_items_from_dict(product, "financial")
-                            ans["financial_products"].append(data[1])
-                            continue
+                        data = self.sendings_financial_data(who_is, key, value)
 
-                        if len(value[key]["cluster_from"]) == 0 or len(value[key]["cluster_to"]) == 0:
-                            data = RequestOzon.get_additional_sendings(who_is, value["posting_number"])
-                            ans["main"][-1].append(data[0])
-                            ans["main"][-1].append(data[1])
-                        else:
-                            ans["main"][-1].append(value[key]["cluster_from"])
-                            ans["main"][-1].append(value[key]["cluster_to"])
-                    # case "analytics_data":
-                    #     data = self.get_items_from_dict(value["analytics_data"])
-                    #     ans["main"][-1].extend(data[1])
-                    #     continue
+                        ans["financial_products"].extend(data["financial_products"])
+
+                        ans["main"][-1].append(data["main"][0])
+                        ans["main"][-1].append(data["main"][1])
                     case "additional_data":
-                        # print(value[key])
-                        pass
+                        continue
                     case _:
                         ans["main"][-1].append(value[key])
-                        continue
 
         return ans, 0, list()
+
+    def sendings_product(self, key: str, value):
+        ans = list()
+        for product in value[key]:
+            data = self.get_items_from_dict(product, "product")
+            ans.append(data[1])
+
+        return ans
+
+    def sendings_financial_data(self, who_is: str, key: str, value):
+        ans = {
+            "main": list(),
+            "financial_products": list()
+        }
+        for product in value[key]["products"]:
+            print(product)
+            data = self.get_items_from_dict(product, "financial")
+            ans["financial_products"].append(data[1])
+
+        if len(value[key]["cluster_from"]) == 0 or len(value[key]["cluster_to"]) == 0:
+            data = RequestOzon.get_additional_sendings(who_is, value["posting_number"])
+            ans["main"].append(data[0])
+            ans["main"].append(data[1])
+        else:
+            ans["main"].append(value[key]["cluster_from"])
+            ans["main"].append(value[key]["cluster_to"])
+
+        return ans
+
+
+    @staticmethod
+    def sendings_keys(row: dict):
+        ans = {
+            "keys": list(),
+            "products_keys": list(),
+            "financial_products_keys": list()
+        }
+        for key in row.keys():
+            match key:
+                case "products":
+                    ans["products_keys"].extend(list(row["products"][0].keys()))
+
+                case "financial_data":
+                    ans["financial_products_keys"].extend(list(row["financial_data"]["products"][0].keys()))
+                    ans["financial_products_keys"].pop(ans["financial_products_keys"].index("item_services"))
+
+                    ans["keys"].append("cluster_from")
+                    ans["keys"].append("cluster_to")
+
+                    # ans["financial_products_keys"][0].extend(list(
+                    #     row["financial_data"]["products"][0]["item_services"].keys()
+                    # ))
+
+                case "additional_data":
+                    # Тут вроде должны быть данные, но пока их нет(
+                    pass
+
+                # case "analytics_data":
+                #     ans["keys"].extend(list(
+                #         row["analytics_data"].keys()
+                #     ))
+                case _:
+                    ans["keys"].append(key)
+        return ans
 
     def stocks_fbs(self, file: list[dict[str, str | int | list[dict[str, str | int]]]]):
         result: list[list] = list()
@@ -399,10 +411,12 @@ class Converter:
         Конвевртирует огромные json из кучи вложенных словарей и списков в красивый список
         :return: tuple(keys, values)
         """
-        #  tuple(keys, values)
         keys = list()
         values = list()
         for key, value in file.items():
+            if key == "item_services":
+                continue
+            
             keys.append(f"{plus_key}_{key}")
 
             if key == "actions" or key == "digital_codes":

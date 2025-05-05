@@ -15,27 +15,26 @@ class Converter:
                 return 'is empty'
         if type(file) is not list and type(file) is not dict:
             sys.exit(str(file))
-        if name_of_sheet in ['orders_today', 'sales_today', 'stocks', 'rk']:
-            return self.list_with_dict(file=file)
-        elif name_of_sheet in "coefficients":
-            return self.list_with_dict_without_numpy(file=file)
-        elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
-            return self.orders_not_today(file=file)
-        elif name_of_sheet in ['sales_1mnth']:
-            return self.sales_not_today(file=file)
-        elif name_of_sheet in ['prices', 'fixed_prices']:
-            return self.prices(file=file)
-        elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
-            return self.tariffs(file=file)
-        elif name_of_sheet == 'statements':
-            return self.statements(file=file)
-        elif name_of_sheet == 'storage_paid':
-            return self.list_with_dict(file=file)
-        elif name_of_sheet == 'stocks_hard':
-            return self.stocks_hard(file=file)
-        else:
-            print(file)
-            return sys.exit("I can't convert =(")
+        match name_of_sheet:
+            case 'orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid':
+                return self.list_with_dict(file=file)
+            case "coefficients":
+                return self.list_with_dict_without_numpy(file=file)
+            case 'orders_1mnth', 'orders_1week', 'orders_2days':
+                return self.orders_not_today(file=file)
+            case 'sales_1mnth':
+                return self.sales_not_today(file=file)
+            case 'prices', 'fixed_prices':
+                return self.prices(file=file)
+            case 'tariffs_boxes', 'tariffs_pallet':
+                return self.tariffs(file=file)
+            case 'statements':
+                return self.statements(file=file)
+            case 'stocks_hard':
+                return self.stocks_hard(file=file)
+            case _:
+                print(file)
+                return sys.exit("I can't convert =(")
 
     def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
         keys = list()
@@ -74,7 +73,7 @@ class Converter:
             ans = numpy.concatenate((ans, values), axis=0)
         need_to_delete = list()
         for i in range(len(ans)):
-            if datetime.datetime.now().strftime('%Y-%m-%d') == str(ans[i][1])[:10]:
+            if str(ans[i][1]).startswith(datetime.datetime.now().strftime('%Y-%m-%d')):
                 need_to_delete.append(i)
         ans = numpy.delete(ans, need_to_delete, axis=0)
         needed_keys = self.check_keys(keys)
@@ -162,34 +161,38 @@ class Converter:
             for key, value in element.items():
                 if key != "warehouses":
                     ans[-1].append(value)
-                else:
-                    ans[-1].append("0")
-                    ans[-1].append("0")
-                    ans[-1].append("0")
-                    ans[-1].extend([""] * len(file["warehouses"]))
-                    for warehouse in value:
-                        if warehouse["warehouseName"] == "В пути до получателей":
-                            ans[-1][7] = warehouse["quantity"]
-                        elif warehouse["warehouseName"] == "В пути возвраты на склад WB":
-                            ans[-1][8] = warehouse["quantity"]
-                        elif warehouse["warehouseName"] == "Всего находится на складах":
-                            ans[-1][9] = warehouse["quantity"]
+                    continue
+
+                ans[-1].append("0")
+                ans[-1].append("0")
+                ans[-1].append("0")
+                ans[-1].extend([""] * len(file["warehouses"]))
+                for warehouse in value:
+                    if warehouse["warehouseName"] == "В пути до получателей":
+                        ans[-1][7] = warehouse["quantity"]
+                        continue
+                    elif warehouse["warehouseName"] == "В пути возвраты на склад WB":
+                        ans[-1][8] = warehouse["quantity"]
+                        continue
+                    elif warehouse["warehouseName"] == "Всего находится на складах":
+                        ans[-1][9] = warehouse["quantity"]
+                        continue
+
+                    try:
+                        index = keys.index(warehouse["warehouseName"])
+                    except ValueError:
+                        for name in keys:
+                            if warehouse["warehouseName"] in name:
+                                ans[-1][keys.index(name)] = warehouse["quantity"]
+                                break
                         else:
-                            try:
-                                index = keys.index(warehouse["warehouseName"])
-                            except ValueError:
-                                for name in keys:
-                                    if warehouse["warehouseName"] in name:
-                                        ans[-1][keys.index(name)] = warehouse["quantity"]
-                                        break
-                                else:
-                                    keys.append(warehouse["warehouseName"])
-                                    ans[-1].append(warehouse["quantity"])
-                            else:
-                                try:
-                                    ans[-1][index] = warehouse["quantity"]
-                                except IndexError:
-                                    ans[-1].append(warehouse["quantity"])
+                            keys.append(warehouse["warehouseName"])
+                            ans[-1].append(warehouse["quantity"])
+                    else:
+                        try:
+                            ans[-1][index] = warehouse["quantity"]
+                        except IndexError:
+                            ans[-1].append(warehouse["quantity"])
 
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys

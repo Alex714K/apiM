@@ -11,8 +11,11 @@ from logging import getLogger
 
 
 class RequestOzon:
-    def __init__(self, LockOzonRequest: RLock):
-        self.LockOzonRequest = LockOzonRequest
+    # Константы
+    MISSING_JSON_FILE = "Missing json file"
+
+    def __init__(self, lock_ozon_request: RLock):
+        self.lock_ozon_request = lock_ozon_request
         self.logger = getLogger("RequestOzon")
 
     def start(self, name_of_sheet: str, who_is: str):
@@ -35,35 +38,39 @@ class RequestOzon:
                 return self.orders_alt(who_is)
             case "sendings":
                 return self.sendings(who_is)
-        if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
-            return self.orders(name_of_sheet, who_is)
+            case "orders_1mnth", "orders_1week", "orders_2days":
+                return self.orders(name_of_sheet, who_is)
+        return None
 
     def statistics(self, who_is):
-        self.check_token()
+        self.check_token(who_is)
+        # не допилено
         # url = 'https://performance.ozon.ru:443/api/client/campaign'
         # response = requests.get(url=url, headers=headers)
         # json_response = response.json()
         # # print(json_response)
 
-    def check_token(self):
-        with open("plugins/Ozon/data/token_and_time.txt", 'r') as txt:
-            data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
-        time_in_file = datetime.datetime.strptime(data['time'], "%Y-%m-%d %H:%M:%S")
-        time_now = datetime.datetime.today() + datetime.timedelta(seconds=1)
-        if time_in_file > time_now:
-            return data['token']
-        else:
-            url = 'https://performance.ozon.ru/api/client/token'
-            headers = {
-                "Content-Type:": "application/json",
-                "Accept": "application/json"
-            }
-            params = {
-                "client_id": ...,
-                "client_secret": ...,
-                "grant_type": "client_credentials"
-            }
-            response = requests.post(url=url, headers=headers)
+    def check_token(self, who_is):
+        pass
+        # не допилено
+        # with open("plugins/Ozon/data/token_and_time.txt", 'r') as txt:
+        #     data = dict(map(lambda x: x.split('='), txt.read().split('\n')))
+        # time_in_file = datetime.datetime.strptime(data['time'], "%Y-%m-%d %H:%M:%S")
+        # time_now = datetime.datetime.today() + datetime.timedelta(seconds=1)
+        # if time_in_file > time_now:
+        #     return data['token']
+        # else:
+        #     url = 'https://performance.ozon.ru/api/client/token'
+        #     headers = {
+        #         "Content-Type:": "application/json",
+        #         "Accept": "application/json"
+        #     }
+        #     params = {
+        #         "client_id": ...,
+        #         "client_secret": ...,
+        #         "grant_type": "client_credentials"
+        #     }
+        #     response = requests.post(url=url, headers=headers)
 
     def sendings(self, who_is: str):
         headers = {
@@ -92,20 +99,22 @@ class RequestOzon:
                 try:
                     response = requests.post(url=url, headers=headers, json=params)
                 except socket.gaierror:
-                    self.logger.warning(f"gaierror in request (sendings)")
+                    self.logger.warning("gaierror in request (sendings)")
                     return 'Проблема с соединением'
+
                 if not response:
                     self.logger.warning(f"sendings - Http статус: {response.status_code} ( {response.reason} )")
                     return response.status_code, response.reason
-                else:
-                    try:
-                        # Преобразуем ответ в json-объект
-                        json_response = response.json()
-                    except requests.exceptions.JSONDecodeError:
-                        self.logger.error(f"Missing json file in sendings")
-                        return 'Missing json file'
-                    self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
-                    data.extend(json_response["result"])
+
+                try:
+                    # Преобразуем ответ в json-объект
+                    json_response = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    self.logger.error("Missing json file in sendings")
+                    return self.MISSING_JSON_FILE
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
+                data.extend(json_response["result"])
+
                 if len(json_response["result"]) == 1000:
                     params["offset"] += 1000
                     time.sleep(5)
@@ -136,14 +145,14 @@ class RequestOzon:
                 return 'Проблема с соединением'
             if not response:
                 # self.logger.warning(f"sendings - Http статус: {response.status_code} ( {response.reason} )")
-                return response.status_code, response.reason
+                return RequestOzon.get_additional_sendings(who_is, posting_number)
             else:
                 try:
                     # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
                     # self.logger.error(f"Missing json file in sendings")
-                    return 'Missing json file'
+                    return RequestOzon.MISSING_JSON_FILE
                 # self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
                 if (len(json_response["result"]["financial_data"]["cluster_from"]) > 0 and
                         len(json_response["result"]["financial_data"]["cluster_to"]) > 0):
@@ -167,20 +176,20 @@ class RequestOzon:
         try:
             response = requests.post(url=url, headers=headers, json=params)
         except socket.gaierror:
-            self.logger.warning(f"gaierror in request (orders_alt_1)")
+            self.logger.warning("gaierror in request (orders_alt_1)")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"orders_alt_1 - Http статус: {response.status_code} ( {response.reason} )")
             return response.status_code, response.reason
-        else:
-            try:
-                # Преобразуем ответ в json-объект
-                json_response = response.json()
-            except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in orders_alt_1")
-                return 'Missing json file'
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_1")
-            code = json_response["result"]["code"]
+
+        try:
+            # Преобразуем ответ в json-объект
+            json_response = response.json()
+        except requests.exceptions.JSONDecodeError:
+            self.logger.error("Missing json file in orders_alt_1")
+            return self.MISSING_JSON_FILE
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_1")
+        code = json_response["result"]["code"]
 
         url = "https://api-seller.ozon.ru/v1/report/info"
         params = {"code": code}
@@ -188,20 +197,20 @@ class RequestOzon:
             try:
                 response = requests.post(url=url, headers=headers, json=params)
             except socket.gaierror:
-                self.logger.warning(f"gaierror in request (orders_alt_2)")
+                self.logger.warning("gaierror in request (orders_alt_2)")
                 return 'Проблема с соединением'
 
             if not response:
                 self.logger.warning(f"orders_alt_2 - Http статус: {response.status_code} ( {response.reason} )")
                 return response.status_code, response.reason
-            else:
-                try:
-                    # Преобразуем ответ в json-объект
-                    json_response = response.json()
-                except requests.exceptions.JSONDecodeError:
-                    self.logger.error(f"Missing json file in orders_alt_2")
-                    return 'Missing json file'
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_2")
+
+            try:
+                # Преобразуем ответ в json-объект
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error("Missing json file in orders_alt_2")
+                return self.MISSING_JSON_FILE
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_2")
 
             if json_response["result"]["status"] == "success":
                 url = json_response["result"]["file"]
@@ -240,7 +249,6 @@ class RequestOzon:
             "limit": 1000
         }
         json_data = list()
-        len_of_data = 1000
         actual_distance = 0
         while True:
             params["offset"] = actual_distance
@@ -252,16 +260,13 @@ class RequestOzon:
             if not response:
                 self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
                 time.sleep(10)
-                # with open('data.json') as data:
-                #     return json.load(data)
-                # return response.status_code, response.reason
             else:
                 try:
                     # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
                     self.logger.error(f"Missing json file in {name_of_sheet}")
-                    return 'Missing json file'
+                    return self.MISSING_JSON_FILE
                 # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 # Записываем данные в файл (убирать комментарий при необходимости)
                 # with open('data.json', 'w', encoding='UTF-8') as d:
@@ -293,22 +298,15 @@ class RequestOzon:
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             return response.status_code, response.reason
-        else:
-            try:
-                # Преобразуем ответ в json-объект
-                json_response = response.json()
-            except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in {name_of_sheet}")
-                return 'Missing json file'
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+
+        try:
+            json_response = response.json()
+        except requests.exceptions.JSONDecodeError:
+            self.logger.error(f"Missing json file in {name_of_sheet}")
+            return self.MISSING_JSON_FILE
+
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
         code_of_report = json_response["result"]["code"]
         time.sleep(5)
         url = "https://api-seller.ozon.ru/v1/report/info"
@@ -324,8 +322,6 @@ class RequestOzon:
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
-                #     return json.load(data)
                 time.sleep(10)
             else:
                 try:
@@ -333,7 +329,7 @@ class RequestOzon:
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
                     self.logger.error(f"Missing json file in {name_of_sheet}")
-                    return 'Missing json file'
+                    return self.MISSING_JSON_FILE
                 # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 # Записываем данные в файл (убирать комментарий при необходимости)
                 # with open('data.json', 'w', encoding='UTF-8') as d:
@@ -373,21 +369,13 @@ class RequestOzon:
             return 'Проблема с соединением'
         if not response1:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response1.status_code} ( {response1.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             return response1.status_code, response1.reason
         else:
             try:
-                # Преобразуем ответ в json-объект
                 json_response1 = response1.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {name_of_sheet}")
-                return 'Missing json file'
-            # # print(json.dumps(json_response1, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response1, ensure_ascii=False, indent=4))
-            #     json.dump(json_response1, d, ensure_ascii=False, indent=4)
+                return self.MISSING_JSON_FILE
             self.logger.debug(f"Http статус: {response1.status_code}, name_of_sheet: {name_of_sheet}")
             first_part = json_response1["result"]["rows"]
 
@@ -400,21 +388,13 @@ class RequestOzon:
             return 'Проблема с соединением'
         if not response2:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response2.status_code} ( {response2.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             return response2.status_code, response2.reason
         else:
             try:
-                # Преобразуем ответ в json-объект
                 json_response2 = response2.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {name_of_sheet}")
-                return 'Missing json file'
-            # # print(json.dumps(json_response2, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response2, ensure_ascii=False, indent=4))
-            #     json.dump(json_response2, d, ensure_ascii=False, indent=4)
+                return self.MISSING_JSON_FILE
             self.logger.debug(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}")
             second_part = json_response2["result"]["rows"]
         first_part.extend(second_part)
@@ -474,69 +454,52 @@ class RequestOzon:
             "second": numpy.array([])
         }
         # Выполняем запросы
+        # Первый запрос
         while True:
-            # Первый запрос
             try:
                 response = requests.post(url, headers=headers, json=params1)
             except socket.gaierror:
-                self.logger.warning(f"gaierror in request (analytics)")
+                self.logger.warning("gaierror in request (analytics)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"analytics - Http статус: {response.status_code} ( {response.reason} )")
                 time.sleep(10)
-                # with open('data.json') as data:
-                #     return json.load(data)
-                # return response.status_code, response.reason
             else:
                 try:
                     # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
-                    self.logger.error(f"Missing json file in analytics")
-                    return 'Missing json file'
-                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
-                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+                    self.logger.error("Missing json file in analytics")
+                    return self.MISSING_JSON_FILE
+
                 self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: analytics")
                 first_part = numpy.array(json_response["result"]["data"])
                 parts["first"] = numpy.concatenate((parts["first"], first_part), axis=0)
-                # parts["first"].extend(first_part)
                 if len(json_response["result"]["data"]) != 1000:
                     break
                 time.sleep(60)
                 params1["offset"] += 1000
         time.sleep(60)
+
+        # Второй запрос
         while True:
-            # Второй запрос
             try:
                 response = requests.post(url, headers=headers, json=params2)
             except socket.gaierror:
-                self.logger.warning(f"gaierror in request (analytics)")
+                self.logger.warning("gaierror in request (analytics)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"analytics - Http статус: {response.status_code} ( {response.reason} )")
                 time.sleep(10)
-                # with open('data.json') as data:
-                #     return json.load(data)
-                # return response.status_code, response.reason
             else:
                 try:
-                    # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
-                    self.logger.error(f"Missing json file in analytics")
-                    return 'Missing json file'
-                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
-                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+                    self.logger.error("Missing json file in analytics")
+                    return self.MISSING_JSON_FILE
                 self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: analytics")
                 second_part = numpy.array(json_response["result"]["data"])
                 parts["second"] = numpy.concatenate((parts["second"], second_part), axis=0)
-                # parts["second"].extend(second_part)
                 if len(json_response["result"]["data"]) != 1000:
                     break
                 time.sleep(60)
@@ -555,10 +518,6 @@ class RequestOzon:
                 self.logger.error("WTF - analytics, Ozon")
                 break
         else:
-            # # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data/data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(parts["first"], d, ensure_ascii=False, indent=4)
             return parts["first"]
         parts.clear()
         return self.analytics(who_is=who_is)
@@ -580,26 +539,19 @@ class RequestOzon:
             try:
                 response = requests.post(url=url, headers=headers, json=params)
             except socket.gaierror:
-                self.logger.warning(f"gaierror in request (prices)")
+                self.logger.warning("gaierror in request (prices)")
                 return 'Проблема с соединением'
+
             if not response:
                 self.logger.warning(f"prices - Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
-                #     return json.load(data)
                 return response.status_code, response.reason
-            else:
-                try:
-                    # Преобразуем ответ в json-объект
-                    json_response = response.json()
-                except requests.exceptions.JSONDecodeError:
-                    self.logger.error(f"Missing json file in prices")
-                    return 'Missing json file'
-                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
-                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: prices")
+
+            try:
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error("Missing json file in prices")
+                return self.MISSING_JSON_FILE
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: prices")
             file.extend(json_response["items"])
             if len(json_response["items"]) == 1000:
                 last_id = json_response["cursor"]
@@ -613,34 +565,27 @@ class RequestOzon:
             "Authorization": token,
             "Content-Type": "application/json",
         }
-        url = (f"https://performance.ozon.ru:443/api/client/statistics/campaign/product/json?"
-               f"dateFrom=2024-08-01&dateTo=2024-08-03")
+        url = ("""https://performance.ozon.ru:443/api/client/statistics/campaign/product/json?
+                dateFrom=2024-08-01&dateTo=2024-08-03""")
         try:
             response = requests.get(url, headers=headers)
         except socket.gaierror:
-            self.logger.warning(f"gaierror in request (statistics_product)")
+            self.logger.warning("gaierror in request (statistics_product)")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"statistics_product - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             time.sleep(2)
             return self.statistics_product(who_is)
-        else:
-            try:
-                # Преобразуем ответ в json-объект
-                json_response = response.json()
-            except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in statistics_product")
-                time.sleep(5)
-                return self.statistics_product(who_is)
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: statistics_product")
-            return json_response
+
+        try:
+            json_response = response.json()
+        except requests.exceptions.JSONDecodeError:
+            self.logger.error("Missing json file in statistics_product")
+            time.sleep(5)
+            return self.statistics_product(who_is)
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: statistics_product")
+
+        return json_response
 
     def get_list_of_campaigns_id(self, who_is):
         headers = {
@@ -651,31 +596,23 @@ class RequestOzon:
             response = requests.get("https://performance.ozon.ru:443/api/client/campaign?advObjectType=SKU",
                                     headers=headers)
         except socket.gaierror:
-            self.logger.warning(f"gaierror in request (get_list_of_campaigns_id)")
+            self.logger.warning("gaierror in request (get_list_of_campaigns_id)")
             return 'Проблема с соединением'
         if not response:
             self.logger.warning(f"get_list_of_campaigns_id - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             time.sleep(2)
             return self.get_list_of_campaigns_id(who_is)
         else:
             try:
-                # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in get_list_of_campaigns_id")
+                self.logger.error("Missing json file in get_list_of_campaigns_id")
                 time.sleep(5)
                 return self.get_list_of_campaigns_id(who_is)
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_list_of_campaigns_id")
             return json_response
 
-    def get_report(self, who_is: str, UUID: str):
+    def get_report(self, who_is: str, uuid: str):
         """
         Получение отчёта о рекламных компаниях
         """
@@ -685,67 +622,52 @@ class RequestOzon:
         }
         while True:
             try:
-                response = requests.get(f"https://performance.ozon.ru:443/api/client/statistics/{UUID}",
+                response = requests.get(f"https://performance.ozon.ru:443/api/client/statistics/{uuid}",
                                         headers=headers)
             except socket.gaierror:
-                self.logger.warning(f"gaierror in request (get_report)")
+                self.logger.warning("gaierror in request (get_report)")
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"get_report - Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
-                #     return json.load(data)
                 time.sleep(2)
-                return self.get_report(who_is, UUID)
+                return self.get_report(who_is, uuid)
             else:
                 try:
-                    # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
-                    self.logger.error(f"Missing json file in get_report")
+                    self.logger.error("Missing json file in get_report")
                     time.sleep(5)
-                    return self.get_report(who_is, UUID)
-                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
-                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
+                    return self.get_report(who_is, uuid)
                 self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
             match json_response["state"]:
                 case "OK":
                     break
                 case "ERROR":
                     self.logger.warning(f"get_token, Error:{json_response['error']}")
-                    return self.get_report(who_is, UUID)
+                    return self.get_report(who_is, uuid)
 
-        params = {"UUID": UUID}
+        params = {"UUID": uuid}
         try:
             response = requests.get("https://performance.ozon.ru:443/api/client/statistics/report",
                                     headers=headers,
                                     json=params)
         except socket.gaierror:
-            self.logger.warning(f"gaierror in request (get_report)")
+            self.logger.warning("gaierror in request (get_report)")
             time.sleep(2)
-            return self.get_report(who_is, UUID)
+            return self.get_report(who_is, uuid)
         if not response:
             self.logger.warning(f"get_report - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             time.sleep(2)
-            return self.get_report(who_is, UUID)
-        else:
-            try:
-                # Преобразуем ответ в json-объект
-                json_response = response.json()
-            except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in get_report")
-                time.sleep(5)
-                return self.get_report(who_is, UUID)
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
+            return self.get_report(who_is, uuid)
+
+        try:
+            json_response = response.json()
+        except requests.exceptions.JSONDecodeError:
+            self.logger.error("Missing json file in get_report")
+            time.sleep(5)
+            return self.get_report(who_is, uuid)
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
+
         return json_response
 
     def get_token(self, who_is: str):
@@ -781,29 +703,22 @@ class RequestOzon:
         try:
             response = requests.post(url, headers=headers, json=params)
         except socket.gaierror:
-            self.logger.warning(f"gaierror in request (get_token)")
+            self.logger.warning("gaierror in request (get_token)")
             time.sleep(5)
             return self.get_token(who_is)
         if not response:
             self.logger.warning(f"get_token - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             time.sleep(5)
             return self.get_token(who_is)
-        else:
-            try:
-                # Преобразуем ответ в json-объект
-                json_response = response.json()
-            except requests.exceptions.JSONDecodeError:
-                self.logger.error(f"Missing json file in get_token")
-                time.sleep(5)
-                return self.get_token(who_is)
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-            self.logger.debug(f"Http статус: {response.status_code}, func: get_token")
+
+        try:
+            json_response = response.json()
+        except requests.exceptions.JSONDecodeError:
+            self.logger.error("Missing json file in get_token")
+            time.sleep(5)
+            return self.get_token(who_is)
+        self.logger.debug(f"Http статус: {response.status_code}, func: get_token")
+
         token = json_response["access_token"]
         token_type = json_response["token_type"]
         name = f"Ozon-time_expire-{who_is}"
@@ -834,23 +749,15 @@ class RequestOzon:
                 return 'Проблема с соединением'
             if not response:
                 self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
-                # with open('data.json') as data:
-                #     return json.load(data)
                 time.sleep(2)
                 return self.stocks_fbs(name_of_sheet, who_is)
             else:
                 try:
-                    # Преобразуем ответ в json-объект
                     json_response = response.json()
                 except requests.exceptions.JSONDecodeError:
                     self.logger.error("Missing json file in get_report")
                     time.sleep(5)
                     return self.stocks_fbs(name_of_sheet, who_is)
-                # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                # Записываем данные в файл (убирать комментарий при необходимости)
-                # with open('data.json', 'w', encoding='UTF-8') as d:
-                #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-                #     json.dump(json_response, d, ensure_ascii=False, indent=4)
                 self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
 
                 result.extend(json_response["items"])

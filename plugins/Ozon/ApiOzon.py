@@ -1,9 +1,7 @@
 import datetime
 import calendar
-import json
 import threading
 import time
-
 import googleapiclient.errors
 import pandas
 from googleapiclient.discovery import build
@@ -34,12 +32,11 @@ class ApiOzon(Converter, GoogleMainFunctions):
         Запуск работы с запросом на сервера Ozon.
         :param name_of_sheet: Название листа
         :param who_is: Чей токен используется
-        :param folder: В какую папку идти
         :return:
         """
         self.logger.info(f"Started: folder=Ozon, who_is={who_is}, name_of_sheet={name_of_sheet}")
         if name_of_sheet == "update_Results":
-            self.update_Results(who_is)
+            self.update_results(who_is)
         if not self.standart_start(name_of_sheet, who_is):
             return
         match name_of_sheet:
@@ -108,9 +105,6 @@ class ApiOzon(Converter, GoogleMainFunctions):
         self.choose_spreadsheetId(f"{who_is}-sendings")
 
         data = self.values
-        # with open("data.json", "w", encoding="UTF-8") as file:
-        #     json.dump(data, file, ensure_ascii=False, indent=4)
-        #     print("dumped")
         self.values = [data["keys"]]
         self.values.extend(data["main"])
         self.dist = len(self.values)
@@ -156,29 +150,28 @@ class ApiOzon(Converter, GoogleMainFunctions):
         self.spreadsheetId = os.getenv(f"Ozon-spreadsheetid-{who_is}")
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
-        requestOzon = RequestOzon(self.LockOzonRequest).start(name_of_sheet, who_is)
-        if type(requestOzon) is not pandas.DataFrame:
-            match requestOzon:
+        request_ozon = RequestOzon(self.LockOzonRequest).start(name_of_sheet, who_is)
+        if type(request_ozon) is not pandas.DataFrame:
+            match request_ozon:
                 case 'Missing json file':
                     self.logger.warning("Не получен файл с Ozon - start_work_with_request")
                     time.sleep(self.wait_time)
-                    # self.result = 'ERROR: Не получен файл с Ozon'
                     return self.start_work_with_request(name_of_sheet, who_is)
                 case 'Проблема с соединением':
                     self.logger.warning("Проблема с соединением - RequestOzon - start_work_with_request")
                     time.sleep(self.wait_time)
-                    # self.result = 'ERROR: Проблема с соединением'
                     return self.start_work_with_request(name_of_sheet, who_is)
-        if requestOzon is tuple:
-            if requestOzon[0] is int and requestOzon[0] != 200:
-                self.result = f'ERROR: {requestOzon[1]}'
+
+        if request_ozon is tuple:
+            if request_ozon[0] is int and request_ozon[0] != 200:
+                self.result = f'ERROR: {request_ozon[1]}'
                 return False
         try:
-            json_response = requestOzon
+            json_response = request_ozon
         except TypeError:
-            self.logger.warning(f"Нет доступа к файлу - start_work_with_request")
-            # print(f"Нет доступа к файлу ({self.name_of_sheet})")
+            self.logger.warning("Нет доступа к файлу - start_work_with_request")
             return False
+
         result = self.convert_to_list(json_response, name_of_sheet, who_is)
         match result:
             case 'download':

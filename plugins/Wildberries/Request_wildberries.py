@@ -10,9 +10,9 @@ import os
 
 
 class RequestWildberries:
-    def __init__(self, LockWbRequest: RLock):
+    def __init__(self, lock_wb_request: RLock):
         self.name_of_sheet = None
-        self.LockWbRequest = LockWbRequest
+        self.lock_wb_request = lock_wb_request
         self.logger = getLogger("RequestWildberries")
 
     def start(self, name_of_sheet: str, who_is: str):
@@ -24,9 +24,9 @@ class RequestWildberries:
             case _:
                 return self.simple_start(name_of_sheet, who_is)
 
-    def simple_start(self, name_of_sheet: str, who_is: str, storage_paid=False, statements=False):
-        """Формирует с отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
-        вводимых параветров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
+    def simple_start(self, name_of_sheet: str, who_is: str):
+        """Формирует и отправляет запрос на сервера Wildberries для получения различных данных (в зависимости от
+        вводимых параметров). При успешном получении возвращает json-объект. При ошибке ничего не возвращает и
         пишет ошибку в консоль"""
         self.name_of_sheet = name_of_sheet
         # Ссылка
@@ -62,21 +62,13 @@ class RequestWildberries:
 
         if not response:
             self.logger.warning(f"{name_of_sheet} - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             return response.status_code, response.reason
         else:
             try:
-                # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {self.name_of_sheet}")
                 return "Missing json file"
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             return json_response, response.status_code
 
@@ -119,40 +111,29 @@ class RequestWildberries:
                 time.sleep(10)
                 continue
             json_response = response.json()
-            num_of_tryes = 0
             try:
                 if json_response["data"]["status"] == "done":
                     break
-                else:
-                    self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
-                    if count < 4:
-                        count += 1
-                    time.sleep(5 * count)
+
+                self.logger.debug(f"stocks_hard - status:{json_response["data"]["status"]}")
+                if count < 4:
+                    count += 1
+                time.sleep(5 * count)
             except KeyError:
                 self.logger.error(f"stocks_hard - status:{json_response}")
-                if num_of_tryes > 3:
-                    return self.stocks_hard(who_is)
                 time.sleep(4)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/download"
         response = requests.get(url, headers=headers)
 
         if not response:
             self.logger.warning(f"stocks_hard - Http статус: {response.status_code} ( {response.reason} )")
-            # with open('data.json') as data:
-            #     return json.load(data)
             return response.status_code, response.reason
         else:
             try:
-                # Преобразуем ответ в json-объект
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {self.name_of_sheet}")
                 return "Missing json file"
-            # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            # Записываем данные в файл (убирать комментарий при необходимости)
-            # with open('data.json', 'w', encoding='UTF-8') as d:
-            #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
-            #     json.dump(json_response, d, ensure_ascii=False, indent=4)
             self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             return {"json": json_response, "warehouses": self.get_warehouses(who_is)}, response.status_code
 
@@ -173,50 +154,48 @@ class RequestWildberries:
     def make_request(url, kwargs: dict) -> str:
         """Формируей ссылку для отправки запроса на сервер Wildberries"""
         if kwargs == {}:
-            fin_url = f"{url}"
-        else:
-            fin_url = f"{url}?"
-            a = True
-            for key, item in kwargs.items():
-                if a:
-                    if item != None:
-                        if 'rk' in key:
-                            fin_url += f"{key[:-3]}={item}"
-                        else:
-                            fin_url += f"{key}={item}"
-                        a = False
+            return url
+
+        fin_url = f"{url}?"
+        a = True
+        for key, item in kwargs.items():
+            if a and item is not None:
+                if 'rk' in key:
+                    fin_url += f"{key[:-3]}={item}"
                 else:
-                    if item != None:
-                        if 'rk' in key:
-                            fin_url += f"&{key[:-3]}={item}"
-                        else:
-                            fin_url += f"&{key}={item}"
+                    fin_url += f"{key}={item}"
+                a = False
+            elif item is not None:
+                if 'rk' in key:
+                    fin_url += f"&{key[:-3]}={item}"
+                else:
+                    fin_url += f"&{key}={item}"
 
         return fin_url
 
     @staticmethod
-    def choose_dates_old(dateFrom: str = None, date: str = None, dateTo: str = None) -> tuple[str, str, str]:
+    def choose_dates_old(date_from: str = None, date: str = None, date_to: str = None) -> tuple[str, str, str]:
         """Если вводиться не дата, а слова: today, 2days, 1week, 1mnth; то выводятся сегодняшняя дата и до -30 дней"""
-        match dateFrom:
+        match date_from:
             case 'today':
-                dateFrom = datetime.date.today()
+                date_from = datetime.date.today()
             case '2days':
-                dateFrom = datetime.date.today() - datetime.timedelta(days=2)
+                date_from = datetime.date.today() - datetime.timedelta(days=2)
             case '1week':
-                dateFrom = datetime.date.today() - datetime.timedelta(weeks=1)
+                date_from = datetime.date.today() - datetime.timedelta(weeks=1)
             case '1mnth':
-                dateFrom = datetime.date.today() - datetime.timedelta(days=30)
+                date_from = datetime.date.today() - datetime.timedelta(days=30)
             case 'statements':
                 first_day = datetime.date.today().weekday() + 7
                 last_day = first_day - 6
-                dateFrom = datetime.date.today() - datetime.timedelta(days=first_day)
-                dateTo = datetime.date.today() - datetime.timedelta(days=last_day)
+                date_from = datetime.date.today() - datetime.timedelta(days=first_day)
+                date_to = datetime.date.today() - datetime.timedelta(days=last_day)
             case 'storage_paid':
                 year = datetime.date.today().year
                 month = (datetime.date.today() - datetime.timedelta(days=30)).month
                 last_day = (datetime.date.today() - datetime.timedelta(days=1)).day
-                dateFrom = datetime.date(year, month, 1).strftime("%Y-%m-%d")
-                dateTo = datetime.date(year, month, last_day).strftime("%Y-%m-%d")
+                date_from = datetime.date(year, month, 1).strftime("%Y-%m-%d")
+                date_to = datetime.date(year, month, last_day).strftime("%Y-%m-%d")
 
         match date:
             case 'today':
@@ -231,16 +210,16 @@ class RequestWildberries:
                 with open('plugins/Wildberries/data/date_of_tariffs.txt', 'r') as txt:
                     date = txt.read()
 
-        match dateTo:
+        match date_to:
             case 'today':
-                dateTo = datetime.date.today()
+                date_to = datetime.date.today()
             case '2days':
-                dateTo = datetime.date.today() - datetime.timedelta(days=2)
+                date_to = datetime.date.today() - datetime.timedelta(days=2)
             case '1week':
-                dateTo = datetime.date.today() - datetime.timedelta(weeks=1)
+                date_to = datetime.date.today() - datetime.timedelta(weeks=1)
             case '1mnth':
-                dateTo = datetime.date.today() - datetime.timedelta(days=30)
-        return dateFrom, date, dateTo
+                date_to = datetime.date.today() - datetime.timedelta(days=30)
+        return date_from, date, date_to
 
     def make_params(self) -> dict | dict[str, int] | dict[str, str]:
         match self.name_of_sheet:
@@ -309,7 +288,7 @@ class RequestWildberries:
                 'endDate': (datetime.date.today()).strftime('%Y-%m-%d')
             }
         }
-        response = requests.post(url, headers=headers, json=params)
+        requests.post(url, headers=headers, json=params)
         flag = True
         while flag:
             if datetime.datetime.today().second % 15 == 0:
@@ -324,5 +303,5 @@ class RequestWildberries:
         if flag:
             return None, None
         response = requests.get(url, headers=headers)
-        # return list(map(lambda x: x.split(';'), response.content.decode("utf-8"))), response.status_code
+
         return response.content.decode("utf-8"), response.status_code

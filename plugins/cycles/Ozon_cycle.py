@@ -4,7 +4,7 @@ import time
 from plugins.Api import Api
 
 
-def Ozon_cycle():
+def ozon_cycle():
     API = Api()
     my_scheduler = schedule.Scheduler()
     # grand
