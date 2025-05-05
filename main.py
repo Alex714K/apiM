@@ -25,6 +25,7 @@ if __name__ == "__main__":
     # Ozon
     # API.start('analytics', 'grand', 'Ozon')
     # API.start('stock_on_warehouses', 'grand', 'Ozon')
+    # API.start('stocks_FBS', 'grand', 'Ozon')
     # API.start('products', 'grand', 'Ozon')
     # API.start('prices', 'grand', 'Ozon')
     # API.start('orders_1mnth', 'grand', 'Ozon')
