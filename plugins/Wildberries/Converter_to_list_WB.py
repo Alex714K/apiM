@@ -15,26 +15,26 @@ class Converter:
                 return 'is empty'
         if type(file) is not list and type(file) is not dict:
             sys.exit(str(file))
-        match name_of_sheet:
-            case n if n in ['orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid']:
-                return self.list_with_dict(file=file)
-            case "coefficients":
-                return self.list_with_dict_without_numpy(file=file)
-            case n if n in ['orders_1mnth', 'orders_1week', 'orders_2days']:
-                return self.orders_not_today(file=file)
-            case 'sales_1mnth':
-                return self.sales_not_today(file=file)
-            case n if n in ['prices', 'fixed_prices']:
-                return self.prices(file=file)
-            case n if n in ['tariffs_boxes', 'tariffs_pallet']:
-                return self.tariffs(file=file)
-            case 'statements':
-                return self.statements(file=file)
-            case 'stocks_hard':
-                return self.stocks_hard(file=file)
-            case _:
-                print(file)
-                return sys.exit("I can't convert =(")
+
+        if name_of_sheet in ['orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid']:
+            return self.list_with_dict(file=file)
+        elif name_of_sheet == "coefficients":
+            return self.list_with_dict_without_numpy(file=file)
+        elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
+            return self.orders_not_today(file=file)
+        elif name_of_sheet == "sales_1mnth":
+            return self.sales_not_today(file=file)
+        elif name_of_sheet in ['prices', 'fixed_prices']:
+            return self.prices(file=file)
+        elif name_of_sheet in ['tariffs_boxes', 'tariffs_pallet']:
+            return self.tariffs(file=file)
+        elif name_of_sheet == "statements":
+            return self.statements(file=file)
+        elif name_of_sheet == "stocks_hard":
+            return self.stocks_hard(file=file)
+        else:
+            print(file)
+            sys.exit("I can't convert =(")
 
     def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
         keys = list()
