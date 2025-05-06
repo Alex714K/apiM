@@ -11,9 +11,12 @@ def launch():
     for process in processes:
         process.start()
 
+    # for process in processes:
+    #     process.join()
+
     while True:
         for process in processes:
             if not process.is_alive():
                 process.kill()
                 process.run()
-        time.sleep(1)
+        time.sleep(2)

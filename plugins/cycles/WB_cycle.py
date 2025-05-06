@@ -1,4 +1,7 @@
 import logging
+import threading
+import time
+
 import schedule
 from plugins.Api import Api
 
@@ -151,3 +154,4 @@ def wb_cycle():
 
     while True:
         my_scheduler.run_pending()
+        time.sleep(10)

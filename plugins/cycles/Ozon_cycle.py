@@ -79,3 +79,4 @@ def ozon_cycle():
 
     while True:
         my_scheduler.run_pending()
+        time.sleep(10)
