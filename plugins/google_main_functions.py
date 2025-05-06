@@ -1,14 +1,10 @@
 import datetime
 import http.client
 import ssl
-import sys
 import threading
 import time
-from warnings import deprecated
-
 import googleapiclient.errors
 import httplib2
-import csv
 import os
 
 
