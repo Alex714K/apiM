@@ -33,11 +33,12 @@ class Converter:
                 return self.orders_alt(file=file)
             case "sendings":
                 return self.sendings(file=file, who_is=who_is)
-        if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
-            return self.orders(file)
-        else:
-            print(file)
-            return sys.exit("I can't convert =(")
+            case _:
+                if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
+                    return self.orders(file)
+                else:
+                    print(file)
+                    return sys.exit("I can't convert =(")
 
     def statistics_product(self, file: list | dict):
         keys = list(file["rows"][0].keys())
