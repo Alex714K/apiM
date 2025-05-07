@@ -17,6 +17,5 @@ def launch():
     while True:
         for process in processes:
             if not process.is_alive():
-                process.kill()
                 process.run()
         time.sleep(2)
