@@ -328,7 +328,6 @@ class Converter:
             "financial_products": list()
         }
         for product in value[key]["products"]:
-            print(product)
             data = self.get_items_from_dict(product, "financial")
             ans["financial_products"].append(data[1])
 
