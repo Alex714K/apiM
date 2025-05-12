@@ -556,8 +556,8 @@ class GoogleMainFunctions:
         ans = dict()
         try:
             sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - get_all_sheet_ids')
+        except googleapiclient.errors.HttpError as ex:
+            self.logger.warning(f'Проблема с соединением Google - get_all_sheet_ids - {ex}')
             time.sleep(self.wait_time)
             return self.get_all_sheet_ids()
         except TimeoutError:
