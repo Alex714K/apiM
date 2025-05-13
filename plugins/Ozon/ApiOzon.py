@@ -105,6 +105,8 @@ class ApiOzon(Converter, GoogleMainFunctions):
         self.choose_spreadsheetId(f"{who_is}-sendings")
 
         data = self.values
+        if data == "smth wrong":
+            return
         self.values = [data["keys"]]
         self.values.extend(data["main"])
         self.dist = len(self.values)

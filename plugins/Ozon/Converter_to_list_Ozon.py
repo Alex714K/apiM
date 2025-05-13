@@ -11,6 +11,8 @@ class Converter:
                         file: list | dict | pandas.DataFrame | str, name_of_sheet: str, who_is: str) -> \
             (tuple[list | dict, int, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
+        if type(file) == tuple:
+            return "smth wrong"
         match file:
             case None:
                 return "is None"
