@@ -15,7 +15,12 @@ def launch():
     #     process.join()
 
     while True:
-        for process in processes:
-            if not process.is_alive():
-                process.run()
+        for i in range(len(processes)):
+            if not processes[i].is_alive():
+                processes[i].kill()
+                if i == 0:
+                    processes[i] = Process(target=wb_cycle)
+                elif i == 1:
+                    processes[i] = Process(target=ozon_cycle)
+                processes[i].start()
         time.sleep(2)
