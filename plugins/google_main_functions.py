@@ -455,65 +455,76 @@ class GoogleMainFunctions:
             time.sleep(self.wait_time)
             return self.insert_new_info(design)
 
-    # TODO Выясни, что это блять?
-    # def update_results(self, who_is: str):
-    #     design = list()
-    #     match who_is:
-    #         case "WB":
-    #             with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
-    #                 csv_file = csv.reader(file)
-    #                 for row in filter(lambda x: x != "", csv_file):
-    #                     design.append(row)
-    #             users = ["grand", "terehov", "dnk", "planeta"]
-    #         case "Ozon":
-    #             with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
-    #                 csv_file = csv.reader(file)
-    #                 for row in filter(lambda x: x != "", csv_file):
-    #                     design.append(row)
-    #             users = ["grand", "terehov", "dnk"]
-    #         case _:
-    #             sys.exit("Wrong 'who_is' in update_Results")
-    #
-    #     value_input_option = "USER_ENTERED"
-    #     major_dimension = "ROWS"  # список - строка`
-    #     for user in users:
-    #         spreadsheet_id = os.getenv(user)
-    #         try:
-    #             self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
-    #                 "valueInputOption": value_input_option,
-    #                 "data": [
-    #                     {"range": "Result!A:E",
-    #                      "majorDimension": major_dimension,
-    #                      "values": design
-    #                      }
-    #                 ]
-    #             }).execute()
-    #             return None
-    #         except googleapiclient.errors.HttpError:
-    #             self.logger.warning('Проблема с соединением Google - update_Results')
-    #             time.sleep(self.wait_time)
-    #             return self.update_results(who_is)
-    #         except TimeoutError:
-    #             self.logger.warning('Проблема с соединением Google (TimeoutError) - update_Results')
-    #             time.sleep(self.wait_time)
-    #             return self.update_results(who_is)
-    #         except ssl.SSLError as err:
-    #             self.logger.warning(f'Ужасная ошибка ssl: {err}')
-    #             time.sleep(self.wait_time)
-    #             return self.update_results(who_is)
-    #         except OSError as err:
-    #             self.logger.warning(f'Вероятно TimeOutError: {err}')
-    #             time.sleep(self.wait_time)
-    #             return self.update_results(who_is)
-    #         except http.client.ResponseNotReady as err:
-    #             self.logger.warning(f'Проблема с http: {err}')
-    #             time.sleep(self.wait_time)
-    #             return self.update_results(who_is)
-    #         except Exception as err:
-    #             self.logger.error(f"Ошибка: {err}")
-    #             time.sleep(self.wait_time)
-    #             return self.update_results(who_is)
-    #     return None
+    def update_results(self, who_is: str):
+        from plugins.test.data import UpdateAndSchedules
+        import csv
+        import sys
+
+        design = list()
+        match who_is:
+            case "WB":
+                with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
+                    csv_file = csv.reader(file)
+                    for row in filter(lambda x: x != "", csv_file):
+                        design.append(row)
+                users = UpdateAndSchedules.clients_wb
+            case "Ozon":
+                with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
+                    csv_file = csv.reader(file)
+                    for row in filter(lambda x: x != "", csv_file):
+                        design.append(row)
+                users = UpdateAndSchedules.clients_ozon
+            case _:
+                sys.exit("Wrong 'who_is' in update_Results")
+
+        value_input_option = "USER_ENTERED"
+        major_dimension = "ROWS"  # список - строка`
+        for user in users:
+            match who_is:
+                case "WB":
+                    spreadsheet_id = os.getenv(f"Wildberries-spreadsheetid-{user}")
+                case "Ozon":
+                    spreadsheet_id = os.getenv(f"Ozon-spreadsheetid-{user}")
+                case _:
+                    continue
+            try:
+                self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
+                    "valueInputOption": value_input_option,
+                    "data": [
+                        {"range": "Result!A:E",
+                         "majorDimension": major_dimension,
+                         "values": design
+                         }
+                    ]
+                }).execute()
+            except googleapiclient.errors.HttpError:
+                self.logger.warning('Проблема с соединением Google - update_Results')
+                time.sleep(self.wait_time)
+                return self.update_results(who_is)
+            except TimeoutError:
+                self.logger.warning('Проблема с соединением Google (TimeoutError) - update_Results')
+                time.sleep(self.wait_time)
+                return self.update_results(who_is)
+            except ssl.SSLError as err:
+                self.logger.warning(f'Ужасная ошибка ssl: {err}')
+                time.sleep(self.wait_time)
+                return self.update_results(who_is)
+            except OSError as err:
+                self.logger.warning(f'Вероятно TimeOutError: {err}')
+                time.sleep(self.wait_time)
+                return self.update_results(who_is)
+            except http.client.ResponseNotReady as err:
+                self.logger.warning(f'Проблема с http: {err}')
+                time.sleep(self.wait_time)
+                return self.update_results(who_is)
+            except Exception as err:
+                self.logger.error(f"Ошибка: {err}")
+                time.sleep(self.wait_time)
+                return self.update_results(who_is)
+            finally:
+                self.logger.info(f"Updated {user}'s result")
+                time.sleep(self.wait_time)
+        self.logger.info("Updated results")
 
     def get_row_count_in_sheet(self, sheet_id: int | str) -> int:
         try:

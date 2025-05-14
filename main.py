@@ -1,9 +1,9 @@
 from plugins.Api import Api
 
-
 if __name__ == "__main__":
     API = Api()
     # Wildberries
+    # API.start('update_Results', 'WB', 'WB')
     # API.start('stocks', 'planeta', 'WB')
     # API.start('stocks_hard', 'planeta', 'WB')
     # API.start('orders_1mnth', 'planeta', 'WB')
@@ -23,6 +23,7 @@ if __name__ == "__main__":
     # API.start("coefficients", "planeta", "WB")
     # API.start('stat_prodvigene', 'planeta', 'WB')
     # Ozon
+    # API.start('update_Results', 'Ozon', 'Ozon')
     # API.start('analytics', 'grand', 'Ozon')
     # API.start('stock_on_warehouses', 'grand', 'Ozon')
     # API.start('stocks_FBS', 'grand', 'Ozon')

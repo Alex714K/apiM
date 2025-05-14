@@ -37,6 +37,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         self.logger.info(f"Started: folder=WB, who_is={who_is}, name_of_sheet={name_of_sheet}")
         if name_of_sheet == "update_Results":
             self.update_results(who_is)
+            return
         if not self.standart_start(name_of_sheet, who_is):
             return
         match name_of_sheet:
