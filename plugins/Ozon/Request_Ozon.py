@@ -1,3 +1,5 @@
+import sys
+
 import pandas
 import datetime
 import os
@@ -38,9 +40,12 @@ class RequestOzon:
                 return self.orders_alt(who_is)
             case "sendings":
                 return self.sendings(who_is)
-            case "orders_1mnth", "orders_1week", "orders_2days":
-                return self.orders(name_of_sheet, who_is)
-        return None
+            case _:
+                if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
+                    return self.orders(name_of_sheet, who_is)
+                else:
+                    print(name_of_sheet)
+                    sys.exit("I can't request =(")
 
     def statistics(self, who_is):
         self.check_token(who_is)
