@@ -11,7 +11,7 @@ class Converter:
                         file: list | dict | pandas.DataFrame | str, name_of_sheet: str, who_is: str) -> \
             (tuple[list | dict, int, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
-        if type(file) == tuple:
+        if isinstance(file, tuple):
             return "smth wrong"
         match file:
             case None:
@@ -310,6 +310,8 @@ class Converter:
                         ans["main"][-1].append(data["main"][0])
                         ans["main"][-1].append(data["main"][1])
                     case "additional_data":
+                        continue
+                    case "legal_info":
                         continue
                     case _:
                         ans["main"][-1].append(value[key])
