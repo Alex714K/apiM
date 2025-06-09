@@ -148,6 +148,9 @@ class RequestWildberries:
         except socket.gaierror:
             time.sleep(10)
             return self.get_warehouses(who_is)
+        response_json = response.json()
+        if response_json is dict and response_json["status"] == 401:
+            sys.exit(f"get_warehouses - status: {response_json["status"]}")
         return list(map(lambda x: str(x["name"]).replace("(", "").replace(")", ""), response.json()))
 
     @staticmethod
