@@ -32,6 +32,10 @@ def ozon_cycle():
     my_scheduler.every(15).minutes.do(API.start, 'prices', 'peco_bathroom', 'Ozon')
     my_scheduler.every(30).minutes.do(API.start, 'stock_on_warehouses', 'peco_bathroom', 'Ozon')
 
+    # briovi
+    my_scheduler.every(15).minutes.do(API.start, 'prices', 'briovi', 'Ozon')
+    my_scheduler.every(30).minutes.do(API.start, 'stock_on_warehouses', 'briovi', 'Ozon')
+
     # grand
     my_scheduler.every().day.at('07:10').do(API.start, 'orders_alt', 'grand', 'Ozon')
     my_scheduler.every().day.at('07:15').do(API.start, 'analytics', 'grand', 'Ozon')
@@ -74,6 +78,13 @@ def ozon_cycle():
     my_scheduler.every().day.at('09:30').do(API.start, 'orders_1mnth', 'peco_bathroom', 'Ozon')
     my_scheduler.every().day.at('09:35').do(API.start, 'orders_1week', 'peco_bathroom', 'Ozon')
     my_scheduler.every().day.at('09:40').do(API.start, 'orders_2days', 'peco_bathroom', 'Ozon')
+
+    # briovi
+    my_scheduler.every().day.at('09:45').do(API.start, 'orders_alt', 'briovi', 'Ozon')
+    my_scheduler.every().day.at('09:50').do(API.start, 'products', 'briovi', 'Ozon')
+    my_scheduler.every().day.at('09:55').do(API.start, 'orders_1mnth', 'briovi', 'Ozon')
+    my_scheduler.every().day.at('10:00').do(API.start, 'orders_1week', 'briovi', 'Ozon')
+    my_scheduler.every().day.at('10:05').do(API.start, 'orders_2days', 'briovi', 'Ozon')
 
     logging.getLogger("extraInfo").info("Ozon scheduled")
 
