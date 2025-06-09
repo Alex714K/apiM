@@ -123,19 +123,31 @@ class RequestWildberries:
                 self.logger.error(f"stocks_hard - status:{json_response}")
                 time.sleep(4)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/download"
-        response = requests.get(url, headers=headers)
+
+        return {"json": self.try_get_data_of_hard_stocks(url, headers), "warehouses": self.get_warehouses(who_is)}, response.status_code
+
+    def try_get_data_of_hard_stocks(self, url: str, headers: dict):
+        try:
+            response = requests.get(url, headers=headers)
+        except socket.gaierror:
+            self.logger.warning(f"gaierror with Google ({self.name_of_sheet})")
+            time.sleep(10)
+            return self.try_get_data_of_hard_stocks(url, headers)
 
         if not response:
             self.logger.warning(f"stocks_hard - Http статус: {response.status_code} ( {response.reason} )")
-            return response.status_code, response.reason
+            return self.try_get_data_of_hard_stocks(url, headers)
         else:
             try:
                 json_response = response.json()
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {self.name_of_sheet}")
                 return "Missing json file"
+            if json_response is int and json_response != 200:
+                return self.try_get_data_of_hard_stocks(url, headers)
             self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
-            return {"json": json_response, "warehouses": self.get_warehouses(who_is)}, response.status_code
+            return json_response
+
 
     def get_warehouses(self, who_is: str):
         url = "https://supplies-api.wildberries.ru/api/v1/warehouses"

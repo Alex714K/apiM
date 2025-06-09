@@ -157,10 +157,10 @@ class Converter:
         keys.extend(file["warehouses"])
         ans = [keys]
         for element in file["json"]:
-            ans.append(list())
+            ans.append([""] * len(keys))
             for key, value in element.items():
                 if key != "warehouses":
-                    ans[-1].append(value)
+                    ans[-1][keys.index(key)] = value
                     continue
 
                 ans[-1].append("0")
