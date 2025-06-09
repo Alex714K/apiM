@@ -73,6 +73,14 @@ def wb_cycle():
     my_scheduler.every(15).minutes.do(API.start, 'prices', 'sisin', 'WB')
     my_scheduler.every(30).minutes.do(API.start, 'coefficients', 'sisin', 'WB')
 
+    # briovi
+    my_scheduler.every(30).minutes.do(API.start, 'stocks', 'briovi', 'WB')
+    my_scheduler.every(30).minutes.do(API.start, 'stocks_hard', 'briovi', 'WB')
+    my_scheduler.every(30).minutes.do(API.start, 'orders_today', 'briovi', 'WB')
+    my_scheduler.every(30).minutes.do(API.start, 'sales_today', 'briovi', 'WB')
+    my_scheduler.every(15).minutes.do(API.start, 'prices', 'briovi', 'WB')
+    my_scheduler.every(30).minutes.do(API.start, 'coefficients', 'briovi', 'WB')
+
     # fixed_prices
     my_scheduler.every().hour.at('23:00').do(API.start, 'fixed_prices', 'grand', 'WB')
     my_scheduler.every().hour.at('23:05').do(API.start, 'fixed_prices', 'terehov', 'WB')
@@ -82,6 +90,7 @@ def wb_cycle():
     my_scheduler.every().hour.at('23:25').do(API.start, 'fixed_prices', 'peco', 'WB')
     my_scheduler.every().hour.at('23:30').do(API.start, 'fixed_prices', 'rus_house', 'WB')
     my_scheduler.every().hour.at('23:35').do(API.start, 'fixed_prices', 'sisin', 'WB')
+    my_scheduler.every().hour.at('23:40').do(API.start, 'fixed_prices', 'briovi', 'WB')
 
     # grand
     my_scheduler.every().day.at('03:10').do(API.start, 'orders_1mnth', 'grand', 'WB')
@@ -146,6 +155,14 @@ def wb_cycle():
     my_scheduler.every().day.at('06:55').do(API.start, 'sales_1mnth', 'sisin', 'WB')
     my_scheduler.every().day.at('07:00').do(API.start, 'tariffs_boxes', 'sisin', 'WB')
     my_scheduler.every().day.at('07:05').do(API.start, 'tariffs_pallet', 'sisin', 'WB')
+
+    # briovi
+    my_scheduler.every().day.at('07:10').do(API.start, 'orders_1mnth', 'briovi', 'WB')
+    my_scheduler.every().day.at('07:15').do(API.start, 'orders_1week', 'briovi', 'WB')
+    my_scheduler.every().day.at('07:20').do(API.start, 'orders_2days', 'briovi', 'WB')
+    my_scheduler.every().day.at('07:25').do(API.start, 'sales_1mnth', 'briovi', 'WB')
+    my_scheduler.every().day.at('07:30').do(API.start, 'tariffs_boxes', 'briovi', 'WB')
+    my_scheduler.every().day.at('07:35').do(API.start, 'tariffs_pallet', 'briovi', 'WB')
 
     # Платное хранение
     # my_scheduler.every().day.at('00:00').do(API.start, 'storage_paid', 'planeta', 'WB')
