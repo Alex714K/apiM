@@ -170,5 +170,8 @@ def wb_cycle():
     logging.getLogger("extraInfo").info("WB scheduled")
 
     while True:
-        my_scheduler.run_pending()
+        try:
+            my_scheduler.run_pending()
+        except Exception as ex:
+            API.logger.warning(f"Smth happend ({ex})")
         time.sleep(10)
