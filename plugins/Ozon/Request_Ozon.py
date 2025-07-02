@@ -442,15 +442,13 @@ class RequestOzon:
             "offset": 0
         }
         params2 = {
-            "date_from": date_from.strftime("%Y-%m-%d"),
-            "date_to": date_to.strftime("%Y-%m-%d"),
+            "date_from": params1["date_from"],
+            "date_to": params1["date_to"],
             "metrics": [
                 "session_view_pdp", "session_view", "conv_tocart_search", "conv_tocart_pdp", "conv_tocart", "returns",
                 "cancellations", "delivered_units", "position_category"
             ],
-            "dimension": [
-                "sku", "day"
-            ],
+            "dimension": params1["dimension"],
             "limit": 1000,
             "offset": 0
         }
