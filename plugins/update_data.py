@@ -11,7 +11,7 @@ class UpdateAndSchedules:
         "tariffs_boxes",
         "tariffs_pallet",
         "productsWB",
-        "productsOzon"
+        "productsMP"
     ]
 
     names_of_sheet_wb_interval: list[list[str]] = [
