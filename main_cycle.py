@@ -1,13 +1,12 @@
 import threading
 import time
-from plugins.cycle_init_func import launch
 
+from plugins.Api import Api
+from plugins.cycle_init_func import launch
+from plugins.manual_full_update import manual_full_update
 
 if __name__ == "__main__":
-    main_thrd = threading.Thread(target=launch)
-    main_thrd.start()
+    # launch()
+    api = Api()
     while True:
-        time.sleep(3)
-        if not main_thrd.is_alive():
-            main_thrd = threading.Thread(target=launch)
-            main_thrd.start()
+        manual_full_update(api)

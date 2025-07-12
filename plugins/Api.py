@@ -1,5 +1,8 @@
 import datetime
 import logging
+import multiprocessing
+from multiprocessing.sharedctypes import Synchronized
+
 import httplib2
 import googleapiclient.errors
 import googleapiclient.discovery
@@ -14,19 +17,20 @@ from plugins.logger.Logger import activate_loggers
 
 
 class Api:
+    CREDENTIALS_FILE_WB = "WildberriesPython.json"
+    CREDENTIALS_FILE_OZON = "OzonPython.json"
+
+
     def __init__(self):
-        self.lock_wb_request = threading.RLock()
-        self.lock_ozon_request = threading.RLock()
-        self.lock_wb_result = threading.RLock()
-        self.lock_ozon_result = threading.RLock()
-        self.lock_wb_file_change_formats = threading.RLock()
-        self.lock_ozon_file_change_formats = threading.RLock()
-        self.lock_google = threading.Lock()
         self.logger = logging.getLogger()
-        self.service = None
         load_dotenv()
         activate_loggers()
-        self.connect_to_google()
+
+        # self.lock: Synchronized = lock
+
+        self.last_update_time = datetime.datetime.today()
+        self.service_wb = self.create_service("WB")
+        self.service_ozon = self.create_service("Ozon")
 
     def start(self, name_of_sheet: str, who_is: str, folder: str):
         """
@@ -35,38 +39,41 @@ class Api:
         """
         match folder:
             case 'WB':
-                name = f"WB, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
-                locks = {
-                    "LockWbRequest": self.lock_wb_request,
-                    "LockWbResult": self.lock_wb_result,
-                    "LockWbFile_ChangeFormats": self.lock_wb_file_change_formats,
-                    "lock_Google": self.lock_google,
-                }
-                # wb_thread = threading.Thread(target=ApiWB(self.service, **locks).start,
-                #                              args=(name_of_sheet, who_is, folder,),
-                #                              name=name)
-                # wb_thread.start()
-                ApiWB(self.service, **locks).start(name_of_sheet, who_is)
+                ApiWB(self.get_service).start(name_of_sheet, who_is)
             case 'Ozon':
-                name = f"Ozon, {name_of_sheet}, {who_is}, {datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")}"
-                locks = {
-                    "LockOzonRequest": self.lock_ozon_request,
-                    "LockOzonResult": self.lock_ozon_result,
-                    "LockOzonFile_ChangeFormats": self.lock_ozon_file_change_formats,
-                    "lock_Google": self.lock_google
-                }
-                # ozon_thread = threading.Thread(target=ApiOzon(self.service, **locks).start,
-                #                                args=(name_of_sheet, who_is, folder,),
-                #                                name=name)
-                # ozon_thread.start()
-                ApiOzon(self.service, **locks).start(name_of_sheet, who_is)
+                ApiOzon(self.get_service).start(name_of_sheet, who_is)
 
-    def connect_to_google(self):
+    def get_service(self, folder: str):
         """
         Выполняет подключение к сервису Google.
         :return: Возвращает bool ответ результата подключения
         """
-        CREDENTIALS_FILE = 'Alex714K.json'
+        # if (datetime.datetime.today() - self.last_update_time) < datetime.timedelta(seconds=5):
+        #     time.sleep(5)
+        service = None
+        match folder:
+            case "WB":
+                service = self.service_wb
+            case "Ozon":
+                service = self.service_ozon
+
+        return service
+
+    def create_service(self, folder: str):
+        CREDENTIALS_FILE = ""
+
+        # while self.lock.value > 1:
+        #     time.sleep(1)
+        # if self.lock.value == 0:
+        #     self.lock.value += 1
+        #
+        # time.sleep(10)
+
+        match folder:
+            case "WB":
+                CREDENTIALS_FILE = self.CREDENTIALS_FILE_WB
+            case "Ozon":
+                CREDENTIALS_FILE = self.CREDENTIALS_FILE_OZON
         # Читаем ключи из файла
         scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
         credentials = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE,
@@ -76,11 +83,13 @@ class Api:
         except httplib2.error.ServerNotFoundError:
             self.logger.warning("Google: ServerNotFound")
             time.sleep(2)
-            return self.connect_to_google()
+            return self.get_service(folder)
         except socket.gaierror:
             self.logger.warning("gaierror with Google")
             time.sleep(2)
-            return self.connect_to_google()
-        finally:
-            self.logger.debug("Connected to Google")
-        self.service = service
+            return self.get_service(folder)
+
+        # if self.lock.value > 0:
+        #     self.lock.value -= 1
+
+        return service

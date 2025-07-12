@@ -1,6 +1,5 @@
 import datetime
 import calendar
-import threading
 import time
 import googleapiclient.errors
 import pandas
@@ -14,17 +13,16 @@ import os
 
 
 class ApiOzon(Converter, GoogleMainFunctions):
-    def __init__(self, service: googleapiclient.discovery.build, **kwargs: threading.RLock):
-        super().__init__(**kwargs)
-        self.service = service
+    def __init__(self, get_service):
+        super().__init__(get_service)
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
         self.who_is = None
-        self.folder = None
-        self.LockOzonRequest = kwargs["LockOzonRequest"]
-        self.LockOzonResult = kwargs["LockOzonResult"]
-        self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
+        self.folder = "Ozon"
+        # self.LockOzonRequest = kwargs["LockOzonRequest"]
+        # self.LockOzonResult = kwargs["LockOzonResult"]
+        # self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
         self.logger = getLogger("ApiOzon")
 
     def start(self, name_of_sheet: str, who_is: str):
@@ -104,6 +102,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
 
     def sendings_update(self, who_is: str):
         self.choose_spreadsheetId(f"{who_is}-sendings")
+        self.who_is = f"{who_is}-sendings"
 
         data = self.values
         if data == "smth wrong":
@@ -153,7 +152,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         self.spreadsheet_id = os.getenv(f"Ozon-spreadsheetid-{who_is}")
 
     def start_work_with_request(self, name_of_sheet: str, who_is: str):
-        request_ozon = RequestOzon(self.LockOzonRequest).start(name_of_sheet, who_is)
+        request_ozon = RequestOzon().start(name_of_sheet, who_is)
         if type(request_ozon) is not pandas.DataFrame:
             match request_ozon:
                 case 'Missing json file':
@@ -203,7 +202,6 @@ class ApiOzon(Converter, GoogleMainFunctions):
         :param bad: Успешно или нет
         :return:
         """
-        self.LockOzonResult.acquire()
         design = list()
         with open('plugins/Ozon/data/info_about_Result_Ozon.csv', 'r', encoding='UTF-8') as file:
             csv_file = csv.reader(file)
@@ -214,4 +212,3 @@ class ApiOzon(Converter, GoogleMainFunctions):
                     design.append(row)
         self.create_result(design)
         self.insert_new_info(design)
-        self.LockOzonResult.release()

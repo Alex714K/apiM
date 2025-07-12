@@ -2,7 +2,6 @@ import datetime
 import http.client
 import os
 import ssl
-import threading
 import time
 import googleapiclient.errors
 import googleapiclient.discovery
@@ -14,17 +13,17 @@ from plugins.google_main_functions import GoogleMainFunctions
 
 
 class ApiWB(Converter, GoogleMainFunctions):
-    def __init__(self, service: googleapiclient.discovery.build, **kwargs: threading.RLock):
-        super().__init__(**kwargs)
+    def __init__(self, get_service):
+        super().__init__(get_service)
         self.wait_time = 3  # в секундах
-        self.service = service
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
         self.who_is = None
-        self.LockWbRequest = kwargs["LockWbRequest"]
-        self.LockWbResult = kwargs["LockWbResult"]
-        self.LockWbFile_ChangeFormats = kwargs["LockWbFile_ChangeFormats"]
+        self.folder = "WB"
+        # self.LockWbRequest = kwargs["LockWbRequest"]
+        # self.LockWbResult = kwargs["LockWbResult"]
+        # self.LockWbFile_ChangeFormats = kwargs["LockWbFile_ChangeFormats"]
         self.logger = getLogger("ApiWB")
 
     def start(self, name_of_sheet: str, who_is: str):
@@ -57,6 +56,8 @@ class ApiWB(Converter, GoogleMainFunctions):
             return True
 
     def standart_update(self, name_of_sheet: str, who_is: str):
+        if len(self.values) == 0:
+            return
         self.choose_spreadsheetId(who_is)
         new_or_not = self.choose_name_of_sheet(name_of_sheet, who_is)
         if new_or_not == 'error':
@@ -105,7 +106,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         :param who_is: Чей токен используется
         :return: Возвращается bool ответ результата запроса
         """
-        request_wb = RequestWildberries(self.LockWbRequest).start(name_of_sheet=name_of_sheet, who_is=who_is)
+        request_wb = RequestWildberries().start(name_of_sheet=name_of_sheet, who_is=who_is)
         match request_wb:
             case 'Missing json file':
                 time.sleep(self.wait_time)
@@ -149,7 +150,6 @@ class ApiWB(Converter, GoogleMainFunctions):
         :param bad: Успешно или нет
         :return:
         """
-        self.LockWbResult.acquire()
         design = list()
         with open('plugins/Wildberries/data/info_about_Result.csv', 'r', encoding='UTF-8') as file:
             csv_file = csv.reader(file)
@@ -160,7 +160,6 @@ class ApiWB(Converter, GoogleMainFunctions):
                     design.append(row)
         self.create_result(design)
         self.insert_new_info(design)
-        self.LockWbResult.release()
 
     def private_update_statements(self):
         # getted = self.service.spreadsheets().

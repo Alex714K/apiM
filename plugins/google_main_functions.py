@@ -1,7 +1,7 @@
 import datetime
 import http.client
 import ssl
-import threading
+import csv
 import time
 import googleapiclient.errors
 import httplib2
@@ -9,22 +9,77 @@ import os
 
 
 class GoogleMainFunctions:
-    def __init__(self, **kwargs: threading.RLock):
+    def __init__(self, get_service):
         self.logger = None
 
         self.wait_time = 7  # в секундах
 
         self.spreadsheet_id = None
-        self.service = None
+        self.get_service = get_service
         self.values = None
         self.dist: int = 0
         self.needed_keys = None
         self.result = None
         self.name_of_sheet = None
         self.who_is = None
+        self.folder = None
 
-        self.lock_google = kwargs["lock_Google"]
         self.seconds_of_lock_google = 1.5
+
+    def get_sheets_names_and_indexes(self):
+        sheet_properties = dict()
+        try:
+            with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "r", encoding="UTF-8") as file:
+                sheet_properties = dict(csv.reader(file, lineterminator="\n", delimiter=";"))
+        except FileNotFoundError:
+            sheet_properties = self.get_sheets_names_and_indexes_from_google()
+            with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "w", encoding="UTF-8") as file:
+                csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_properties.items()))
+        except IndexError:
+            sheet_properties = self.get_sheets_names_and_indexes_from_google()
+            with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "w", encoding="UTF-8") as file:
+                csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_properties.items()))
+
+        return sheet_properties
+
+    def get_sheets_names_and_indexes_from_google(self):
+        try:
+            sheets_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - get_sheets_metadata_from_google - {err}')
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+        except httplib2.error.ServerNotFoundError:
+            self.logger.warning('Проблема с соединением (httplib)')
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
+            return self.get_sheets_names_and_indexes_from_google()
+
+        ans = list()
+        for sheet_property in sheets_metadata["sheets"]:
+            ans.append([sheet_property["properties"]["title"], sheet_property["properties"]["index"]])
+
+        return ans
+
 
     def choose_name_of_sheet(self, name_of_sheet, who_is) -> bool:
         """
@@ -36,7 +91,7 @@ class GoogleMainFunctions:
         :return: Возващает bool ответ результата определения
         """
         try:
-            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
+            sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError as err:
             self.logger.warning(f'Проблема с соединением Google - choose_name_of_sheet - {err}')
             time.sleep(self.wait_time)
@@ -84,9 +139,9 @@ class GoogleMainFunctions:
         return True
 
     def update_sheet(self, name_of_sheet: str):
-        if self.private_clear(name_of_sheet=name_of_sheet):
+        if not self.private_clear(name_of_sheet=name_of_sheet):
             return False
-        if self.private_update(name_of_sheet=name_of_sheet):
+        if not self.private_update(name_of_sheet=name_of_sheet):
             return False
         return True
 
@@ -98,9 +153,12 @@ class GoogleMainFunctions:
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата создания
         """
-        column_count = len(self.values[0])  # кол-во столбцов
+        if len(self.values) == 0:
+            column_count = 0
+        else:
+            column_count = len(self.values[0])  # кол-во столбцов
         try:
-            self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
+            self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
                 "requests": [{
                     "addSheet": {
                         "properties": {
@@ -147,13 +205,15 @@ class GoogleMainFunctions:
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата очистки
         """
+        if len(self.values) == 0:
+            return False
         if name_of_sheet != "Result!A:E":
-            needed_letter = self.create_last_letter_from_width()
+            needed_letter = self.create_last_letter_from_width(len(self.values[0]))
             r = f"{name_of_sheet}!A:{needed_letter}"
         else:
             r = name_of_sheet
         try:
-            self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id, range=r
+            self.get_service(self.folder).spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id, range=r
                                                        ).execute()
         except googleapiclient.errors.HttpError as err:
             self.logger.warning(f'Проблема с соединением Google - private_clear - {err}')
@@ -180,10 +240,10 @@ class GoogleMainFunctions:
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         self.logger.debug(f"Clearing complete ({name_of_sheet})")
-        return False
+        return True
 
-    def create_last_letter_from_width(self) -> str:
-        dist = len(self.values[0])
+    @staticmethod
+    def create_last_letter_from_width(dist) -> str:
         needed_letter = ""
         a_ord = ord("A")
         while True:
@@ -201,7 +261,7 @@ class GoogleMainFunctions:
         :param name_of_sheet: Название листа
         :return: Возвращает bool ответ результата обновления
         """
-        sheet_id = self.get_all_sheet_ids()[name_of_sheet]
+        sheet_id = self.get_sheet_id(name_of_sheet)
         difference_distance = len(self.values) - self.get_row_count_in_sheet(sheet_id)
         if difference_distance > 0:
             self.append_new_rows(sheet_id, difference_distance)
@@ -212,7 +272,7 @@ class GoogleMainFunctions:
         for i in range(1, self.dist + 1, 1000):
             distance = f"{name_of_sheet}!{i}:{i+1000}"
             try:
-                self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
+                self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
                     "valueInputOption": value_input_option,
                     "data": [
                         {"range": distance,
@@ -247,9 +307,9 @@ class GoogleMainFunctions:
                 return self.private_update(name_of_sheet)
         self.logger.debug(f"Updating complete ({name_of_sheet})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
-        return False
+        return True
 
-    def append_new_rows(self,sheet_id: int, num_rows: int):
+    def append_new_rows(self,sheet_id: str, num_rows: int):
         requests = [{
             "appendDimension": {
                 "sheetId": sheet_id,
@@ -262,10 +322,35 @@ class GoogleMainFunctions:
             'requests': requests
         }
 
-        response = self.service.spreadsheets().batchUpdate(
-            spreadsheetId=self.spreadsheet_id,
-            body=body
-        ).execute()
+        try:
+            response = self.get_service(self.folder).spreadsheets().batchUpdate(
+                spreadsheetId=self.spreadsheet_id,
+                body=body
+            ).execute()
+        except googleapiclient.errors.HttpError as err:
+            self.logger.warning(f'Проблема с соединением Google - change_formats - {err}')
+            time.sleep(self.wait_time)
+            return self.append_new_rows(sheet_id, num_rows)
+        except TimeoutError:
+            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            time.sleep(self.wait_time)
+            return self.append_new_rows(sheet_id, num_rows)
+        except ssl.SSLError as err:
+            self.logger.warning(f'Ужасная ошибка ssl: {err}')
+            time.sleep(self.wait_time)
+            return self.append_new_rows(sheet_id, num_rows)
+        except OSError as err:
+            self.logger.warning(f'Вероятно TimeOutError: {err}')
+            time.sleep(self.wait_time)
+            return self.append_new_rows(sheet_id, num_rows)
+        except http.client.ResponseNotReady as err:
+            self.logger.warning(f'Проблема с http: {err}')
+            time.sleep(self.wait_time)
+            return self.append_new_rows(sheet_id, num_rows)
+        except Exception as err:
+            self.logger.error(f"Ошибка: {err}")
+            time.sleep(self.wait_time)
+            return self.append_new_rows(sheet_id, num_rows)
 
         return response
 
@@ -277,7 +362,7 @@ class GoogleMainFunctions:
         :param name_of_sheet: Название листа, в котором работаем
         :return:
         """
-        sheet_id = self.get_all_sheet_ids()[name_of_sheet]
+        sheet_id = self.get_sheet_id(name_of_sheet)
         if needed_keys is None:
             return None
         data = {"requests": []}
@@ -296,7 +381,7 @@ class GoogleMainFunctions:
         if not data["requests"]:
             return None
         try:
-            self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body=data).execute()
+            self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body=data).execute()
             return None
         except googleapiclient.errors.HttpError as err:
             self.logger.warning(f'Проблема с соединением Google - change_formats - {err}')
@@ -332,7 +417,7 @@ class GoogleMainFunctions:
         has_result = "Result" in self.get_all_sheet_ids().keys()
         if not has_result:
             try:
-                self.service.spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
+                self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
                     "requests": [{
                         "addSheet": {
                             "properties": {
@@ -375,7 +460,7 @@ class GoogleMainFunctions:
 
     def insert_design_result(self, design: list) -> None:
         try:
-            self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
+            self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
                 "valueInputOption": "USER_ENTERED",
                 "data": [
                     {"range": "Result!A:E",
@@ -420,7 +505,7 @@ class GoogleMainFunctions:
         value_input_option = "USER_ENTERED"
         major_dimension = "ROWS"  # список - строка
         try:
-            self.service.spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
+            self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
                 "valueInputOption": value_input_option,
                 "data": [
                     {"range": f"Result!D{row}:E{row}",
@@ -488,7 +573,7 @@ class GoogleMainFunctions:
                 case _:
                     continue
             try:
-                self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
+                self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
                     "valueInputOption": value_input_option,
                     "data": [
                         {"range": "Result!A:E",
@@ -528,7 +613,7 @@ class GoogleMainFunctions:
 
     def get_row_count_in_sheet(self, sheet_id: int | str) -> int:
         try:
-            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
+            sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - get_row_count_in_sheet')
             time.sleep(self.wait_time)
@@ -564,38 +649,53 @@ class GoogleMainFunctions:
         return 0
 
     def get_all_sheet_ids(self) -> dict:
+        sheet_ids = dict()
+        try:
+            with open(f"data/sheetIds/sheet_ids_{self.who_is}_{self.folder}.csv", "r", encoding="UTF-8") as file:
+                sheet_ids = dict(csv.reader(file, lineterminator="\n", delimiter=";"))
+        except Exception:
+            sheet_ids = self.get_all_sheet_ids_from_google()
+            with open(f"data/sheetIds/sheet_ids_{self.who_is}_{self.folder}.csv", "w", encoding="UTF-8") as file:
+                csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_ids.items()))
+
+        return self.get_all_sheet_ids_from_google()
+
+    def get_all_sheet_ids_from_google(self) -> dict:
         ans = dict()
         try:
-            sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
+            sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError as ex:
             self.logger.warning(f'Проблема с соединением Google - get_all_sheet_ids - {ex}')
             time.sleep(self.wait_time)
-            return self.get_all_sheet_ids()
+            return self.get_all_sheet_ids_from_google()
         except TimeoutError:
             self.logger.warning('Проблема с соединением Google (TimeoutError) - get_all_sheet_ids')
             time.sleep(self.wait_time)
-            return self.get_all_sheet_ids()
+            return self.get_all_sheet_ids_from_google()
         except ssl.SSLError as err:
             self.logger.warning(f'Ужасная ошибка ssl: {err}')
             time.sleep(self.wait_time)
-            return self.get_all_sheet_ids()
+            return self.get_all_sheet_ids_from_google()
         except OSError as err:
             self.logger.warning(f'Вероятно TimeOutError: {err}')
             time.sleep(self.wait_time)
-            return self.get_all_sheet_ids()
+            return self.get_all_sheet_ids_from_google()
         except http.client.ResponseNotReady as err:
             self.logger.warning(f'Проблема с http: {err}')
             time.sleep(self.wait_time)
-            return self.get_all_sheet_ids()
+            return self.get_all_sheet_ids_from_google()
         except Exception as err:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
-            return self.get_all_sheet_ids()
+            return self.get_all_sheet_ids_from_google()
 
         sheets = sheet_metadata.get("sheets", "")
         for sheet in sheets:
             ans[sheet["properties"]["title"]] = sheet["properties"]["sheetId"]
         return ans
+
+    def get_sheet_id(self, name_of_sheet: str) -> str:
+        return self.get_all_sheet_ids()[name_of_sheet]
 
     @staticmethod
     def replace_from_dot_to_comma(file: list | dict):

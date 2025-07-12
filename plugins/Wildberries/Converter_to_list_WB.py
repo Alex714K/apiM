@@ -18,6 +18,8 @@ class Converter:
 
         if name_of_sheet in ['orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid']:
             return self.list_with_dict(file=file)
+        elif name_of_sheet == "productsWB" or name_of_sheet == "productsMP":
+            return self.products(file=file)
         elif name_of_sheet == "coefficients":
             return self.list_with_dict_without_numpy(file=file)
         elif name_of_sheet in ['orders_1mnth', 'orders_1week', 'orders_2days']:
@@ -57,6 +59,52 @@ class Converter:
         ans = [keys]
         for i, row in enumerate(file):
             ans.append(list(row.values()))
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
+
+    def products(self, file: dict[str, dict[str, list[int | str | dict[str, str | int | list | dict]]]]):
+        if len(file["data"]["items"]) == 0:
+            return list(), 0, list()
+        keys = list()
+        for key in file["data"]["items"][0].keys():
+            if key == "metrics":
+                continue
+            keys.append(key)
+        for key in file["data"]["items"][0]["metrics"].keys():
+            if key == "avgOrdersByMonth":
+                keys.append(key + "Start")
+                keys.append(key + "End")
+                keys.append(key + "Value")
+            elif key in ["saleRate", "avgStockTurnover", "officeMissingTime"]:
+                keys.append(key + "InHours")
+            elif key == "currentPrice":
+                keys.append("currentPrice" + "MinPrice")
+                keys.append("currentPrice" + "MaxPrice")
+            else:
+                keys.append(key)
+        ans = [keys]
+
+        for item in file["data"]["items"]:
+            row = list()
+            for key, value in item.items():
+                if key == "metrics":
+                    continue
+                row.append(value)
+
+            for key, value in item["metrics"].items():
+                if key == "avgOrdersByMonth":
+                    row.append(value[0]["start"])
+                    row.append(value[0]["end"])
+                    row.append(value[0]["value"])
+                elif key in ["saleRate", "avgStockTurnover", "officeMissingTime"]:
+                    row.append(value["days"] * 24 + value["hours"])
+                elif key == "currentPrice":
+                    row.append(value["minPrice"])
+                    row.append(value["maxPrice"])
+                else:
+                    row.append(value)
+            ans.append(row)
+
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
 

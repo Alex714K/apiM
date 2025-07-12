@@ -10,9 +10,8 @@ import os
 
 
 class RequestWildberries:
-    def __init__(self, lock_wb_request: RLock):
+    def __init__(self):
         self.name_of_sheet = None
-        self.lock_wb_request = lock_wb_request
         self.logger = getLogger("RequestWildberries")
 
     def start(self, name_of_sheet: str, who_is: str):
@@ -47,12 +46,15 @@ class RequestWildberries:
                     name_of_sheet in ["sales_today", "sales_1mnth", "tariffs_boxes", "tariffs_pallet", "statements"] or
                     name_of_sheet in ["prices", "fixed_prices", "rk", "coefficients", "stat_prodvigene"]):
                 params = self.make_params()
-                url_for_reqst = self.make_request(url, params)
-                response = requests.get(url_for_reqst, headers=headers)
+                url_for_request = self.make_request(url, params)
+                response = requests.get(url_for_request, headers=headers)
             # Если через json и ссылку
-            elif name_of_sheet in []:
+            elif name_of_sheet in ["productsWB", "productsMP"]:
                 params = self.make_params()
-                response = requests.get(url, headers=headers, json=params)
+                if name_of_sheet in ["productsWB", "productsMP"]:
+                    response = requests.post(url, headers=headers, json=params)
+                else:
+                    response = requests.get(url, headers=headers, json=params)
             else:
                 self.logger.critical(f"Man, you forget {name_of_sheet}2 in Request_wildberries.py")
                 sys.exit(f"Man, you forget {name_of_sheet}2 in Request_wildberries.py")
@@ -284,6 +286,40 @@ class RequestWildberries:
                 params = {}
             case "coefficients":
                 params = {}
+            case "productsWB":
+                today = datetime.date.today()
+                params = {
+                    "currentPeriod": {
+                        "start": today.strftime("%Y-%m-%d"),
+                        "end": today.strftime("%Y-%m-%d")
+                    },
+                    "stockType": "wb",
+                    "skipDeletedNm": True,
+                    "availabilityFilters": ["deficient", "actual", "balanced", "nonActual", "nonLiquid", "invalidData"],
+                    "orderBy": {
+                        "field": "avgOrders",
+                        "mode": "asc"
+                    },
+                    "limit": 1000,
+                    "offset": 0
+                }
+            case "productsMP":
+                today = datetime.date.today()
+                params = {
+                    "currentPeriod": {
+                        "start": today.strftime("%Y-%m-%d"),
+                        "end": today.strftime("%Y-%m-%d")
+                    },
+                    "stockType": "mp",
+                    "skipDeletedNm": True,
+                    "availabilityFilters": ["deficient", "actual", "balanced", "nonActual", "nonLiquid", "invalidData"],
+                    "orderBy": {
+                        "field": "avgOrders",
+                        "mode": "asc"
+                    },
+                    "limit": 1000,
+                    "offset": 0
+                }
             case _:
                 params = {}
         return params

@@ -16,8 +16,7 @@ class RequestOzon:
     # Константы
     MISSING_JSON_FILE = "Missing json file"
 
-    def __init__(self, lock_ozon_request: RLock):
-        self.lock_ozon_request = lock_ozon_request
+    def __init__(self):
         self.logger = getLogger("RequestOzon")
 
     def start(self, name_of_sheet: str, who_is: str):
