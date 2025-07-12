@@ -6,7 +6,7 @@ def manual_full_update(API: Api):
     # print("Started WB")
     # print("-" * 25)
 
-    for client in UpdateAndSchedules.clients_wb:
+    for client, time in UpdateAndSchedules.clients_wb:
         # print(f"client: {client}")
         for name_of_sheet in UpdateAndSchedules.names_of_sheet_wb_oneday:
             if name_of_sheet == "orders_1mnth" and client == "grand":
@@ -21,7 +21,7 @@ def manual_full_update(API: Api):
     # print("Started Ozon")
     # print("-" * 25)
 
-    for client in UpdateAndSchedules.clients_ozon:
+    for client, time in UpdateAndSchedules.clients_ozon:
         # print(f"client: {client}")
         for name_of_sheet in UpdateAndSchedules.names_of_sheet_ozon_oneday:
             if client != "grand" and (name_of_sheet == "sendings" or name_of_sheet == "analytics"):
