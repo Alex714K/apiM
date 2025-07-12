@@ -649,14 +649,14 @@ class GoogleMainFunctions:
         return 0
 
     def get_all_sheet_ids(self) -> dict:
-        sheet_ids = dict()
-        try:
-            with open(f"data/sheetIds/sheet_ids_{self.who_is}_{self.folder}.csv", "r", encoding="UTF-8") as file:
-                sheet_ids = dict(csv.reader(file, lineterminator="\n", delimiter=";"))
-        except Exception:
-            sheet_ids = self.get_all_sheet_ids_from_google()
-            with open(f"data/sheetIds/sheet_ids_{self.who_is}_{self.folder}.csv", "w", encoding="UTF-8") as file:
-                csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_ids.items()))
+        # sheet_ids = dict()
+        # try:
+        #     with open(f"data/sheetIds/sheet_ids_{self.who_is}_{self.folder}.csv", "r", encoding="UTF-8") as file:
+        #         sheet_ids = dict(csv.reader(file, lineterminator="\n", delimiter=";"))
+        # except Exception:
+        #     sheet_ids = self.get_all_sheet_ids_from_google()
+        #     with open(f"data/sheetIds/sheet_ids_{self.who_is}_{self.folder}.csv", "w", encoding="UTF-8") as file:
+        #         csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_ids.items()))
 
         return self.get_all_sheet_ids_from_google()
 
