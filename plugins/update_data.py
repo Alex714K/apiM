@@ -49,7 +49,7 @@ class UpdateAndSchedules:
         "rus_house",
         "sisin",
         "briovi",
-        # "medavibe",
+        "medavibe",
     ]
 
     clients_wb = list()
