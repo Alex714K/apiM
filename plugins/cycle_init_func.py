@@ -11,7 +11,25 @@ from plugins.Wildberries.create_process_for_client import create_process_for_cli
 from plugins.Ozon.create_process_for_client import create_process_for_client as create_process_ozon
 
 
-def launch() -> Any:
+def launch():
+    processes = [Process(target=wb_cycle), Process(target=ozon_cycle)]
+
+    for process in processes:
+        process.start()
+
+    while True:
+        for i in range(len(processes)):
+            if not processes[i].is_alive():
+                processes[i].kill()
+                if i == 0:
+                    processes[i] = Process(target=wb_cycle)
+                elif i == 1:
+                    processes[i] = Process(target=ozon_cycle)
+                processes[i].start()
+        time.sleep(2)
+
+
+def launch_beta() -> Any:
     processes_wb: list[Process] = list()
     processes_ozon: list[Process] = list()
     lock = Value('i', 0)
@@ -53,24 +71,3 @@ def launch() -> Any:
 
         time.sleep(5)
         print(lock.value)
-
-
-def launch_beta():
-    processes = [Process(target=wb_cycle), Process(target=ozon_cycle)]
-
-    for process in processes:
-        process.start()
-
-    # for process in processes:
-    #     process.join()
-
-    while True:
-        for i in range(len(processes)):
-            if not processes[i].is_alive():
-                processes[i].kill()
-                if i == 0:
-                    processes[i] = Process(target=wb_cycle)
-                elif i == 1:
-                    processes[i] = Process(target=ozon_cycle)
-                processes[i].start()
-        time.sleep(2)

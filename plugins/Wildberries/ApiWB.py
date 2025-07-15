@@ -3,18 +3,22 @@ import http.client
 import os
 import ssl
 import time
+import csv
+from threading import Lock
+
 import googleapiclient.errors
 import googleapiclient.discovery
-import csv
 from plugins.Wildberries.Converter_to_list_WB import Converter
 from plugins.Wildberries.Request_wildberries import RequestWildberries
 from logging import getLogger
 from plugins.google_main_functions import GoogleMainFunctions
+from plugins.navigation.ClientEnum import Client
+from plugins.navigation.NameOfSheetEnum import NameOfSheet
 
 
 class ApiWB(Converter, GoogleMainFunctions):
-    def __init__(self, get_service):
-        super().__init__(get_service)
+    def __init__(self, get_service, read_lock: Lock, write_lock: Lock):
+        super().__init__(get_service, read_lock, write_lock)
         self.wait_time = 3  # в секундах
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
@@ -26,7 +30,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         # self.LockWbFile_ChangeFormats = kwargs["LockWbFile_ChangeFormats"]
         self.logger = getLogger("ApiWB")
 
-    def start(self, name_of_sheet: str, who_is: str):
+    def execute(self, who_is: Client, name_of_sheet: NameOfSheet):
         """
         Запуск работы с запросом на сервера WildBerries.
         :param name_of_sheet: Название листа
@@ -47,7 +51,7 @@ class ApiWB(Converter, GoogleMainFunctions):
             case _:
                 self.standart_update(name_of_sheet, who_is)
 
-    def standart_start(self, name_of_sheet: str, who_is: str):
+    def standart_start(self, name_of_sheet: NameOfSheet, who_is: Client):
         self.name_of_sheet = name_of_sheet
         self.who_is = who_is
         if not self.start_work_with_request(name_of_sheet, who_is):
@@ -55,7 +59,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         else:
             return True
 
-    def standart_update(self, name_of_sheet: str, who_is: str):
+    def standart_update(self, name_of_sheet: NameOfSheet, who_is: Client):
         if len(self.values) == 0:
             return
         self.choose_spreadsheetId(who_is)
@@ -170,7 +174,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         #     need.append([info['properties']['title'], info['properties']['sheetId']])
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
-            self.service.spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id,
+            self.get_service().spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id,
                                                        range=last_week
                                                        ).execute()
         except googleapiclient.errors.HttpError as err:
@@ -200,7 +204,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         time.sleep(5)
         try:
-            self.service.spreadsheets().values().batchUpdate(
+            self.get_service().spreadsheets().values().batchUpdate(
                 spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE', body={
                     "valueInputOption": 'USER_ENTERED',
                     "data": [

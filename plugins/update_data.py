@@ -1,55 +1,59 @@
 import datetime
 
+from plugins.navigation.ClientEnum import Client
+from plugins.navigation.NameOfSheetEnum import NameOfSheet
+
 
 class UpdateAndSchedules:
-    names_of_sheet_wb_oneday: list[str] = [
-        "orders_1mnth",
-        "orders_1week",
-        "orders_2days",
-        "sales_1mnth",
-        "fixed_prices",
-        "tariffs_boxes",
-        "tariffs_pallet",
-        "productsWB",
-        "productsMP"
+    names_of_sheet_wb_oneday: list[NameOfSheet] = [
+        NameOfSheet.Orders1Month,
+        NameOfSheet.Orders1Week,
+        NameOfSheet.Orders2Days,
+        NameOfSheet.Sales1Month,
+        NameOfSheet.FixedPrices,
+        NameOfSheet.TariffsBoxes,
+        NameOfSheet.TariffsPallet,
+        NameOfSheet.ProductsWB,
+        NameOfSheet.ProductsMP
     ]
 
-    names_of_sheet_wb_interval: list[list[str]] = [
-        ["stocks", "30"],
-        ["stocks_hard", "30"],
-        ["orders_today", "30"],
-        ["sales_today", "30"],
-        ["prices", "15"],
-        ["coefficients", "30"],
+    names_of_sheet_wb_interval: list[list] = [
+        [NameOfSheet.Stocks, "30"],
+        [NameOfSheet.StocksHard, "30"],
+        [NameOfSheet.OrdersToday, "30"],
+        [NameOfSheet.SalesToday, "30"],
+        [NameOfSheet.SalesToday, "15"],
+        [NameOfSheet.Coefficients, "30"],
     ]
 
-    names_of_sheet_ozon_oneday: list[str] = [
-        "orders_alt",
-        "analytics",
-        "products",
-        "orders_1mnth",
-        "orders_1week",
-        "orders_2days",
+    names_of_sheet_ozon_oneday: list[NameOfSheet] = [
+        NameOfSheet.OrdersAlt,
+        NameOfSheet.Analytics,
+        NameOfSheet.Products,
+        NameOfSheet.Orders1Month,
+        NameOfSheet.Orders1Week,
+        NameOfSheet.Orders2Days,
     ]
 
-    names_of_sheet_ozon_interval: list[list[str]] = [
-        ["prices", "15"],
-        ["stock_on_warehouses", "30"],
-        ["sendings", "30"],
+    names_of_sheet_ozon_interval: list[list] = [
+        [NameOfSheet.Prices, "15"],
+        [NameOfSheet.StockOnWarehouse, "30"],
+        [NameOfSheet.Sendings, "30"],
     ]
 
+    current_time = datetime.datetime(2000, 1, 1, hour=3, minute=10, second=0)
     start_time = datetime.datetime(2000, 1, 1, hour=3, minute=0, second=0)
     clients_wb_private = [
-        "grand",
-        "terehov",
-        "dnk",
-        "planeta",
-        "2ruz",
-        "peco",
-        "rus_house",
-        "sisin",
-        "briovi",
-        "medavibe",
+        Client.Grand,
+        Client.Terehov,
+        Client.Dnk,
+        Client.Planeta,
+        Client.TwoRuz,
+        Client.Peco,
+        Client.RusHouse,
+        Client.Sisin,
+        Client.Briovi,
+        Client.Medavibe,
     ]
 
     clients_wb = list()
@@ -59,13 +63,13 @@ class UpdateAndSchedules:
         start_time += datetime.timedelta(minutes=5 * len(names_of_sheet_wb_oneday))
 
     clients_ozon_private = [
-        "grand",
-        "terehov",
-        "dnk",
-        "2ruz",
-        "peco",
-        "peco_bathroom",
-        "briovi",
+        Client.Grand,
+        Client.Terehov,
+        Client.Dnk,
+        Client.TwoRuz,
+        Client.Peco,
+        Client.PecoBathroom,
+        Client.Briovi,
     ]
 
     clients_ozon = list()

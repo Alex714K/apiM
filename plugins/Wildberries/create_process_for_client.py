@@ -16,11 +16,11 @@ def create_process_for_client(lock: Synchronized, client: str, folder: str, star
 def schedule_all(lock: Synchronized, client: str, folder: str, start_time: datetime):
     my_scheduler = schedule.Scheduler()
     for name_of_sheet in UpdateAndSchedules.names_of_sheet_wb_oneday:
-        my_scheduler.every().day.at(start_time.strftime("%H:%M")).do(Api(lock).start, name_of_sheet, client, folder)
+        my_scheduler.every().day.at(start_time.strftime("%H:%M")).do(Api().execute, folder, client, name_of_sheet)
         start_time = start_time + timedelta(minutes=5)
 
     for name_of_sheet, interval in UpdateAndSchedules.names_of_sheet_wb_interval:
-        my_scheduler.every(int(interval)).seconds.do(Api(lock).start, name_of_sheet, client, folder)
+        my_scheduler.every(int(interval)).seconds.do(Api().execute, folder, client, name_of_sheet)
 
     while True:
         my_scheduler.run_pending()

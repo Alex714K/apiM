@@ -1,20 +1,25 @@
 import datetime
 import calendar
 import time
+import csv
+from threading import Lock
+
 import googleapiclient.errors
 import pandas
 from googleapiclient.discovery import build
-import csv
 from plugins.Ozon.Converter_to_list_Ozon import Converter
 from plugins.Ozon.Request_Ozon import RequestOzon
 from logging import getLogger
 from plugins.google_main_functions import GoogleMainFunctions
 import os
 
+from plugins.navigation.ClientEnum import Client
+from plugins.navigation.NameOfSheetEnum import NameOfSheet
+
 
 class ApiOzon(Converter, GoogleMainFunctions):
-    def __init__(self, get_service):
-        super().__init__(get_service)
+    def __init__(self, get_service, read_lock: Lock , write_lock: Lock):
+        super().__init__(get_service, read_lock, write_lock)
         self.values, self.dist, self.needed_keys = None, None, None
         self.result = None
         self.name_of_sheet = None
@@ -25,7 +30,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         # self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
         self.logger = getLogger("ApiOzon")
 
-    def start(self, name_of_sheet: str, who_is: str):
+    def execute(self, who_is: Client, name_of_sheet: NameOfSheet):
         """
         Запуск работы с запросом на сервера Ozon.
         :param name_of_sheet: Название листа
@@ -46,14 +51,14 @@ class ApiOzon(Converter, GoogleMainFunctions):
             case _:
                 self.standart_update(name_of_sheet, who_is)
 
-    def standart_start(self, name_of_sheet: str, who_is: str):
+    def standart_start(self, name_of_sheet: NameOfSheet, who_is: Client):
         self.name_of_sheet = name_of_sheet
         self.who_is = who_is
         if not self.start_work_with_request(name_of_sheet, who_is):
             return False
         return True
 
-    def standart_update(self, name_of_sheet: str, who_is: str):
+    def standart_update(self, name_of_sheet: NameOfSheet, who_is: Client):
         self.choose_spreadsheetId(who_is)
         new_or_not = self.choose_name_of_sheet(name_of_sheet, who_is)
         if new_or_not == 'error':
