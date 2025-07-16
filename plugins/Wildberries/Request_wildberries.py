@@ -8,6 +8,9 @@ import socket
 from logging import getLogger
 import os
 
+from plugins.navigation.ClientEnum import Client
+from plugins.navigation.NameOfSheetEnum import NameOfSheet
+
 
 class RequestWildberries:
     def __init__(self):
@@ -20,6 +23,8 @@ class RequestWildberries:
                 return self.stocks_hard(who_is)
             case "nm_report":
                 return self.nm_report(who_is)
+            case NameOfSheet.CardsList:
+                return self.cards_list(who_is)
             case _:
                 return self.simple_start(name_of_sheet, who_is)
 
@@ -126,7 +131,8 @@ class RequestWildberries:
                 time.sleep(4)
         url = f"https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/{task_id}/download"
 
-        return {"json": self.try_get_data_of_hard_stocks(url, headers), "warehouses": self.get_warehouses(who_is)}, response.status_code
+        return {"json": self.try_get_data_of_hard_stocks(url, headers),
+                "warehouses": self.get_warehouses(who_is)}, response.status_code
 
     def try_get_data_of_hard_stocks(self, url: str, headers: dict):
         try:
@@ -150,7 +156,6 @@ class RequestWildberries:
             self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
             return json_response
 
-
     def get_warehouses(self, who_is: str):
         url = "https://supplies-api.wildberries.ru/api/v1/warehouses"
         # Токен
@@ -166,6 +171,39 @@ class RequestWildberries:
         if response_json is dict and response_json["status"] == 401:
             sys.exit(f"get_warehouses - status: {response_json["status"]}")
         return list(map(lambda x: str(x["name"]).replace("(", "").replace(")", ""), response.json()))
+
+    def cards_list(self, who_is: str):
+        self.name_of_sheet = NameOfSheet.CardsList.value
+        url = "https://content-api.wildberries.ru/content/v2/get/cards/list"
+        headers = {
+            "Authorization": os.getenv(f"Wildberries-token-{who_is}")
+        }
+        params = self.make_params()
+        ans = list()
+        while True:
+            try:
+                response = requests.post(url, headers=headers, json=params)
+            except socket.gaierror:
+                time.sleep(1)
+                continue
+            try:
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in {self.name_of_sheet}")
+                time.sleep(1)
+                continue
+
+            ans.extend(json_response["cards"])
+            if json_response["cursor"]["total"] < 100:
+                break
+
+            params["settings"]["cursor"]["updatedAt"] = json_response["cursor"]["updatedAt"]
+            params["settings"]["cursor"]["nmID"] = json_response["cursor"]["nmID"]
+
+        self.logger.debug(f"Http статус: 200, name_of_sheet: {self.name_of_sheet}")
+
+        return ans, 200
+
 
     @staticmethod
     def make_request(url, kwargs: dict) -> str:
@@ -319,6 +357,20 @@ class RequestWildberries:
                     },
                     "limit": 1000,
                     "offset": 0
+                }
+            case NameOfSheet.CardsList:
+                params = {
+                    "settings": {
+                        "cursor": {
+                            "limit": 100,
+                        },
+                        "filter": {
+                            "withPhoto": -1
+                        },
+                        "sort": {
+                            "ascending": False
+                        }
+                    }
                 }
             case _:
                 params = {}

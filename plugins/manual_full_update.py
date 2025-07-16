@@ -12,8 +12,6 @@ def manual_full_update(API: Api):
     for client, time in UpdateAndSchedules.clients_wb:
         # print(f"client: {client}")
         for name_of_sheet in UpdateAndSchedules.names_of_sheet_wb_oneday:
-            if name_of_sheet == "orders_1mnth" and client == "grand":
-                continue
             API.execute(Folder.WB, client, name_of_sheet)
         for name_of_sheet in UpdateAndSchedules.names_of_sheet_wb_interval:
             # if name_of_sheet == ["stocks_hard", "30"] and client != "grand":

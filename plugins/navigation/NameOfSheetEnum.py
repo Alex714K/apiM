@@ -28,3 +28,4 @@ class NameOfSheet(StrEnum):
     Sendings = "sendings"
     Statistics = "statistics"
     StatisticsProduct = "statistics_product"
+    CardsList = "cards_list"

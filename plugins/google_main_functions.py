@@ -32,20 +32,20 @@ class GoogleMainFunctions:
         self.seconds_of_lock_google = 1.5
 
     def get_sheets_names_and_indexes(self):
-        sheet_properties = dict()
-        try:
-            with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "r", encoding="UTF-8") as file:
-                sheet_properties = dict(csv.reader(file, lineterminator="\n", delimiter=";"))
-        except FileNotFoundError:
-            sheet_properties = self.get_sheets_names_and_indexes_from_google()
-            with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "w", encoding="UTF-8") as file:
-                csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_properties.items()))
-        except IndexError:
-            sheet_properties = self.get_sheets_names_and_indexes_from_google()
-            with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "w", encoding="UTF-8") as file:
-                csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_properties.items()))
+        # sheet_properties = dict()
+        # try:
+        #     with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "r", encoding="UTF-8") as file:
+        #         sheet_properties = dict(csv.reader(file, lineterminator="\n", delimiter=";"))
+        # except FileNotFoundError:
+        #     sheet_properties = self.get_sheets_names_and_indexes_from_google()
+        #     with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "w", encoding="UTF-8") as file:
+        #         csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_properties.items()))
+        # except IndexError:
+        #     sheet_properties = self.get_sheets_names_and_indexes_from_google()
+        #     with open(f"data/sheetIds/sheet_ids_{self.who_is}.csv", "w", encoding="UTF-8") as file:
+        #         csv.writer(file, lineterminator="\n", delimiter=";").writerows(list(sheet_properties.items()))
 
-        return sheet_properties
+        return self.get_sheets_names_and_indexes_from_google()
 
     def get_sheets_names_and_indexes_from_google(self):
         self.read_lock.acquire()

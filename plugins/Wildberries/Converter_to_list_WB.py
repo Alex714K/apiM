@@ -3,6 +3,8 @@ import sys
 import numpy
 import datetime
 
+from plugins.navigation.NameOfSheetEnum import NameOfSheet
+
 
 class Converter:
     def convert_to_list(self,
@@ -34,6 +36,8 @@ class Converter:
             return self.statements(file=file)
         elif name_of_sheet == "stocks_hard":
             return self.stocks_hard(file=file)
+        elif name_of_sheet == NameOfSheet.CardsList:
+            return self.cards_list(file=file)
         else:
             print(file)
             sys.exit("I can't convert =(")
@@ -58,7 +62,12 @@ class Converter:
             keys.append(key)
         ans = [keys]
         for i, row in enumerate(file):
-            ans.append(list(row.values()))
+            values = list(row.values())
+            good_values = list()
+            for value in values:
+                if not (value is list or value is dict):
+                    good_values.append(value)
+            ans.append(good_values)
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
 
@@ -136,7 +145,8 @@ class Converter:
             values = list()
             flag = False
             for key, value in row.items():
-                if key == "lastChangeDate" and datetime.date(int(value[0:3]), int(value[5:7]), int(value[8:10])) == datetime.date.today():
+                if key == "lastChangeDate" and datetime.date(int(value[0:3]), int(value[5:7]),
+                                                             int(value[8:10])) == datetime.date.today():
                     flag = True
                 values.append(value)
             if flag:
@@ -161,9 +171,9 @@ class Converter:
             ans.append([])
             for key, value in row.items():
                 if type(value) is list:
-                    ans[i+1].extend([value for key, value in value[0].items()])
+                    ans[i + 1].extend([value for key, value in value[0].items()])
                 else:
-                    ans[i+1].append(value)
+                    ans[i + 1].append(value)
         ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
@@ -194,14 +204,14 @@ class Converter:
         for i, row in enumerate(file):
             ans.append([])
             for key, value in row.items():
-                ans[i+1].append(value)
+                ans[i + 1].append(value)
         ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
 
     def stocks_hard(self, file):
         keys = ["brand", "subjectName", "vendorCode", "nmId", "barcode", "techSize", "volume", "В пути до получателей",
-                         "В пути возвраты на склад WB", "Всего находится на складах"]
+                "В пути возвраты на склад WB", "Всего находится на складах"]
         keys.extend(file["warehouses"])
         ans = [keys]
         for element in file["json"]:
@@ -241,6 +251,36 @@ class Converter:
                             ans[-1][index] = warehouse["quantity"]
                         except IndexError:
                             ans[-1].append(warehouse["quantity"])
+
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
+
+    def cards_list(self, file):
+        ans = list()
+        keys = ['nmID', 'imtID', 'nmUUID', 'subjectID', 'subjectName', 'vendorCode', 'brand', 'title', 'description',
+                'needKiz', 'photos', 'video', 'length', 'width', 'height', 'weight', 'isValid', 'characteristics',
+                'sizes', 'tag_ids', 'tag_names', 'createdAt', 'updatedAt']
+        ans.append(keys)
+
+        for row in file:
+            ans.append([""] * len(keys))
+            for key, value in row.items():
+                if key == "photos":
+                    photos = ""
+                    for photo in value:
+                        photos = photos + ";".join(list(photo.values()))
+                    ans[-1][keys.index(key)] = photos
+                elif key == "dimensions":
+                    ans[-1][keys.index("length")] = value["length"]
+                    ans[-1][keys.index("width")] = value["width"]
+                    ans[-1][keys.index("height")] = value["height"]
+                    ans[-1][keys.index("weight")] = value["weightBrutto"]
+                    ans[-1][keys.index("isValid")] = value["isValid"]
+                elif key == "tags":
+                    ans[-1][keys.index("tag_ids")] = ";".join(list(map(lambda x: str(x["id"]), value)))
+                    ans[-1][keys.index("tag_names")] = ";".join(list(map(lambda x: x["name"], value)))
+                else:
+                    ans[-1][keys.index(key)] = value
 
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
@@ -289,5 +329,5 @@ class Converter:
         for i, row in enumerate(file):
             ans.append([])
             for key, value in row.items():
-                ans[i+1].append(value)
+                ans[i + 1].append(value)
         return ans, len(ans)

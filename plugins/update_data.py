@@ -14,7 +14,8 @@ class UpdateAndSchedules:
         NameOfSheet.TariffsBoxes,
         NameOfSheet.TariffsPallet,
         NameOfSheet.ProductsWB,
-        NameOfSheet.ProductsMP
+        NameOfSheet.ProductsMP,
+        NameOfSheet.CardsList
     ]
 
     names_of_sheet_wb_interval: list[list] = [

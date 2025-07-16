@@ -31,6 +31,7 @@ if __name__ == "__main__":
     # API.execute(Folder.WB, Client.Grand, NameOfSheet.ProductsWB)
     # API.execute(Folder.WB, Client.Grand, NameOfSheet.ProductsMP)
     # API.execute(Folder.WB, Client.Planeta, 'stat_prodvigene')
+    # API.execute(Folder.WB, Client.Planeta, NameOfSheet.CardsList)
     # Ozon
     # API.execute(Folder.Ozon, Folder.Ozon, 'update_Results')
     # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.Analytics)
