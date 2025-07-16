@@ -38,7 +38,7 @@ class UpdateAndSchedules:
 
     names_of_sheet_ozon_interval: list[list] = [
         [NameOfSheet.Prices, "15"],
-        [NameOfSheet.StockOnWarehouse, "30"],
+        [NameOfSheet.StockOnWarehouses, "30"],
         [NameOfSheet.Sendings, "30"],
     ]
 
