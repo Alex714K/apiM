@@ -44,53 +44,52 @@ def ozon_cycle():
 
     # grand
     my_scheduler.every().day.at('07:40').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('07:43').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Analytics)
-    my_scheduler.every().day.at('07:46').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Products)
-    my_scheduler.every().day.at('07:49').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('07:52').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('07:55').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('07:43').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Products)
+    my_scheduler.every().day.at('07:46').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('07:49').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('07:52').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Orders2Days)
 
     # terehov
-    my_scheduler.every().day.at('07:58').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('08:01').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Products)
-    my_scheduler.every().day.at('08:04').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('08:07').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('08:10').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('07:55').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.OrdersAlt)
+    my_scheduler.every().day.at('07:58').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Products)
+    my_scheduler.every().day.at('08:01').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('08:04').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('08:07').do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Orders2Days)
 
     # dnk
-    my_scheduler.every().day.at('08:13').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('08:16').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Products)
-    my_scheduler.every().day.at('08:19').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('08:22').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('08:25').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('08:10').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.OrdersAlt)
+    my_scheduler.every().day.at('08:13').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Products)
+    my_scheduler.every().day.at('08:16').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('08:19').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('08:22').do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Orders2Days)
 
     # 2ruz
-    my_scheduler.every().day.at('08:28').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('08:31').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Products)
-    my_scheduler.every().day.at('08:34').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('08:37').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('08:40').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('08:25').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.OrdersAlt)
+    my_scheduler.every().day.at('08:28').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Products)
+    my_scheduler.every().day.at('08:31').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('08:34').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('08:37').do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Orders2Days)
 
     # peco
-    my_scheduler.every().day.at('08:43').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('08:46').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Products)
-    my_scheduler.every().day.at('08:49').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('08:52').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('08:55').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('08:40').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.OrdersAlt)
+    my_scheduler.every().day.at('08:43').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Products)
+    my_scheduler.every().day.at('08:46').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('08:49').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('08:52').do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Orders2Days)
 
     # peco_bathroom
-    my_scheduler.every().day.at('08:58').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('09:01').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Products)
-    my_scheduler.every().day.at('09:04').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('09:07').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('09:10').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('08:55').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.OrdersAlt)
+    my_scheduler.every().day.at('08:58').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Products)
+    my_scheduler.every().day.at('09:01').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('09:04').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('09:07').do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Orders2Days)
 
     # briovi
-    my_scheduler.every().day.at('09:13').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.OrdersAlt)
-    my_scheduler.every().day.at('09:16').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Products)
-    my_scheduler.every().day.at('09:19').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Orders1Month)
-    my_scheduler.every().day.at('09:22').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Orders1Week)
-    my_scheduler.every().day.at('09:25').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('09:10').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.OrdersAlt)
+    my_scheduler.every().day.at('09:13').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Products)
+    my_scheduler.every().day.at('09:16').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('09:19').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('09:22').do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Orders2Days)
 
     logging.getLogger("extraInfo").info("Ozon scheduled")
 
