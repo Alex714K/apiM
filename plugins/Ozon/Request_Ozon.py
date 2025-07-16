@@ -4,7 +4,6 @@ import pandas
 import datetime
 import os
 import socket
-from threading import RLock
 import time
 import requests
 import calendar
@@ -43,6 +42,7 @@ class RequestOzon:
                 if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
                     return self.orders(name_of_sheet, who_is)
                 else:
+                    print(1)
                     print(name_of_sheet)
                     sys.exit("I can't request =(")
 
@@ -402,6 +402,7 @@ class RequestOzon:
             self.logger.debug(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}")
             second_part = json_response2["result"]["rows"]
         first_part.extend(second_part)
+        self.logger.debug(f"Http статус: 200, name_of_sheet: {name_of_sheet}")
         return first_part
 
     @staticmethod

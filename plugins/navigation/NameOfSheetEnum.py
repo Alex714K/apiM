@@ -24,7 +24,7 @@ class NameOfSheet(StrEnum):
     ProductsWB = "productsWB"
     ProductsMP = "productsMP"
     Products = "products"
-    StockOnWarehouse = "stock_on_warehouse"
+    StockOnWarehouses = "stock_on_warehouses"
     Sendings = "sendings"
     Statistics = "statistics"
     StatisticsProduct = "statistics_product"

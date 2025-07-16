@@ -15,32 +15,32 @@ def ozon_cycle():
     my_scheduler = schedule.Scheduler()
     # grand
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.StockOnWarehouses)
     my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.Sendings)
 
     # terehov
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Terehov, NameOfSheet.StockOnWarehouses)
 
     # dnk
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Dnk, NameOfSheet.StockOnWarehouses)
 
     # 2ruz
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.TwoRuz, NameOfSheet.StockOnWarehouses)
 
     # peco
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Peco, NameOfSheet.StockOnWarehouses)
 
     # peco_bathroom
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.PecoBathroom, NameOfSheet.StockOnWarehouses)
 
     # briovi
     my_scheduler.every(15).minutes.do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.Prices)
-    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.StockOnWarehouse)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.Ozon, Client.Briovi, NameOfSheet.StockOnWarehouses)
 
     # grand
     my_scheduler.every().day.at('07:40').do(API.execute, Folder.Ozon, Client.Grand, NameOfSheet.OrdersAlt)
