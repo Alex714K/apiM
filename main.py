@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # Ozon
     # API.execute(Folder.Ozon, Folder.Ozon, 'update_Results')
     # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.Analytics)
-    # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.StockOnWarehouse)
+    # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.StockOnWarehouses)
     # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.StocksFBS)
     # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.Products)
     # API.execute(Folder.Ozon, Client.Grand, NameOfSheet.Prices)
