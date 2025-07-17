@@ -13,3 +13,5 @@ class Client(StrEnum):
     Sisin = "sisin"
     Briovi = "briovi"
     Medavibe = "medavibe"
+    DaryAndLove = "dary&love"
+    LiaNika = "lia_nika"

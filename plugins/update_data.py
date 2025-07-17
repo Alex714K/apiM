@@ -29,7 +29,7 @@ class UpdateAndSchedules:
 
     names_of_sheet_ozon_oneday: list[NameOfSheet] = [
         NameOfSheet.OrdersAlt,
-        NameOfSheet.Analytics,
+        # NameOfSheet.Analytics,
         NameOfSheet.Products,
         NameOfSheet.Orders1Month,
         NameOfSheet.Orders1Week,
@@ -55,6 +55,8 @@ class UpdateAndSchedules:
         Client.Sisin,
         Client.Briovi,
         Client.Medavibe,
+        Client.DaryAndLove,
+        Client.LiaNika
     ]
 
     clients_wb = list()

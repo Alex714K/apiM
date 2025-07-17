@@ -93,17 +93,35 @@ def wb_cycle():
     my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.SalesToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.Coefficients)
 
+    # dary&love
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Stocks)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.StocksHard)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.OrdersToday)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.SalesToday)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Coefficients)
+
+    # lia_nika
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Stocks)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.StocksHard)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.OrdersToday)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.SalesToday)
+    my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Coefficients)
+
     # fixed_prices
     my_scheduler.every().day.at('23:00').do(API.execute, Folder.WB, Client.Grand, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:05').do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:10').do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:15').do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:20').do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:25').do(API.execute, Folder.WB, Client.Peco, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:30').do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:35').do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:40').do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.FixedPrices)
-    my_scheduler.every().day.at('23:45').do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:03').do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:06').do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:09').do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:12').do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:15').do(API.execute, Folder.WB, Client.Peco, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:18').do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:21').do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:24').do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:27').do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:30').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.FixedPrices)
+    my_scheduler.every().day.at('23:33').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.FixedPrices)
 
     # grand
     my_scheduler.every().day.at('03:10').do(API.execute, Folder.WB, Client.Grand, NameOfSheet.Orders1Month)
@@ -214,6 +232,28 @@ def wb_cycle():
     my_scheduler.every().day.at('07:31').do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.ProductsWB)
     my_scheduler.every().day.at('07:34').do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.ProductsMP)
     my_scheduler.every().day.at('07:37').do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.CardsList)
+
+    # dary&love
+    my_scheduler.every().day.at('07:40').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('07:43').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('07:46').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('07:49').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Sales1Month)
+    my_scheduler.every().day.at('07:52').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.TariffsBoxes)
+    my_scheduler.every().day.at('07:55').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.TariffsPallet)
+    my_scheduler.every().day.at('07:58').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.ProductsWB)
+    my_scheduler.every().day.at('08:01').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.ProductsMP)
+    my_scheduler.every().day.at('08:04').do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.CardsList)
+
+    # lia_nika
+    my_scheduler.every().day.at('08:07').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Orders1Month)
+    my_scheduler.every().day.at('08:10').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Orders1Week)
+    my_scheduler.every().day.at('08:13').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Orders2Days)
+    my_scheduler.every().day.at('08:16').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Sales1Month)
+    my_scheduler.every().day.at('08:19').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.TariffsBoxes)
+    my_scheduler.every().day.at('08:22').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.TariffsPallet)
+    my_scheduler.every().day.at('08:25').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.ProductsWB)
+    my_scheduler.every().day.at('08:28').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.ProductsMP)
+    my_scheduler.every().day.at('08:31').do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.CardsList)
 
     # Платное хранение
     # my_scheduler.every().day.at('00:00').do(API.execute, 'storage_paid', 'planeta', 'WB')
