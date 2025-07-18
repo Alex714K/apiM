@@ -23,7 +23,7 @@ class UpdateAndSchedules:
         [NameOfSheet.StocksHard, "30"],
         [NameOfSheet.OrdersToday, "30"],
         [NameOfSheet.SalesToday, "30"],
-        [NameOfSheet.SalesToday, "15"],
+        [NameOfSheet.Prices, "15"],
         [NameOfSheet.Coefficients, "30"],
     ]
 
