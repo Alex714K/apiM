@@ -18,7 +18,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Grand, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Grand, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Grand, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Grand, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Grand, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Grand, NameOfSheet.Coefficients)
 
     # terehov
@@ -26,7 +26,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Terehov, NameOfSheet.Coefficients)
 
     # dnk
@@ -34,7 +34,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Dnk, NameOfSheet.Coefficients)
 
     # planeta
@@ -42,7 +42,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Planeta, NameOfSheet.Coefficients)
 
     # 2ruz
@@ -50,7 +50,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.TwoRuz, NameOfSheet.Coefficients)
 
     # peco
@@ -58,7 +58,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Peco, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Peco, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Peco, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Peco, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Peco, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Peco, NameOfSheet.Coefficients)
 
     # rus_house
@@ -66,7 +66,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.RusHouse, NameOfSheet.Coefficients)
 
     # sisin
@@ -74,7 +74,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Sisin, NameOfSheet.Coefficients)
 
     # briovi
@@ -82,7 +82,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Briovi, NameOfSheet.Coefficients)
 
     # medavibe
@@ -90,7 +90,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.Medavibe, NameOfSheet.Coefficients)
 
     # dary&love
@@ -98,7 +98,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.DaryAndLove, NameOfSheet.Coefficients)
 
     # lia_nika
@@ -106,7 +106,7 @@ def wb_cycle():
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.StocksHard)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.OrdersToday)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.SalesToday)
-    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.SalesToday)
+    my_scheduler.every(15).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Prices)
     my_scheduler.every(30).minutes.do(API.execute, Folder.WB, Client.LiaNika, NameOfSheet.Coefficients)
 
     # fixed_prices
