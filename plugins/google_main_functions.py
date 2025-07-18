@@ -15,7 +15,7 @@ class GoogleMainFunctions:
     def __init__(self, get_service, read_lock: Lock, write_lock: Lock):
         self.logger = None
 
-        self.wait_time = 1  # в секундах
+        self.wait_time = 1.1  # в секундах
 
         self.spreadsheet_id = None
         self.get_service = get_service
@@ -28,8 +28,6 @@ class GoogleMainFunctions:
         self.folder = None
         self.read_lock = read_lock
         self.write_lock = write_lock
-
-        self.seconds_of_lock_google = 1.5
 
     def get_sheets_names_and_indexes(self):
         # sheet_properties = dict()
@@ -49,7 +47,7 @@ class GoogleMainFunctions:
 
     def get_sheets_names_and_indexes_from_google(self):
         self.read_lock.acquire()
-        threading.Timer(1, self.read_lock.release).start()
+        threading.Timer(self.wait_time, self.read_lock.release).start()
 
         try:
             sheets_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
@@ -99,7 +97,7 @@ class GoogleMainFunctions:
         :return: Возващает bool ответ результата определения
         """
         self.read_lock.acquire()
-        threading.Timer(1, self.read_lock.release).start()
+        threading.Timer(self.wait_time, self.read_lock.release).start()
 
         try:
             sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
@@ -170,7 +168,7 @@ class GoogleMainFunctions:
             column_count = len(self.values[0])  # кол-во столбцов
 
         self.write_lock.acquire()
-        threading.Timer(1, self.write_lock.release).start()
+        threading.Timer(self.wait_time, self.write_lock.release).start()
 
         try:
             self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
@@ -229,7 +227,7 @@ class GoogleMainFunctions:
             r = name_of_sheet
 
         self.write_lock.acquire()
-        threading.Timer(1, self.write_lock.release).start()
+        threading.Timer(self.wait_time, self.write_lock.release).start()
 
         try:
             self.get_service(self.folder).spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id, range=r
@@ -292,7 +290,7 @@ class GoogleMainFunctions:
             distance = f"{name_of_sheet}!{i}:{i+1000}"
 
             self.write_lock.acquire()
-            threading.Timer(1, self.write_lock.release).start()
+            threading.Timer(self.wait_time, self.write_lock.release).start()
 
             try:
                 self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
@@ -346,7 +344,7 @@ class GoogleMainFunctions:
         }
 
         self.write_lock.acquire()
-        threading.Timer(1, self.write_lock.release).start()
+        threading.Timer(self.wait_time, self.write_lock.release).start()
 
         try:
             response = self.get_service(self.folder).spreadsheets().batchUpdate(
@@ -408,7 +406,7 @@ class GoogleMainFunctions:
             return None
 
         self.write_lock.acquire()
-        threading.Timer(1, self.write_lock.release).start()
+        threading.Timer(self.wait_time, self.write_lock.release).start()
 
         try:
             self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body=data).execute()
@@ -447,7 +445,7 @@ class GoogleMainFunctions:
         has_result = "Result" in self.get_all_sheet_ids().keys()
         if not has_result:
             self.write_lock.acquire()
-            threading.Timer(1, self.write_lock.release).start()
+            threading.Timer(self.wait_time, self.write_lock.release).start()
 
             try:
                 self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
@@ -493,7 +491,7 @@ class GoogleMainFunctions:
 
     def insert_design_result(self, design: list) -> None:
         self.write_lock.acquire()
-        threading.Timer(1, self.write_lock.release).start()
+        threading.Timer(self.wait_time, self.write_lock.release).start()
 
         try:
             self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
@@ -542,7 +540,7 @@ class GoogleMainFunctions:
         major_dimension = "ROWS"  # список - строка
 
         self.write_lock.acquire()
-        threading.Timer(1, self.write_lock.release).start()
+        threading.Timer(self.wait_time, self.write_lock.release).start()
 
         try:
             self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
@@ -614,7 +612,7 @@ class GoogleMainFunctions:
                     continue
 
             self.write_lock.acquire()
-            threading.Timer(1, self.write_lock.release).start()
+            threading.Timer(self.wait_time, self.write_lock.release).start()
 
             try:
                 self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body={
@@ -657,7 +655,7 @@ class GoogleMainFunctions:
 
     def get_row_count_in_sheet(self, sheet_id: int | str) -> int:
         self.read_lock.acquire()
-        threading.Timer(1, self.read_lock.release).start()
+        threading.Timer(self.wait_time, self.read_lock.release).start()
 
         try:
             sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
@@ -699,7 +697,7 @@ class GoogleMainFunctions:
         ans = dict()
 
         self.read_lock.acquire()
-        threading.Timer(1, self.read_lock.release).start()
+        threading.Timer(self.wait_time, self.read_lock.release).start()
 
         try:
             sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
