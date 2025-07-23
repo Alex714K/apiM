@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # create_schedules()
     # manual_full_update(API)
     # Wildberries
-    # API.execute('update_Results', 'WB', 'WB')
+    # API.execute('WB', 'WB', 'update_Results')
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.Stocks)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.StocksHard)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.Orders1Month)
