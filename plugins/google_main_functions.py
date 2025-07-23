@@ -1,6 +1,5 @@
 import datetime
 import ssl
-import csv
 import threading
 import time
 import os
@@ -208,7 +207,7 @@ class GoogleMainFunctions:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
-        self.logger.debug(f"Created new sheet '{name_of_sheet}'")
+        self.logger.debug(f"Created new sheet '{name_of_sheet}' ({self.who_is})")
         self.choose_name_of_sheet(name_of_sheet=name_of_sheet, who_is=self.who_is)
         return False
 
@@ -256,7 +255,7 @@ class GoogleMainFunctions:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
-        self.logger.debug(f"Clearing complete ({name_of_sheet})")
+        self.logger.debug(f"Clearing complete (nameOfSheet: {name_of_sheet}, Client: {self.who_is})")
         return True
 
     @staticmethod
@@ -282,7 +281,6 @@ class GoogleMainFunctions:
         difference_distance = len(self.values) - self.get_row_count_in_sheet(sheet_id)
         if difference_distance > 0:
             self.append_new_rows(sheet_id, difference_distance)
-            self.logger.info(f"Rows of sheet '{name_of_sheet}' is increased.")
 
         value_input_option = "USER_ENTERED"
         major_dimension = "ROWS"  # список - строка
@@ -326,7 +324,7 @@ class GoogleMainFunctions:
                 self.logger.error(f"Ошибка: {err}")
                 time.sleep(self.wait_time)
                 return self.private_update(name_of_sheet)
-        self.logger.debug(f"Updating complete ({name_of_sheet})")
+        self.logger.debug(f"Updating complete (NameOfSheet: {name_of_sheet}, Client: {self.who_is})")
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return True
 
@@ -375,6 +373,7 @@ class GoogleMainFunctions:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
             return self.append_new_rows(sheet_id, num_rows)
+        self.logger.info(f"Rows of sheet '{self.name_of_sheet}' is increased ({self.who_is}).")
 
         return response
 
@@ -503,7 +502,6 @@ class GoogleMainFunctions:
                      }
                 ]
             }).execute()
-            return None
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - insert_result')
             time.sleep(self.wait_time)
@@ -528,6 +526,7 @@ class GoogleMainFunctions:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
             return self.insert_design_result(design)
+        return None
 
     def insert_new_info(self, design: list):
         if self.result is None:
@@ -552,7 +551,6 @@ class GoogleMainFunctions:
                      }
                 ]
             }).execute()
-            return None
         except googleapiclient.errors.HttpError:
             self.logger.warning('Проблема с соединением Google - start_work_with_list_result')
             time.sleep(self.wait_time)
@@ -577,6 +575,7 @@ class GoogleMainFunctions:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
             return self.insert_new_info(design)
+        return None
 
     def update_results(self, who_is: str):
         from plugins.test.data import UpdateAndSchedules
