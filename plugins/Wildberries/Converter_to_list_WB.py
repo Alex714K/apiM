@@ -38,6 +38,8 @@ class Converter:
             return self.stocks_hard(file=file)
         elif name_of_sheet == NameOfSheet.CardsList:
             return self.cards_list(file=file)
+        elif name_of_sheet in [NameOfSheet.SalesFunnel1DayBefore, NameOfSheet.SalesFunnel2DaysBefore]:
+            return self.sales_funnel(file=file)
         else:
             print(file)
             sys.exit("I can't convert =(")
@@ -282,6 +284,38 @@ class Converter:
                 else:
                     ans[-1][keys.index(key)] = value
 
+        needed_keys = self.check_keys(keys)
+        return ans, len(ans), needed_keys
+
+    def sales_funnel(self, file):
+        keys = ["nmID", "vendorCode", "brandName", "objectId", "objectName", "openCardCount", "addToCartCount",
+                "ordersCount", "ordersSumRub", "buyoutsCount", "buyoutsSumRub", "cancelCount", "cancelSumRub",
+                "avgPriceRub", "avgOrdersCountPerDay", "addToCartPercent", "cartToOrderPercent", "buyoutsPercent",
+                "stocksMp", "stocksWb"]
+        ans = [keys]
+        for row in file:
+            ans.append([
+                row["nmID"],
+                row["vendorCode"],
+                row["brandName"],
+                row["object"]["id"],
+                row["object"]["name"],
+                row["statistics"]["selectedPeriod"]["openCardCount"],
+                row["statistics"]["selectedPeriod"]["addToCartCount"],
+                row["statistics"]["selectedPeriod"]["ordersCount"],
+                row["statistics"]["selectedPeriod"]["ordersSumRub"],
+                row["statistics"]["selectedPeriod"]["buyoutsCount"],
+                row["statistics"]["selectedPeriod"]["buyoutsSumRub"],
+                row["statistics"]["selectedPeriod"]["cancelCount"],
+                row["statistics"]["selectedPeriod"]["cancelSumRub"],
+                row["statistics"]["selectedPeriod"]["avgPriceRub"],
+                row["statistics"]["selectedPeriod"]["avgOrdersCountPerDay"],
+                row["statistics"]["selectedPeriod"]["conversions"]["addToCartPercent"],
+                row["statistics"]["selectedPeriod"]["conversions"]["cartToOrderPercent"],
+                row["statistics"]["selectedPeriod"]["conversions"]["buyoutsPercent"],
+                row["stocks"]["stocksMp"],
+                row["stocks"]["stocksWb"]
+            ])
         needed_keys = self.check_keys(keys)
         return ans, len(ans), needed_keys
 

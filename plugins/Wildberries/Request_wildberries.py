@@ -18,6 +18,7 @@ class RequestWildberries:
         self.logger = getLogger("RequestWildberries")
 
     def start(self, name_of_sheet: str, who_is: str):
+        self.name_of_sheet = name_of_sheet
         match name_of_sheet:
             case "stocks_hard":
                 return self.stocks_hard(who_is)
@@ -25,6 +26,10 @@ class RequestWildberries:
                 return self.nm_report(who_is)
             case NameOfSheet.CardsList:
                 return self.cards_list(who_is)
+            case NameOfSheet.SalesFunnel1DayBefore:
+                return self.sales_funnel(who_is)
+            case NameOfSheet.SalesFunnel2DaysBefore:
+                return self.sales_funnel(who_is)
             case _:
                 return self.simple_start(name_of_sheet, who_is)
 
@@ -204,6 +209,38 @@ class RequestWildberries:
 
         return ans, 200
 
+    def sales_funnel(self, who_is: str):
+        url = "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/detail"
+        headers = {
+            "Authorization": os.getenv(f"Wildberries-token-{who_is}")
+        }
+        params = self.make_params()
+        ans = list()
+        while True:
+            try:
+                response = requests.post(url, headers=headers, json=params)
+            except socket.gaierror:
+                time.sleep(1)
+                continue
+            try:
+                json_response = response.json()
+            except requests.exceptions.JSONDecodeError:
+                self.logger.error(f"Missing json file in {self.name_of_sheet}")
+                time.sleep(1)
+                continue
+
+            if json_response["error"]:
+                print(json_response)
+                sys.exit()
+
+            ans.extend(json_response["data"]["cards"])
+            if not json_response["data"]["isNextPage"]:
+                break
+
+            params["page"] = params["page"] + 1
+
+        return ans, 200
+
 
     @staticmethod
     def make_request(url, kwargs: dict) -> str:
@@ -293,6 +330,40 @@ class RequestWildberries:
             case 'sales_1mnth':
                 params = {
                     'dateFrom': (datetime.date.today() - datetime.timedelta(days=31)).strftime("%Y-%m-%d"),
+                }
+            case NameOfSheet.SalesFunnel1DayBefore:
+                params = {
+                    "brandNames": [],
+                    "objectIDs": [],
+                    "tagIDs": [],
+                    "nmIDs": [],
+                    "timezone": "Europe/Moscow",
+                    "period": {
+                        "begin": f"{(datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")} 00:00:00",
+                        "end": f"{(datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")} 23:59:59"
+                    },
+                    "orderBy": {
+                        "field": "openCard",
+                        "mode": "asc"
+                    },
+                    "page": 1
+                }
+            case NameOfSheet.SalesFunnel2DaysBefore:
+                params = {
+                    "brandNames": [],
+                    "objectIDs": [],
+                    "tagIDs": [],
+                    "nmIDs": [],
+                    "timezone": "Europe/Moscow",
+                    "period": {
+                        "begin": f"{(datetime.date.today() - datetime.timedelta(days=2)).strftime("%Y-%m-%d")} 00:00:00",
+                        "end": f"{(datetime.date.today() - datetime.timedelta(days=2)).strftime("%Y-%m-%d")} 23:59:59"
+                    },
+                    "orderBy": {
+                        "field": "openCard",
+                        "mode": "asc"
+                    },
+                    "page": 1
                 }
             case 'orders_2days':
                 params = {'dateFrom': (datetime.date.today() - datetime.timedelta(days=2)).strftime("%Y-%m-%d")}

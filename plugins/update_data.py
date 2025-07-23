@@ -10,6 +10,8 @@ class UpdateAndSchedules:
         NameOfSheet.Orders1Week,
         NameOfSheet.Orders2Days,
         NameOfSheet.Sales1Month,
+        NameOfSheet.SalesFunnel1DayBefore,
+        NameOfSheet.SalesFunnel2DaysBefore,
         NameOfSheet.FixedPrices,
         NameOfSheet.TariffsBoxes,
         NameOfSheet.TariffsPallet,

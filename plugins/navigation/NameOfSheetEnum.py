@@ -20,6 +20,8 @@ class NameOfSheet(StrEnum):
     Coefficients = "coefficients"
     Sales1Month = "sales_1mnth"
     SalesToday = "sales_today"
+    SalesFunnel1DayBefore = "sales_funnel_1day_before"
+    SalesFunnel2DaysBefore = "sales_funnel_2days_before"
     Analytics = "analytics"
     ProductsWB = "productsWB"
     ProductsMP = "productsMP"

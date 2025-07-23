@@ -19,6 +19,8 @@ if __name__ == "__main__":
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.OrdersToday)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.SalesToday)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.Sales1Month)
+    # API.execute(Folder.WB, Client.RusHouse, NameOfSheet.SalesFunnel1DayBefore)
+    # API.execute(Folder.WB, Client.RusHouse, NameOfSheet.SalesFunnel2DaysBefore)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.TariffsBoxes)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.TariffsPallet)
     # API.execute(Folder.WB, Client.Planeta, NameOfSheet.Prices)
