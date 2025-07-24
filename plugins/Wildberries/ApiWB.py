@@ -137,7 +137,7 @@ class ApiWB(Converter, GoogleMainFunctions):
                 self.result = 'ERROR: File=None'
                 return False
             case 'is empty':
-                self.logger.warning(f"File({self.name_of_sheet}) is empty")
+                self.logger.warning(f"File({self.name_of_sheet}) is empty ({self.who_is})")
                 self.result = 'ERROR: File is empty'
                 return False
         self.values, self.dist, self.needed_keys = result
