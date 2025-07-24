@@ -51,7 +51,7 @@ class GoogleMainFunctions:
         try:
             sheets_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError as err:
-            self.logger.warning(f'Проблема с соединением Google - get_sheets_metadata_from_google - {err}')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - get_sheets_metadata_from_google - {err}')
             time.sleep(self.wait_time)
             return self.get_sheets_names_and_indexes_from_google()
         except httplib2.error.ServerNotFoundError:
@@ -59,7 +59,7 @@ class GoogleMainFunctions:
             time.sleep(self.wait_time)
             return self.get_sheets_names_and_indexes_from_google()
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
             time.sleep(self.wait_time)
             return self.get_sheets_names_and_indexes_from_google()
         except ssl.SSLError as err:
@@ -101,7 +101,7 @@ class GoogleMainFunctions:
         try:
             sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError as err:
-            self.logger.warning(f'Проблема с соединением Google - choose_name_of_sheet - {err}')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - choose_name_of_sheet - {err}')
             time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except httplib2.error.ServerNotFoundError:
@@ -109,7 +109,7 @@ class GoogleMainFunctions:
             time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
             time.sleep(self.wait_time)
             return self.choose_name_of_sheet(name_of_sheet, who_is)
         except ssl.SSLError as err:
@@ -183,12 +183,12 @@ class GoogleMainFunctions:
                     }
                 }]
             }).execute()
-        except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - private_create')
+        except googleapiclient.errors.HttpError as ex:
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - private_create - {ex}')
             time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
             time.sleep(self.wait_time)
             return self.private_create(name_of_sheet)
         except ssl.SSLError as err:
@@ -232,11 +232,11 @@ class GoogleMainFunctions:
             self.get_service(self.folder).spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id, range=r
                                                        ).execute()
         except googleapiclient.errors.HttpError as err:
-            self.logger.warning(f'Проблема с соединением Google - private_clear - {err}')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - private_clear - {err}')
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except TimeoutError as err:
-            self.logger.warning(f'Проблема с соединением Google ({err})')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) ({err})')
             time.sleep(self.wait_time)
             return self.private_clear(name_of_sheet)
         except ssl.SSLError as err:
@@ -301,11 +301,11 @@ class GoogleMainFunctions:
                     ]
                 }).execute()
             except googleapiclient.errors.HttpError as err:
-                self.logger.warning(f'Проблема с соединением Google - private_update - {err}')
+                self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - private_update - {err}')
                 time.sleep(self.wait_time)
                 return self.private_update(name_of_sheet)
             except TimeoutError as err:
-                self.logger.warning(f'Проблема с соединением Google ({err})')
+                self.logger.warning(f'Проблема с соединением Google ({self.who_is}) ({err})')
                 time.sleep(self.wait_time)
                 return self.private_update(name_of_sheet)
             except ssl.SSLError as err:
@@ -350,11 +350,11 @@ class GoogleMainFunctions:
                 body=body
             ).execute()
         except googleapiclient.errors.HttpError as err:
-            self.logger.warning(f'Проблема с соединением Google - change_formats - {err}')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - change_formats - {err}')
             time.sleep(self.wait_time)
             return self.append_new_rows(sheet_id, num_rows)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
             time.sleep(self.wait_time)
             return self.append_new_rows(sheet_id, num_rows)
         except ssl.SSLError as err:
@@ -411,11 +411,11 @@ class GoogleMainFunctions:
             self.get_service(self.folder).spreadsheets().batchUpdate(spreadsheetId=self.spreadsheet_id, body=data).execute()
             return None
         except googleapiclient.errors.HttpError as err:
-            self.logger.warning(f'Проблема с соединением Google - change_formats - {err}')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - change_formats - {err}')
             time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
             time.sleep(self.wait_time)
             return self.change_formats(needed_keys, name_of_sheet)
         except ssl.SSLError as err:
@@ -460,12 +460,12 @@ class GoogleMainFunctions:
                         }
                     }]
                 }).execute()
-            except googleapiclient.errors.HttpError:
-                self.logger.warning('Проблема с соединением Google - create_result')
+            except googleapiclient.errors.HttpError as ex:
+                self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - create_result - {ex}')
                 time.sleep(self.wait_time)
                 return self.create_result(design)
             except TimeoutError:
-                self.logger.warning('Проблема с соединением Google (TimeoutError)')
+                self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
                 time.sleep(self.wait_time)
                 return self.create_result(design)
             except ssl.SSLError as err:
@@ -503,11 +503,11 @@ class GoogleMainFunctions:
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - insert_result')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - insert_result')
             time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError)')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError)')
             time.sleep(self.wait_time)
             return self.insert_design_result(design)
         except ssl.SSLError as err:
@@ -552,11 +552,11 @@ class GoogleMainFunctions:
                 ]
             }).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - start_work_with_list_result')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - start_work_with_list_result')
             time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError) - start_work_with_list_result')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError) - start_work_with_list_result')
             time.sleep(self.wait_time)
             return self.insert_new_info(design)
         except ssl.SSLError as err:
@@ -624,11 +624,11 @@ class GoogleMainFunctions:
                     ]
                 }).execute()
             except googleapiclient.errors.HttpError:
-                self.logger.warning('Проблема с соединением Google - update_Results')
+                self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - update_Results')
                 time.sleep(self.wait_time)
                 return self.update_results(who_is)
             except TimeoutError:
-                self.logger.warning('Проблема с соединением Google (TimeoutError) - update_Results')
+                self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError) - update_Results')
                 time.sleep(self.wait_time)
                 return self.update_results(who_is)
             except ssl.SSLError as err:
@@ -659,11 +659,11 @@ class GoogleMainFunctions:
         try:
             sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError:
-            self.logger.warning('Проблема с соединением Google - get_row_count_in_sheet')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - get_row_count_in_sheet')
             time.sleep(self.wait_time)
             return self.get_row_count_in_sheet(sheet_id)
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError) - get_row_count_in_sheet')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError) - get_row_count_in_sheet')
             time.sleep(self.wait_time)
             return self.get_row_count_in_sheet(sheet_id)
         except ssl.SSLError as err:
@@ -701,11 +701,11 @@ class GoogleMainFunctions:
         try:
             sheet_metadata = self.get_service(self.folder).spreadsheets().get(spreadsheetId=self.spreadsheet_id).execute()
         except googleapiclient.errors.HttpError as ex:
-            self.logger.warning(f'Проблема с соединением Google - get_all_sheet_ids - {ex}')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) - get_all_sheet_ids - {ex}')
             time.sleep(self.wait_time)
             return self.get_all_sheet_ids_from_google()
         except TimeoutError:
-            self.logger.warning('Проблема с соединением Google (TimeoutError) - get_all_sheet_ids')
+            self.logger.warning(f'Проблема с соединением Google ({self.who_is}) (TimeoutError) - get_all_sheet_ids')
             time.sleep(self.wait_time)
             return self.get_all_sheet_ids_from_google()
         except ssl.SSLError as err:
