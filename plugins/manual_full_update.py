@@ -3,6 +3,7 @@ from plugins.navigation.ClientEnum import Client
 from plugins.navigation.FolderEnum import Folder
 from plugins.navigation.NameOfSheetEnum import NameOfSheet
 from plugins.update_data import UpdateAndSchedules
+import time as sleep_time
 
 
 def manual_full_update(API: Api):
@@ -10,7 +11,7 @@ def manual_full_update(API: Api):
     # print("-" * 25)
 
     for client, time in UpdateAndSchedules.clients_wb:
-        time.sleep(10)
+        sleep_time.sleep(10)
         # print(f"client: {client}")
         for name_of_sheet in UpdateAndSchedules.names_of_sheet_wb_oneday:
             API.execute(Folder.WB, client, name_of_sheet)
@@ -24,7 +25,7 @@ def manual_full_update(API: Api):
     # print("-" * 25)
 
     for client, time in UpdateAndSchedules.clients_ozon:
-        time.sleep(10)
+        sleep_time.sleep(10)
         # print(f"client: {client}")
         for name_of_sheet in UpdateAndSchedules.names_of_sheet_ozon_oneday:
             if client != Client.Grand and (name_of_sheet[0] == NameOfSheet.Sendings or name_of_sheet[0] == NameOfSheet.Analytics):
