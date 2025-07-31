@@ -33,10 +33,6 @@ class Api:
         self.read_lock: Lock = Lock()
         self.write_lock: Lock = Lock()
 
-        # self.last_update_time = datetime.datetime.today()
-        # self.service_wb = self.create_service(Folder.WB)
-        # self.service_ozon = self.create_service(Folder.Ozon)
-
     def create_thread(self, folder: Folder, who_is: Client, name_of_sheet: NameOfSheet) -> Thread:
         """
         Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
