@@ -1,6 +1,7 @@
 import datetime
 import time
 import socket
+from argparse import ArgumentError
 from logging import getLogger
 from threading import Thread, Lock
 
@@ -32,36 +33,28 @@ class Api:
         self.read_lock: Lock = Lock()
         self.write_lock: Lock = Lock()
 
-        self.last_update_time = datetime.datetime.today()
-        self.service_wb = self.create_service(Folder.WB)
-        self.service_ozon = self.create_service(Folder.Ozon)
+        # self.last_update_time = datetime.datetime.today()
+        # self.service_wb = self.create_service(Folder.WB)
+        # self.service_ozon = self.create_service(Folder.Ozon)
 
-    def execute(self, folder: Folder, who_is: Client, name_of_sheet: NameOfSheet):
+    def create_thread(self, folder: Folder, who_is: Client, name_of_sheet: NameOfSheet) -> Thread:
         """
         Основной старт потока. От него зависит, что запуститься. Ничего не возвращает.
         :return: None
         """
+        thread: Thread
         match folder:
             case Folder.WB:
-                Thread(target=ApiWB(self.create_service, self.read_lock, self.write_lock).execute, args=(who_is, name_of_sheet)).start()
-                # ApiWB(self.create_service).execute(who_is, name_of_sheet)
+                thread = Thread(target=ApiWB(self.create_service, self.read_lock, self.write_lock).execute, args=(who_is, name_of_sheet))
+                # ApiWB(self.create_service).create_thread(who_is, name_of_sheet)
             case Folder.Ozon:
-                Thread(target=ApiOzon(self.create_service, self.read_lock, self.write_lock).execute, args=(who_is, name_of_sheet)).start()
-#                 ApiOzon(self.create_service).execute(who_is, name_of_sheet)
+                thread = Thread(target=ApiOzon(self.create_service, self.read_lock, self.write_lock).execute, args=(who_is, name_of_sheet))
+                # ApiOzon(self.create_service).create_thread(who_is, name_of_sheet)
+            case _:
+                raise ValueError("Wrong argument")
 
-    def get_service(self, folder: Folder):
-        """
-        Выполняет подключение к сервису Google.
-        :return: Возвращает bool ответ результата подключения
-        """
-        service = None
-        match folder:
-            case Folder.WB:
-                service = self.service_wb
-            case Folder.Ozon:
-                service = self.service_ozon
-
-        return service
+        thread.start()
+        return thread
 
     def create_service(self, folder: Folder):
         CREDENTIALS_FILE = ""
@@ -80,11 +73,11 @@ class Api:
         except httplib2.error.ServerNotFoundError:
             self.logger.warning("Google: ServerNotFound")
             time.sleep(2)
-            return self.get_service(folder)
+            return self.create_service(folder)
         except socket.gaierror:
             self.logger.warning("gaierror with Google")
             time.sleep(2)
-            return self.get_service(folder)
+            return self.create_service(folder)
 
         return service
 
