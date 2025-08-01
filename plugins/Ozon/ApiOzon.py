@@ -182,7 +182,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
             result = self.convert_to_list(json_response, name_of_sheet, who_is)
         except TypeError as ex:
             self.logger.warning(ex)
-            return False
+            return self.start_work_with_request(name_of_sheet, who_is)
 
         match result:
             case 'download':
