@@ -284,11 +284,9 @@ class GoogleMainFunctions:
 
         value_input_option = "USER_ENTERED"
         major_dimension = "ROWS"  # список - строка
+        self.write_lock.acquire()
         for i in range(1, self.dist + 1, 1000):
             distance = f"{name_of_sheet}!{i}:{i+1000}"
-
-            self.write_lock.acquire()
-            threading.Timer(self.wait_time, self.write_lock.release).start()
 
             try:
                 self.get_service(self.folder).spreadsheets().values().batchUpdate(spreadsheetId=self.spreadsheet_id, body={
@@ -324,7 +322,13 @@ class GoogleMainFunctions:
                 self.logger.error(f"Ошибка: {err}")
                 time.sleep(self.wait_time)
                 return self.private_update(name_of_sheet)
+
+            time.sleep(self.wait_time)
+
         self.logger.debug(f"Updating complete (NameOfSheet: {name_of_sheet}, Client: {self.who_is})")
+
+        self.write_lock.release()
+
         self.change_formats(needed_keys=self.needed_keys, name_of_sheet=name_of_sheet)
         return True
 
