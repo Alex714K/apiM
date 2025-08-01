@@ -25,7 +25,7 @@ class UpdateAndSchedules:
         [NameOfSheet.StocksHard, "30"],
         [NameOfSheet.OrdersToday, "30"],
         [NameOfSheet.SalesToday, "30"],
-        [NameOfSheet.Prices, "15"],
+        [NameOfSheet.Prices, "60"],
         [NameOfSheet.Coefficients, "30"],
     ]
 
@@ -39,7 +39,7 @@ class UpdateAndSchedules:
     ]
 
     names_of_sheet_ozon_interval: list[list] = [
-        [NameOfSheet.Prices, "15"],
+        [NameOfSheet.Prices, "60"],
         [NameOfSheet.StockOnWarehouses, "30"],
         [NameOfSheet.Sendings, "30"],
     ]
