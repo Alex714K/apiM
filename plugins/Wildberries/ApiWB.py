@@ -126,7 +126,12 @@ class ApiWB(Converter, GoogleMainFunctions):
         except TypeError:
             self.logger.warning("Нет доступа к файлу")
             return False
-        result = self.convert_to_list(json_response, name_of_sheet)
+        try:
+            result = self.convert_to_list(json_response, name_of_sheet)
+        except TypeError as ex:
+            self.logger.warning(ex)
+            return False
+
         match result:
             case 'download':
                 self.logger.info(f"Downloaded {name_of_sheet}")
@@ -166,12 +171,6 @@ class ApiWB(Converter, GoogleMainFunctions):
         self.insert_new_info(design)
 
     def private_update_statements(self):
-        # getted = self.service.spreadsheets().
-        # get(spreadsheetId='1Hv0Pk6pRYN4bB5vJEdGnELmAPpXo0r25KatPCtCA_TE').execute()
-        # getted = getted['sheets']
-        # need = list()
-        # for info in getted:
-        #     need.append([info['properties']['title'], info['properties']['sheetId']])
         last_week = (datetime.date.today() - datetime.timedelta(days=7)).isocalendar()[1]
         try:
             self.get_service().spreadsheets().values().clear(spreadsheetId=self.spreadsheet_id,

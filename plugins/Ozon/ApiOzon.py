@@ -178,8 +178,12 @@ class ApiOzon(Converter, GoogleMainFunctions):
         except TypeError:
             self.logger.warning("Нет доступа к файлу - start_work_with_request")
             return False
+        try:
+            result = self.convert_to_list(json_response, name_of_sheet, who_is)
+        except TypeError as ex:
+            self.logger.warning(ex)
+            return False
 
-        result = self.convert_to_list(json_response, name_of_sheet, who_is)
         match result:
             case 'download':
                 self.logger.info(f"Downloaded {name_of_sheet} - start_work_with_request")
