@@ -29,7 +29,7 @@ class ApiWB(Converter, GoogleMainFunctions):
         # self.LockWbRequest = kwargs["LockWbRequest"]
         # self.LockWbResult = kwargs["LockWbResult"]
         # self.LockWbFile_ChangeFormats = kwargs["LockWbFile_ChangeFormats"]
-        self.logger = getLogger("ApiWB")
+        self.logger = getLogger(self.__class__.__name__)
 
     def execute(self, who_is: Client, name_of_sheet: NameOfSheet):
         """

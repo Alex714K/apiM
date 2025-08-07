@@ -16,7 +16,7 @@ class RequestOzon:
     MISSING_JSON_FILE = "Missing json file"
 
     def __init__(self):
-        self.logger = getLogger("RequestOzon")
+        self.logger = getLogger(self.__class__.__name__)
 
     def start(self, name_of_sheet: str, who_is: str):
         match name_of_sheet:

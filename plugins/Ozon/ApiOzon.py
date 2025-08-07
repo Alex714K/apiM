@@ -29,7 +29,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         # self.LockOzonRequest = kwargs["LockOzonRequest"]
         # self.LockOzonResult = kwargs["LockOzonResult"]
         # self.LockOzonFile_ChangeFormats = kwargs["LockOzonFile_ChangeFormats"]
-        self.logger = getLogger("ApiOzon")
+        self.logger = getLogger(self.__class__.__name__)
 
     def execute(self, who_is: Client, name_of_sheet: NameOfSheet):
         """

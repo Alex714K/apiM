@@ -15,7 +15,7 @@ from plugins.navigation.NameOfSheetEnum import NameOfSheet
 class RequestWildberries:
     def __init__(self):
         self.name_of_sheet = None
-        self.logger = getLogger("RequestWildberries")
+        self.logger = getLogger(self.__class__.__name__)
 
     def start(self, name_of_sheet: str, who_is: str):
         self.name_of_sheet = name_of_sheet
