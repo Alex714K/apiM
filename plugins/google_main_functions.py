@@ -488,6 +488,7 @@ class GoogleMainFunctions:
                 time.sleep(self.wait_time)
                 return self.create_result(design)
             self.insert_design_result(design)
+            self.logger.info(f"Created result (Client: {self.who_is})")
             return None
         return None
 
@@ -578,6 +579,7 @@ class GoogleMainFunctions:
             self.logger.error(f"Ошибка: {err}")
             time.sleep(self.wait_time)
             return self.insert_new_info(design)
+        self.logger.info(f"Inserted info in Result (Client: {self.who_is})")
         return None
 
     def update_results(self, who_is: str):
