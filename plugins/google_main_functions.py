@@ -19,7 +19,6 @@ class GoogleMainFunctions:
         self.spreadsheet_id = None
         self.get_service = get_service
         self.values = None
-        self.dist: int = 0
         self.needed_keys = None
         self.result = None
         self.name_of_sheet = None
@@ -176,7 +175,7 @@ class GoogleMainFunctions:
                         "properties": {
                             "title": name_of_sheet,
                             "gridProperties": {
-                                "rowCount": self.dist,
+                                "rowCount": len(self.values),
                                 "columnCount": column_count
                             }
                         }
@@ -285,7 +284,7 @@ class GoogleMainFunctions:
         value_input_option = "USER_ENTERED"
         major_dimension = "ROWS"  # список - строка
         self.write_lock.acquire()
-        for i in range(1, self.dist + 1, 1000):
+        for i in range(1, len(self.values) + 1, 1000):
             distance = f"{name_of_sheet}!{i}:{i+1000}"
 
             try:
@@ -534,7 +533,7 @@ class GoogleMainFunctions:
 
     def insert_new_info(self, design: list):
         if self.result is None:
-            values = [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {self.dist}"]
+            values = [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"Успешно записано строк: {len(self.values)}"]
         else:
             values = [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{self.result}"]
 

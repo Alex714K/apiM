@@ -20,7 +20,8 @@ from plugins.navigation.NameOfSheetEnum import NameOfSheet
 class ApiOzon(Converter, GoogleMainFunctions):
     def __init__(self, get_service, read_lock: Lock , write_lock: Lock):
         super().__init__(get_service, read_lock, write_lock)
-        self.values, self.dist, self.needed_keys = None, None, None
+        self.values = None
+        self.needed_keys = None
         self.result = None
         self.name_of_sheet = None
         self.who_is = None
@@ -197,7 +198,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
                 self.logger.warning(f"File({self.name_of_sheet}) is empty - start_work_with_request")
                 self.result = 'ERROR: File is empty'
                 return False
-        self.values, self.dist, self.needed_keys = result
+        self.values, self.needed_keys = result
         self.values = self.replace_from_dot_to_comma(self.values)
         return True
 

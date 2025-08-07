@@ -8,14 +8,15 @@ from plugins.navigation.NameOfSheetEnum import NameOfSheet
 
 class Converter:
     def convert_to_list(self,
-                        file: list | dict, name_of_sheet: str) -> (tuple[list, int, list | None] | str):
+                        file: list | dict, name_of_sheet: str) -> (tuple[list, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         match file:
             case None:
                 return 'is None'
             case []:
                 return 'is empty'
-        if type(file) is not list and type(file) is not dict:
+
+        if not (isinstance(file, list) or isinstance(file, dict)):
             sys.exit(str(file))
 
         if name_of_sheet in ['orders_today', 'sales_today', 'stocks', 'rk', 'storage_paid']:
@@ -44,7 +45,7 @@ class Converter:
             print(file)
             sys.exit("I can't convert =(")
 
-    def list_with_dict(self, file: list) -> tuple[list, int, list | None]:
+    def list_with_dict(self, file: list) -> tuple[list, list | None]:
         keys = list()
         for key in file[0].keys():
             keys.append(key)
@@ -56,9 +57,9 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
-    def list_with_dict_without_numpy(self, file: list) -> tuple[list, int, list | None]:
+    def list_with_dict_without_numpy(self, file: list) -> tuple[list, list | None]:
         keys = list()
         for key in file[0].keys():
             keys.append(key)
@@ -71,7 +72,7 @@ class Converter:
                     good_values.append(value)
             ans.append(good_values)
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     def products(self, file: dict[str, dict[str, list[int | str | dict[str, str | int | list | dict]]]]):
         if len(file["data"]["items"]) == 0:
@@ -117,9 +118,9 @@ class Converter:
             ans.append(row)
 
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
-    def orders_not_today(self, file: list) -> tuple[list, int, list | None]:
+    def orders_not_today(self, file: list) -> tuple[list, list | None]:
         keys = list()
         for key in file[0].keys():
             keys.append(key)
@@ -136,9 +137,9 @@ class Converter:
                 need_to_delete.append(i)
         ans = numpy.delete(ans, need_to_delete, axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
-    def sales_not_today(self, file: dict) -> tuple[list, int, list | None]:
+    def sales_not_today(self, file: dict) -> tuple[list, list | None]:
         keys = list()
         for key in file[0].keys():
             keys.append(key)
@@ -156,9 +157,9 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
-    def prices(self, file: dict) -> tuple[list, int, list | None]:
+    def prices(self, file: dict) -> tuple[list, list | None]:
         file = file["data"]["listGoods"]
         keys = list()
         for key, value in file[0].items():
@@ -178,9 +179,9 @@ class Converter:
                     ans[i + 1].append(value)
         ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
-    def tariffs(self, file: dict) -> tuple[list, int, list | None]:
+    def tariffs(self, file: dict) -> tuple[list, list | None]:
         with open('plugins/Wildberries/data/date_of_tariffs.txt', 'w') as txt:
             txt.write(file['response']['data']['dtTillMax'])
         keys = list()
@@ -194,9 +195,9 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
-    def statements(self, file: list) -> tuple[list, int, list | None]:
+    def statements(self, file: list) -> tuple[list, list | None]:
         keys = list()
         for key, value in file[0].items():
             keys.append(key)
@@ -209,7 +210,7 @@ class Converter:
                 ans[i + 1].append(value)
         ans = list(map(lambda x: list(map(lambda y: str(y), x)), ans))
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     def stocks_hard(self, file):
         keys = ["brand", "subjectName", "vendorCode", "nmId", "barcode", "techSize", "volume", "В пути до получателей",
@@ -255,7 +256,7 @@ class Converter:
                             ans[-1].append(warehouse["quantity"])
 
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     def cards_list(self, file):
         ans = list()
@@ -285,7 +286,7 @@ class Converter:
                     ans[-1][keys.index(key)] = value
 
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     def sales_funnel(self, file):
         keys = ["nmID", "vendorCode", "brandName", "objectId", "objectName", "openCardCount", "addToCartCount",
@@ -317,7 +318,7 @@ class Converter:
                 row["stocks"]["stocksWb"]
             ])
         needed_keys = self.check_keys(keys)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     @staticmethod
     def download(file: dict, name: str) -> str:

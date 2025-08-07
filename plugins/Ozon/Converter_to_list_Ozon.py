@@ -9,15 +9,17 @@ from plugins.Ozon.Request_Ozon import RequestOzon
 class Converter:
     def convert_to_list(self,
                         file: list | dict | pandas.DataFrame | str, name_of_sheet: str, who_is: str) -> \
-            (tuple[list | dict, int, list | None] | str):
+            (tuple[list | dict, list | None] | str):
         """Конвертирует json-объект в список, который подходит для добавления данных из файла в Google Excel"""
         if isinstance(file, tuple):
             return "smth wrong"
+
         match file:
             case None:
                 return "is None"
             case []:
                 return "is empty"
+
         match name_of_sheet:
             case "analytics":
                 return self.analytics(file=file)
@@ -51,7 +53,7 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
     def orders_alt(self, file: pandas.DataFrame):
         ans = [list(file.keys())]
@@ -64,7 +66,7 @@ class Converter:
                 if type(row[i_element]) is not str and math.isnan(row[i_element]):
                     row[i_element] = ""
 
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     def orders(self, file: list | dict):
         keys = ["sku_id", "sku_name", "day", "ordered_units"]
@@ -82,7 +84,7 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
     def prices(self, file: list | dict):
         keys: list[str] = [
@@ -236,13 +238,13 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
     def products(self, file: str):
         file = file.replace("\ufeff", "").replace("\"", "").replace("\'", "")
         ans = list(map(lambda x: x.split(";"), file.split("\n")))[:-1]
         needed_keys = self.check_keys(ans)
-        return ans, len(ans), needed_keys
+        return ans, needed_keys
 
     def stock_on_warehouses(self, file: list | dict):
         keys = ["sku", "warehouse_name", "item_code", "item_name", "promised_amount", "free_to_sell_amount",
@@ -254,9 +256,9 @@ class Converter:
             values = numpy.array([values])
             ans = numpy.concatenate((ans, values), axis=0)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
-    def analytics(self, file: list | dict) -> tuple[list, int, list | None]:
+    def analytics(self, file: list | dict) -> tuple[list, list | None]:
         keys = ["sku_id", "sku_name", "day", "revenue", "ordered_units", "hits_view_search", "hits_view_pdp",
                 "hits_view", "hits_tocart_search", "hits_tocart_pdp", "hits_tocart", "session_view_search",
                 "session_view_pdp", "session_view", "conv_tocart_search", "conv_tocart_pdp", "conv_tocart", "returns",
@@ -279,9 +281,9 @@ class Converter:
             # print(json.dumps(json_response, ensure_ascii=False, indent=4))
             json.dump(ans.tolist(), d, ensure_ascii=False, indent=4)
         needed_keys = self.check_keys(keys)
-        return ans.tolist(), ans.shape[0], needed_keys
+        return ans.tolist(), needed_keys
 
-    def sendings(self, file: list[dict], who_is: str) -> tuple[dict, int, list]:
+    def sendings(self, file: list[dict], who_is: str) -> tuple[dict, list]:
         ans = {
             "main": list(),
             "keys": list(),
@@ -316,7 +318,7 @@ class Converter:
                     case _:
                         ans["main"][-1].append(value[key])
 
-        return ans, 0, list()
+        return ans, list()
 
     def sendings_product(self, key: str, value):
         ans = list()
@@ -407,7 +409,7 @@ class Converter:
 
         needed_keys = self.check_keys(keys)
 
-        return result, len(result), needed_keys
+        return result, needed_keys
 
     @staticmethod
     def get_items_from_dict(file: dict, plus_key: str = "") -> tuple[list, list]:
