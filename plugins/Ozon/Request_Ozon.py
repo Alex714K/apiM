@@ -42,9 +42,7 @@ class RequestOzon:
                 if name_of_sheet in ["orders_1mnth", "orders_1week", "orders_2days"]:
                     return self.orders(name_of_sheet, who_is)
                 else:
-                    print(1)
-                    print(name_of_sheet)
-                    sys.exit("I can't request =(")
+                    sys.exit(f"I can't request {name_of_sheet} =(")
 
     def statistics(self, who_is):
         self.check_token(who_is)
