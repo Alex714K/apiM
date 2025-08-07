@@ -114,7 +114,7 @@ class RequestOzon:
                 except requests.exceptions.JSONDecodeError:
                     self.logger.error("Missing json file in sendings")
                     return self.MISSING_JSON_FILE
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: sendings, client: {who_is}")
                 data.extend(json_response["result"])
 
                 if len(json_response["result"]) == 1000:
@@ -190,7 +190,7 @@ class RequestOzon:
         except requests.exceptions.JSONDecodeError:
             self.logger.error("Missing json file in orders_alt_1")
             return self.MISSING_JSON_FILE
-        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_1")
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_1, client: {who_is}")
         code = json_response["result"]["code"]
 
         url = "https://api-seller.ozon.ru/v1/report/info"
@@ -212,7 +212,7 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 self.logger.error("Missing json file in orders_alt_2")
                 return self.MISSING_JSON_FILE
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_2")
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: orders_alt_2, client: {who_is}")
 
             if json_response["result"]["status"] == "success":
                 url = json_response["result"]["file"]
@@ -274,7 +274,7 @@ class RequestOzon:
                 # with open('data.json', 'w', encoding='UTF-8') as d:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}, client: {who_is}")
                 len_of_data = len(json_response["result"]["data"])
                 json_data.extend(json_response["result"]["data"])
                 if len_of_data < 1000:
@@ -308,7 +308,7 @@ class RequestOzon:
             self.logger.error(f"Missing json file in {name_of_sheet}")
             return self.MISSING_JSON_FILE
 
-        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}, client: {who_is}")
         code_of_report = json_response["result"]["code"]
         time.sleep(5)
         url = "https://api-seller.ozon.ru/v1/report/info"
@@ -337,7 +337,7 @@ class RequestOzon:
                 # with open('data.json', 'w', encoding='UTF-8') as d:
                 #     # # print(json.dumps(json_response, ensure_ascii=False, indent=4))
                 #     json.dump(json_response, d, ensure_ascii=False, indent=4)
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}, client: {who_is}")
             if json_response["result"]["status"] == "success":
                 break
             else:
@@ -378,7 +378,7 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {name_of_sheet}")
                 return self.MISSING_JSON_FILE
-            self.logger.debug(f"Http статус: {response1.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.debug(f"Http статус: {response1.status_code}, name_of_sheet: {name_of_sheet}, client: {who_is}")
             first_part = json_response1["result"]["rows"]
 
         # Второй запрос
@@ -397,10 +397,10 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {name_of_sheet}")
                 return self.MISSING_JSON_FILE
-            self.logger.debug(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}")
+            self.logger.debug(f"Http статус: {response2.status_code}, name_of_sheet: {name_of_sheet}, client: {who_is}")
             second_part = json_response2["result"]["rows"]
         first_part.extend(second_part)
-        self.logger.debug(f"Http статус: 200, name_of_sheet: {name_of_sheet}")
+        self.logger.debug(f"Http статус: 200, name_of_sheet: {name_of_sheet}, client: {who_is}")
         return first_part
 
     @staticmethod
@@ -473,7 +473,7 @@ class RequestOzon:
                     self.logger.error("Missing json file in analytics")
                     return self.MISSING_JSON_FILE
 
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: analytics")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: analytics, client: {who_is}")
                 first_part = numpy.array(json_response["result"]["data"])
                 parts["first"] = numpy.concatenate((parts["first"], first_part), axis=0)
                 if len(json_response["result"]["data"]) != 1000:
@@ -498,7 +498,7 @@ class RequestOzon:
                 except requests.exceptions.JSONDecodeError:
                     self.logger.error("Missing json file in analytics")
                     return self.MISSING_JSON_FILE
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: analytics")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: analytics, client: {who_is}")
                 second_part = numpy.array(json_response["result"]["data"])
                 parts["second"] = numpy.concatenate((parts["second"], second_part), axis=0)
                 if len(json_response["result"]["data"]) != 1000:
@@ -552,7 +552,7 @@ class RequestOzon:
             except requests.exceptions.JSONDecodeError:
                 self.logger.error("Missing json file in prices")
                 return self.MISSING_JSON_FILE
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: prices")
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: prices, client: {who_is}")
             file.extend(json_response["items"])
             if len(json_response["items"]) == 1000:
                 last_id = json_response["cursor"]
@@ -584,7 +584,7 @@ class RequestOzon:
             self.logger.error("Missing json file in statistics_product")
             time.sleep(5)
             return self.statistics_product(who_is)
-        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: statistics_product")
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: statistics_product, client: {who_is}")
 
         return json_response
 
@@ -610,7 +610,7 @@ class RequestOzon:
                 self.logger.error("Missing json file in get_list_of_campaigns_id")
                 time.sleep(5)
                 return self.get_list_of_campaigns_id(who_is)
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_list_of_campaigns_id")
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_list_of_campaigns_id, client: {who_is}")
             return json_response
 
     def get_report(self, who_is: str, uuid: str):
@@ -639,7 +639,7 @@ class RequestOzon:
                     self.logger.error("Missing json file in get_report")
                     time.sleep(5)
                     return self.get_report(who_is, uuid)
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report, client: {who_is}")
             match json_response["state"]:
                 case "OK":
                     break
@@ -667,7 +667,7 @@ class RequestOzon:
             self.logger.error("Missing json file in get_report")
             time.sleep(5)
             return self.get_report(who_is, uuid)
-        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report")
+        self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: get_report, client: {who_is}")
 
         return json_response
 
@@ -759,7 +759,7 @@ class RequestOzon:
                     self.logger.error("Missing json file in get_report")
                     time.sleep(5)
                     return self.stocks_fbs(name_of_sheet, who_is)
-                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}")
+                self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {name_of_sheet}, client: {who_is}")
 
                 result.extend(json_response["items"])
 

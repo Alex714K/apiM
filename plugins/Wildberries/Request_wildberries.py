@@ -81,7 +81,7 @@ class RequestWildberries:
             except requests.exceptions.JSONDecodeError:
                 self.logger.error(f"Missing json file in {self.name_of_sheet}")
                 return "Missing json file"
-            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}")
+            self.logger.debug(f"Http статус: {response.status_code}, name_of_sheet: {self.name_of_sheet}, client: {who_is}")
             return json_response, response.status_code
 
     def stocks_hard(self, who_is: str):
