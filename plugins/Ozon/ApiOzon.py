@@ -202,6 +202,7 @@ class ApiOzon(Converter, GoogleMainFunctions):
         try:
             self.values, self.needed_keys = result
         except ValueError:
+            print("Bad value of {who_is}, {name_of_sheet}")
             self.logger.warning(f"Bad value of {who_is}, {name_of_sheet}: {result}")
             return False
 
