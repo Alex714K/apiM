@@ -146,7 +146,13 @@ class ApiWB(Converter, GoogleMainFunctions):
                 self.logger.warning(f"File({self.name_of_sheet}) is empty ({self.who_is})")
                 self.result = 'ERROR: File is empty'
                 return False
-        self.values, self.needed_keys = result
+
+        try:
+            self.values, self.needed_keys = result
+        except ValueError:
+            self.logger.warning(f"Bad value of {who_is}, {name_of_sheet}: {result}")
+            return False
+
         self.values = self.replace_from_dot_to_comma(self.values)
         return True
 

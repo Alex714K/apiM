@@ -198,7 +198,13 @@ class ApiOzon(Converter, GoogleMainFunctions):
                 self.logger.warning(f"File({self.name_of_sheet}) is empty - start_work_with_request")
                 self.result = 'ERROR: File is empty'
                 return False
-        self.values, self.needed_keys = result
+
+        try:
+            self.values, self.needed_keys = result
+        except ValueError:
+            self.logger.warning(f"Bad value of {who_is}, {name_of_sheet}: {result}")
+            return False
+
         self.values = self.replace_from_dot_to_comma(self.values)
         return True
 
