@@ -76,7 +76,7 @@ class Converter:
 
     def products(self, file: dict[str, dict[str, list[int | str | dict[str, str | int | list | dict]]]]):
         if len(file["data"]["items"]) == 0:
-            return list(), 0, list()
+            return list(), list()
         keys = list()
         for key in file["data"]["items"][0].keys():
             if key == "metrics":
